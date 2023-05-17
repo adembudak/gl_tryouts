@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   int window_ret = glutCreateWindow("gl");
   if(window_ret < 1) std::exit(EXIT_FAILURE);
+  std::printf("%s\n", glGetString(GL_VERSION));
 
   glutKeyboardUpFunc(handleKeyboard);
   glutMouseFunc(handleMouse);
