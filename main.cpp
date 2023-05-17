@@ -34,11 +34,12 @@ int main(int argc, char *argv[]) {
   glutInitWindowSize(win_x, win_y);
 
   glutCreateWindow("gl");
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
   glutKeyboardUpFunc(handleKeyboard);
   glutMouseFunc(handleMouse);
-  glutDisplayFunc(handleRendering);
   glutReshapeFunc(handleReshape);
+  glutDisplayFunc(handleRendering);
 
   glutMainLoop();
 }
