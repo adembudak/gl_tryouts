@@ -19,6 +19,13 @@ void handleReshape(int new_pos_x, int new_pos_y) { //
   glutPostRedisplay();
 }
 
+void handleRendering() {
+  glClear(GL_COLOR_BUFFER_BIT);
+  glClearColor(0.f, 0.f, 0.f, 1.f);
+
+  glutSwapBuffers();
+}
+
 int main(int argc, char *argv[]) {
   glutInit(&argc, argv);
 
@@ -30,15 +37,7 @@ int main(int argc, char *argv[]) {
 
   glutKeyboardUpFunc(handleKeyboard);
   glutMouseFunc(handleMouse);
-
-  glutDisplayFunc([]() { //
-                         //
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-
-    glutSwapBuffers();
-  });
-
+  glutDisplayFunc(handleRendering);
   glutReshapeFunc(handleReshape);
 
   glutMainLoop();
