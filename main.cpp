@@ -28,34 +28,32 @@ GLuint VertexShaderId, FragmentShaderId, ProgramId;
 GLuint VaoId, VboId, ColorBufferId;
 
 const GLchar *const VertexShader =
-    R"(#version 400"
-     "layout(location=0) in vec4 in_Position;"
-     "layout(location=1) in vec4 in_Color;"
-     "out vec4 ex_Color;"
+    R"(#version 400
+     layout(location=0) in vec4 in_Position;
+     layout(location=1) in vec4 in_Color;
+     out vec4 ex_Color;
 
-     "void main(void) {"
-     "  gl_Position = in_Position;"
-     "  ex_Color = in_Color;"
-     "})";
+     void main(void) {
+       gl_Position = in_Position;
+       ex_Color = in_Color;
+     })";
 
 const GLchar *const FragmentShader =
-    R"(#version 400"
-    "in  vec4 ex_Color;"
-    "out vec4 out_Color;"
+    R"(#version 400
+    in  vec4 ex_Color;
+    out vec4 out_Color;
 
-    "void main(void) {"
-    "  out_Color = ex_Color;"
-    "})";
+    void main(void) {
+      out_Color = ex_Color;
+    })";
 
 void handleRendering() {
   ++frameCount;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   glDrawArrays(GL_TRIANGLES, 0, 3);
 
-  glClearColor(1.f, 0.f, 1.f, 1.f);
-
   glutSwapBuffers();
-  glutPostRedisplay();
 }
 
 void timerFunction(int t) {
@@ -88,7 +86,11 @@ void createShaders() {
   glLinkProgram(ProgramId);
   glUseProgram(ProgramId);
 
-  if(glGetError() != GL_NO_ERROR) std::exit(EXIT_FAILURE);
+  GLenum ErrorCheckValue = glGetError();
+  if(ErrorCheckValue != GL_NO_ERROR) {
+    fprintf(stderr, "ERROR: Could not create the shaders: %s \n", gluErrorString(ErrorCheckValue));
+    exit(-1);
+  }
 }
 
 void destroyShaders() {
@@ -151,27 +153,22 @@ void destroyVBO() {
 }
 
 void cleanUp() {
-  destroyVBO();
   destroyShaders();
+  destroyVBO();
 }
 
 int main(int argc, char *argv[]) {
   glutInit(&argc, argv);
+  glutInitContextVersion(3, 0);
+  glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
+  glutInitContextProfile(GLUT_CORE_PROFILE);
 
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-
-  const int win_x = 256;
-  const int win_y = 256;
-  glutInitWindowSize(win_x, win_y);
-
+  glutInitWindowSize(256, 256);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+
   int window_ret = glutCreateWindow("gl");
-
   if(window_ret < 1) std::exit(EXIT_FAILURE);
-  std::printf("%s\n", glGetString(GL_VERSION));
-
-  GLenum GlewInitResult = glewInit();
-  if(GLEW_OK != GlewInitResult) std::exit(EXIT_FAILURE);
 
   glutKeyboardUpFunc(handleKeyboard);
   glutMouseFunc(handleMouse);
@@ -180,6 +177,15 @@ int main(int argc, char *argv[]) {
   glutIdleFunc(idleFunction);
   glutTimerFunc(0, timerFunction, 0);
   glutCloseFunc(cleanUp);
+
+  glewExperimental = GL_TRUE;
+  GLenum GlewInitResult = glewInit();
+  if(GLEW_OK != GlewInitResult) std::exit(EXIT_FAILURE);
+
+  createShaders();
+  createVBO();
+
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   glutMainLoop();
 }
