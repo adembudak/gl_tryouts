@@ -14,8 +14,9 @@ void handleMouse(int btn, int state, int x, int y) {
   std::cout << ((state == GLUT_DOWN) ? "down " : "up   ") << x << ' ' << y << '\n';
 }
 
-void handleReshape(int new_pos_x, int new_pos_y) { //
-  std::cout << "Reshaped to: " << new_pos_x << ' ' << new_pos_y << '\n';
+void handleReshape(int new_pos_w, int new_pos_h) { //
+  std::cout << "Reshaped to: " << new_pos_w << ' ' << new_pos_h << '\n';
+  glViewport(0, 0, new_pos_w, new_pos_h);
   glutPostRedisplay();
 }
 
