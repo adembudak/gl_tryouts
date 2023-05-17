@@ -6,8 +6,8 @@
 int main(int argc, char *argv[]) {
   glutInit(&argc, argv);
 
-  const int win_x = 1080 / 4;
-  const int win_y = 720 / 4;
+  const int win_x = 256;
+  const int win_y = 256;
   glutInitWindowSize(win_x, win_y);
 
   glutCreateWindow("gl");
@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
   });
 
   glutDisplayFunc([]() { //
+                         //
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
