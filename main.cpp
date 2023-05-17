@@ -22,12 +22,30 @@ void handleReshape(int new_pos_w, int new_pos_h) { //
   glutPostRedisplay();
 }
 
+int frameCount = 0;
+
 void handleRendering() {
+  ++frameCount;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glClearColor(1.f, 0.f, 1.f, 1.f);
 
   glutSwapBuffers();
+  glutPostRedisplay();
+}
+
+void timerFunction(int t) {
+  if(0 != t) {
+    char strBuf[1024]{};
+    std::sprintf(strBuf, "%d Frames Per Second", frameCount * 4);
+    glutSetWindowTitle(strBuf);
+  }
+
+  frameCount = 0;
+  glutTimerFunc(250, timerFunction, 1);
+}
+
+void idleFunction() {
   glutPostRedisplay();
 }
 
@@ -53,6 +71,8 @@ int main(int argc, char *argv[]) {
   glutMouseFunc(handleMouse);
   glutReshapeFunc(handleReshape);
   glutDisplayFunc(handleRendering);
+  glutIdleFunc(idleFunction);
+  glutTimerFunc(0, timerFunction, 0);
 
   glutMainLoop();
 }
