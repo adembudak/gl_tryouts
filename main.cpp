@@ -3,6 +3,22 @@
 
 #include <iostream>
 
+void handleKeyboard(unsigned char key, int x, int y) {
+  switch(key) {
+  case 'q': glutDestroyWindow(glutGetWindow()); break;
+  case 't': glutFullScreenToggle(); break;
+  }
+}
+
+void handleMouse(int btn, int state, int x, int y) {
+  std::cout << ((state == GLUT_DOWN) ? "down " : "up   ") << x << ' ' << y << '\n';
+}
+
+void handleReshape(int new_pos_x, int new_pos_y) { //
+  std::cout << "Reshaped to: " << new_pos_x << ' ' << new_pos_y << '\n';
+  glutPostRedisplay();
+}
+
 int main(int argc, char *argv[]) {
   glutInit(&argc, argv);
 
@@ -12,16 +28,8 @@ int main(int argc, char *argv[]) {
 
   glutCreateWindow("gl");
 
-  glutKeyboardUpFunc([](unsigned char key, int x, int y) {
-    switch(key) {
-    case 'q': glutDestroyWindow(glutGetWindow()); break;
-    case 't': glutFullScreenToggle(); break;
-    }
-  });
-
-  glutMouseFunc([](int btn, int state, int x, int y) {
-    std::cout << ((state == GLUT_DOWN) ? "down " : "up   ") << x << ' ' << y << '\n';
-  });
+  glutKeyboardUpFunc(handleKeyboard);
+  glutMouseFunc(handleMouse);
 
   glutDisplayFunc([]() { //
                          //
@@ -31,10 +39,7 @@ int main(int argc, char *argv[]) {
     glutSwapBuffers();
   });
 
-  glutReshapeFunc([](int new_pos_x, int new_pos_y) { //
-    std::cout << "Reshaped to: " << new_pos_x << ' ' << new_pos_y << '\n';
-    glutPostRedisplay();
-  });
+  glutReshapeFunc(handleReshape);
 
   glutMainLoop();
 }
