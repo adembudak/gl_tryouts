@@ -13,7 +13,19 @@ void handleKeyboard(unsigned char key, int x, int y) {
 }
 
 void handleMouse(int btn, int state, int x, int y) {
-  std::printf("%s %d %d\n", ((state == GLUT_DOWN) ? "down " : "up   "), x, y);
+  auto showState = [=](const char *s) {
+    switch(btn) {
+    case GLUT_LEFT_BUTTON: printf("Left mouse button: %s %d %d\n", s, x, y); break;
+    case GLUT_RIGHT_BUTTON: printf("Right mouse button: %s %d %d\n", s, x, y); break;
+    default: break;
+    }
+  };
+
+  switch(state) {
+  case GLUT_DOWN: showState("Down"); break;
+  case GLUT_UP: showState("Up"); break;
+  default: break;
+  }
 }
 
 void handleReshape(int new_pos_w, int new_pos_h) { //
@@ -24,10 +36,7 @@ void handleReshape(int new_pos_w, int new_pos_h) { //
 
 int frameCount = 0;
 
-GLuint VertexShaderId, FragmentShaderId, ProgramId;
-GLuint VaoId, VboId, ColorBufferId;
-
-const GLchar *const VertexShader =
+const GLchar *const VertexShaderSourceCode =
     R"(#version 400
      layout(location=0) in vec4 in_Position;
      layout(location=1) in vec4 in_Color;
@@ -38,7 +47,7 @@ const GLchar *const VertexShader =
        ex_Color = in_Color;
      })";
 
-const GLchar *const FragmentShader =
+const GLchar *const FragmentShaderSourceCode =
     R"(#version 400
     in  vec4 ex_Color;
     out vec4 out_Color;
@@ -71,13 +80,16 @@ void idleFunction() {
   glutPostRedisplay();
 }
 
+GLuint VertexShaderId, FragmentShaderId, ProgramId;
+GLuint VaoId, VboId, ColorBufferId;
+
 void createShaders() {
   VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
+  glShaderSource(VertexShaderId, 1, &VertexShaderSourceCode, NULL);
   glCompileShader(VertexShaderId);
 
   FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
+  glShaderSource(FragmentShaderId, 1, &FragmentShaderSourceCode, NULL);
   glCompileShader(FragmentShaderId);
 
   ProgramId = glCreateProgram();
@@ -86,10 +98,9 @@ void createShaders() {
   glLinkProgram(ProgramId);
   glUseProgram(ProgramId);
 
-  GLenum ErrorCheckValue = glGetError();
-  if(ErrorCheckValue != GL_NO_ERROR) {
-    fprintf(stderr, "ERROR: Could not create the shaders: %s \n", gluErrorString(ErrorCheckValue));
-    exit(-1);
+  if(GLenum ErrorCheckValue = glGetError(); ErrorCheckValue != GL_NO_ERROR) {
+    std::fprintf(stderr, "ERROR: Could not create the shaders: %s \n", gluErrorString(ErrorCheckValue));
+    std::exit(EXIT_FAILURE);
   }
 }
 
@@ -104,7 +115,10 @@ void destroyShaders() {
 
   glDeleteProgram(ProgramId);
 
-  if(glGetError() != GL_NO_ERROR) std::exit(EXIT_FAILURE);
+  if(GLenum ErrorCheckValue = glGetError(); ErrorCheckValue != GL_NO_ERROR) {
+    std::fprintf(stderr, "ERROR: Could not destroy the shaders: %s \n", gluErrorString(ErrorCheckValue));
+    std::exit(EXIT_FAILURE);
+  }
 }
 
 void createVBO() {
@@ -135,7 +149,10 @@ void createVBO() {
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(1);
 
-  if(glGetError() != GL_NO_ERROR) std::exit(EXIT_FAILURE);
+  if(GLenum ErrorCheckValue = glGetError(); ErrorCheckValue != GL_NO_ERROR) {
+    std::fprintf(stderr, "ERROR: Could not create VBO: %s \n", gluErrorString(ErrorCheckValue));
+    std::exit(EXIT_FAILURE);
+  }
 }
 
 void destroyVBO() {
@@ -149,7 +166,10 @@ void destroyVBO() {
   glBindVertexArray(0);
   glDeleteVertexArrays(1, &VaoId);
 
-  if(glGetError() != GL_NO_ERROR) std::exit(EXIT_FAILURE);
+  if(GLenum ErrorCheckValue = glGetError(); ErrorCheckValue != GL_NO_ERROR) {
+    std::fprintf(stderr, "ERROR: Could not destroy VBO: %s \n", gluErrorString(ErrorCheckValue));
+    std::exit(EXIT_FAILURE);
+  }
 }
 
 void cleanUp() {
