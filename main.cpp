@@ -170,8 +170,14 @@ int main(int argc, char *argv[]) {
   int window_ret = glutCreateWindow("gl");
   if(window_ret < 1) std::exit(EXIT_FAILURE);
 
-  glutKeyboardUpFunc(handleKeyboard);
-  glutMouseFunc(handleMouse);
+  if(glutDeviceGet(GLUT_HAS_KEYBOARD)) {
+    glutKeyboardUpFunc(handleKeyboard);
+  }
+
+  if(glutDeviceGet(GLUT_HAS_MOUSE)) {
+    glutMouseFunc(handleMouse);
+  }
+
   glutReshapeFunc(handleReshape);
   glutDisplayFunc(handleRendering);
   glutIdleFunc(idleFunction);
