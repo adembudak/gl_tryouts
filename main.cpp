@@ -60,7 +60,7 @@ void handleRendering() {
   ++frameCount;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   glutSwapBuffers();
 }
@@ -126,9 +126,6 @@ void createVBO() {
       -0.8f, 0.8f,  0.0f, 1.0f, //
       0.8f,  0.8f,  0.0f, 1.0f, //
       -0.8f, -0.8f, 0.0f, 1.0f, //
-
-      -0.8f, -0.8f, 0.0f, 1.0f, //
-      0.8f,  0.8f,  0.0f, 1.0f, //
       0.8f,  -0.8f, 0.0f, 1.0f  //
   };
 
@@ -136,9 +133,6 @@ void createVBO() {
       1.0f, 0.0f, 0.0f, 1.0f, //
       0.0f, 1.0f, 0.0f, 1.0f, //
       0.0f, 0.0f, 1.0f, 1.0f, //
-
-      0.0f, 0.0f, 1.0f, 1.0f, //
-      0.0f, 1.0f, 0.0f, 1.0f, //
       1.0f, 1.0f, 1.0f, 1.0f  //
   };
 
