@@ -10,8 +10,14 @@ int main() {
     return 2;
   }
 
+  glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+  glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_FALSE);
+
   glfwMakeContextCurrent(window);
 
+  glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
