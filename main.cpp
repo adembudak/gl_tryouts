@@ -1,13 +1,16 @@
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <ranges>
 
 int main() {
-  if (!glfwInit())
+  if (glfwInit() != GLFW_TRUE)
     return 1;
 
   GLFWwindow *window = glfwCreateWindow(640, 480, "GL", NULL, NULL);
-  if (!window) {
+
+  if (window == nullptr) {
     glfwTerminate();
     return 2;
   }
@@ -21,6 +24,9 @@ int main() {
 
   glfwMakeContextCurrent(window);
 
+  if (glewInit() != GLEW_OK)
+    return 3;
+
   const GLubyte *gl_version = glGetString(GL_VERSION);
   std::cout << gl_version << '\n';
 
@@ -32,6 +38,9 @@ int main() {
   GLint numExtensions;
   glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
   std::cout << numExtensions << '\n';
+  for (GLuint i : std::views::iota(0, numExtensions)) {
+    std::cout << glGetStringi(GL_EXTENSIONS, i) << '\n';
+  }
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
   while (!glfwWindowShouldClose(window)) {

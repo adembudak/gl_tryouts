@@ -8,7 +8,8 @@ set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(GLEW REQUIRED)
 
 add_executable(vibe main.cpp)
 
-target_link_libraries(vibe PRIVATE OpenGL::GL glfw)
+target_link_libraries(vibe PRIVATE OpenGL::GL glfw GLEW::GLEW)
