@@ -1,9 +1,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <algorithm>
 #include <cstdio>
 
 #include <iostream>
+#include <random>
 #include <sstream> // for std::ostringstream
 #include <utility> // for std::unreacheble
 
@@ -52,6 +54,32 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   std::cout << sout.str();
 }
 
+const GLenum primitiveKind[] = {GL_POINTS,
+                                GL_LINE_STRIP,
+                                GL_LINE_LOOP,
+                                GL_LINES,
+                                GL_LINE_STRIP_ADJACENCY,
+                                GL_LINES_ADJACENCY,
+                                GL_TRIANGLE_STRIP,
+                                GL_TRIANGLE_FAN,
+                                GL_TRIANGLES,
+                                GL_TRIANGLE_STRIP_ADJACENCY,
+                                GL_TRIANGLES_ADJACENCY};
+
+const GLenum polygonModes[]{GL_POINT, GL_LINE, GL_FILL};
+
+std::size_t primitiveKindSelector = 0;
+std::size_t polygonModesSelector = 0;
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+  if(action == GLFW_PRESS) {
+    switch(key) {
+    case GLFW_KEY_SPACE: primitiveKindSelector = ++primitiveKindSelector % 11; break;
+    case GLFW_KEY_ENTER: polygonModesSelector = ++polygonModesSelector % 3; break;
+    }
+  }
+}
+
 int main() {
   if(glfwInit() != GLFW_TRUE)
     return 1;
@@ -71,6 +99,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_FALSE);
 
   glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, key_callback);
 
   if(glewInit() != GLEW_OK)
     return 3;
@@ -113,7 +142,10 @@ void main() {
 
   glUseProgram(programID);
 
-  GLfloat vertexData[]{0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f};
+  // decagon
+  std::vector<GLfloat> vertexData{
+      0.0f,      0.0f,  1.0f, 0.0f,       0.809017f,  0.587785f,  0.309017f,  0.951057f, -0.309017f, 0.951057f, -0.809017f,
+      0.587785f, -1.0f, 0.0f, -0.809017f, -0.587785f, -0.309017f, -0.951057f, 0.309017f, -0.951057f, 0.809017f, -0.587785f};
 
   GLuint vertexArrayID;
   glGenVertexArrays(1, &vertexArrayID);
@@ -122,17 +154,22 @@ void main() {
   GLuint arrayBufferID;
   glGenBuffers(1, &arrayBufferID);
   glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
-  glBufferStorage(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_MAP_READ_BIT);
-  //  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+  auto data = std::data(vertexData);
+  GLsizeiptr size = std::size(vertexData) * sizeof(decltype(vertexData[0]));
+
+  glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
   glEnableVertexAttribArray(0);
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
+
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
-
     glBindVertexArray(vertexArrayID);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glPolygonMode(GL_FRONT_AND_BACK, polygonModes[polygonModesSelector]);
+    glDrawArrays(primitiveKind[primitiveKindSelector], 0, 25);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
