@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.25)
-project(opengl CXX)
+cmake_minimum_required(VERSION 3.30)
+
+project(GL_tryouts CXX)
 
 find_package(OpenGL REQUIRED)
-find_package(FreeGLUT REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(GLU REQUIRED)
+find_package(glfw3 REQUIRED)
 
-add_executable(out main.cpp)
-target_link_libraries(out PRIVATE OpenGL::OpenGL OpenGL::GLU
-                                  FreeGLUT::freeglut_static GLEW::glew)
+add_executable(vibe main.cpp)
+
+target_link_libraries(vibe PRIVATE OpenGL::GL glfw)
