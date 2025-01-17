@@ -53,12 +53,12 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 }
 
 int main() {
-  if (glfwInit() != GLFW_TRUE)
+  if(glfwInit() != GLFW_TRUE)
     return 1;
 
   GLFWwindow *window = glfwCreateWindow(640, 480, "GL", NULL, NULL);
 
-  if (window == nullptr) {
+  if(window == nullptr) {
     glfwTerminate();
     return 2;
   }
@@ -72,18 +72,67 @@ int main() {
 
   glfwMakeContextCurrent(window);
 
-  if (glewInit() != GLEW_OK)
+  if(glewInit() != GLEW_OK)
     return 3;
 
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, 0);
 
+  GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 
+  const GLchar *const vertexShaderSource = R"(
+  #version 460 core
+
+  in vec2 vertexPosition;
+
+  void main() {
+    gl_Position = vec4(vertexPosition, 0.0, 1.0);
   }
+)";
+
+  glShaderSource(vertexShaderID, 1, &vertexShaderSource, nullptr);
+  glCompileShader(vertexShaderID);
+
+  GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+  const GLchar *const fragmentShaderSource = R"(
+#version 460 core
+
+out vec4 color;
+
+void main() {
+  color = vec4(0.945, 0.96, 0.964, 1.0); 
+})";
+
+  glShaderSource(fragmentShaderID, 1, &fragmentShaderSource, nullptr);
+  glCompileShader(fragmentShaderID);
+
+  GLuint programID = glCreateProgram();
+  glAttachShader(programID, vertexShaderID);
+  glAttachShader(programID, fragmentShaderID);
+  glLinkProgram(programID);
+
+  glUseProgram(programID);
+
+  GLfloat vertexData[]{0.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f};
+
+  GLuint vertexArrayID;
+  glGenVertexArrays(1, &vertexArrayID);
+  glBindVertexArray(vertexArrayID);
+
+  GLuint arrayBufferID;
+  glGenBuffers(1, &arrayBufferID);
+  glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
+  glBufferStorage(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_MAP_READ_BIT);
+  //  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+  glEnableVertexAttribArray(0);
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
-  while (!glfwWindowShouldClose(window)) {
+  while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindVertexArray(vertexArrayID);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
