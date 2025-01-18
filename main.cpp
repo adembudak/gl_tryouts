@@ -51,60 +51,12 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   std::cout << sout.str();
 }
 
-const GLenum primitiveKinds[] = {GL_POINTS,
-                                 GL_LINE_STRIP,
-                                 GL_LINE_LOOP,
-                                 GL_LINES,
-                                 GL_LINE_STRIP_ADJACENCY,
-                                 GL_LINES_ADJACENCY,
-                                 GL_TRIANGLE_STRIP,
-                                 GL_TRIANGLE_FAN,
-                                 GL_TRIANGLES,
-                                 GL_TRIANGLE_STRIP_ADJACENCY,
-                                 GL_TRIANGLES_ADJACENCY};
-
-const GLenum polygonModes[]{GL_POINT, GL_LINE, GL_FILL};
-
-std::size_t primitiveKindSelector = 0;
-std::size_t polygonModesSelector = 0;
-
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   if(action == GLFW_PRESS) {
     switch(key) {
-    case GLFW_KEY_SPACE:  primitiveKindSelector = ++primitiveKindSelector % 11; break;
-    case GLFW_KEY_ENTER:  polygonModesSelector = ++polygonModesSelector % 3; break;
-
     case GLFW_KEY_Q:      [[fallthrough]];
     case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
     }
-
-    auto activePrimitiveKind = [](int ndx) {
-      switch(ndx) {
-      case 0:  return "GL_POINTS";
-      case 1:  return "GL_LINE_STRIP";
-      case 2:  return "GL_LINE_LOOP";
-      case 3:  return "GL_LINES";
-      case 4:  return "GL_LINE_STRIP_ADJACENCY";
-      case 5:  return "GL_LINES_ADJACENCY";
-      case 6:  return "GL_TRIANGLE_STRIP";
-      case 7:  return "GL_TRIANGLE_FAN";
-      case 8:  return "GL_TRIANGLES";
-      case 9:  return "GL_TRIANGLE_STRIP_ADJACENCY";
-      case 10: return "GL_TRIANGLES_ADJACENCY";
-      default: std::unreachable(); break;
-      }
-    }(primitiveKindSelector);
-
-    auto activePolygonMode = [](int ndx) {
-      switch(ndx) {
-      case 0:  return "GL_POINT";
-      case 1:  return "GL_LINE";
-      case 2:  return "GL_FILL";
-      default: std::unreachable(); break;
-      }
-    }(polygonModesSelector);
-
-    std::cout << activePrimitiveKind << ' ' << activePolygonMode << '\n';
   }
 }
 
@@ -196,8 +148,8 @@ void main() {
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(vertexArrayID);
 
-    glPolygonMode(GL_FRONT_AND_BACK, polygonModes[polygonModesSelector]);
-    glDrawArrays(primitiveKinds[primitiveKindSelector], 0, 25);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glDrawArrays(GL_TRIANGLES, 0, 25);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
