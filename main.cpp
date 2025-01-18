@@ -9,7 +9,7 @@
 #include <vector>
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                const GLchar *message, const void *userParam) {
+                                const GLchar* message, const void* userParam) {
 
   std::ostringstream sout;
   sout << '\n';
@@ -53,7 +53,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   std::cout << sout.str();
 }
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if(action == GLFW_PRESS) {
     switch(key) {
     case GLFW_KEY_Q:      [[fallthrough]];
@@ -66,7 +66,7 @@ int main() {
   if(glfwInit() != GLFW_TRUE)
     return 1;
 
-  GLFWwindow *window = glfwCreateWindow(640, 480, "GL", NULL, NULL);
+  GLFWwindow* window = glfwCreateWindow(640, 480, "GL", NULL, NULL);
 
   if(window == nullptr) {
     glfwTerminate();
@@ -90,8 +90,11 @@ int main() {
   glDebugMessageCallback(MessageCallback, 0);
 
   util::shaderLoader shaderLoader;
-  GLuint programID =
-      shaderLoader.load({"vertexShader.vert", "fragmentShader.frag"}).compile().attach().link().getProgramID();
+  GLuint programID = shaderLoader.load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"})
+                         .compile()
+                         .attach()
+                         .link()
+                         .getProgramID();
 
   glUseProgram(programID);
 
