@@ -1,3 +1,5 @@
+#include "shaderLoader.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -87,38 +89,9 @@ int main() {
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, 0);
 
-  GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-
-  const GLchar *const vertexShaderSource = R"(
-  #version 460 core
-
-  in vec2 vertexPosition;
-
-  void main() {
-    gl_Position = vec4(vertexPosition, 0.0, 1.0);
-  }
-)";
-
-  glShaderSource(vertexShaderID, 1, &vertexShaderSource, nullptr);
-  glCompileShader(vertexShaderID);
-
-  GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-  const GLchar *const fragmentShaderSource = R"(
-#version 460 core
-
-out vec4 color;
-
-void main() {
-  color = vec4(0.945, 0.96, 0.964, 1.0); 
-})";
-
-  glShaderSource(fragmentShaderID, 1, &fragmentShaderSource, nullptr);
-  glCompileShader(fragmentShaderID);
-
-  GLuint programID = glCreateProgram();
-  glAttachShader(programID, vertexShaderID);
-  glAttachShader(programID, fragmentShaderID);
-  glLinkProgram(programID);
+  util::shaderLoader shaderLoader;
+  GLuint programID =
+      shaderLoader.load({"vertexShader.vert", "fragmentShader.frag"}).compile().attach().link().getProgramID();
 
   glUseProgram(programID);
 
