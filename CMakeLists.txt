@@ -9,7 +9,14 @@ set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(range-v3 REQUIRED)
+find_package(mpark_patterns REQUIRED)
 
-add_executable(vibe main.cpp)
+add_library(shaderLoader)
+target_sources(shaderLoader PRIVATE shaderLoader.cpp)
+target_link_libraries(shaderLoader PRIVATE OpenGL::GL range-v3::range-v3
+                                           GLEW::GLEW mpark_patterns)
 
-target_link_libraries(vibe PRIVATE OpenGL::GL glfw GLEW::GLEW)
+add_executable(vibe)
+target_sources(vibe PRIVATE main.cpp)
+target_link_libraries(vibe PRIVATE OpenGL::GL glfw GLEW::GLEW shaderLoader)
