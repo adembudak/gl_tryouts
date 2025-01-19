@@ -14,6 +14,8 @@ find_package(mpark_patterns REQUIRED)
 
 add_library(shaderLoader)
 target_sources(shaderLoader PRIVATE shaderLoader.cpp)
+target_sources(shaderLoader PRIVATE FILE_SET HEADERS BASE_DIRS
+                                    ${PROJECT_SOURCE_DIR} FILES shaderLoader.h)
 target_link_libraries(shaderLoader PRIVATE OpenGL::GL range-v3::range-v3
                                            GLEW::GLEW mpark_patterns)
 
