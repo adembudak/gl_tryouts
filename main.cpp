@@ -48,7 +48,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   }
   sout << '\n';
 
-  sout << "Message: " << message;
+  sout << "Message: " << message << '\n';
 
   std::cout << sout.str();
 }
@@ -111,6 +111,23 @@ int main() {
     GLfloat x, y;
   };
 
+  struct Color {
+    GLubyte r, g, b, a;
+  };
+
+  std::vector<Color> colors = {
+      {12,  85,  184, 255},
+      {215, 47,  102, 255},
+      {89,  202, 53,  255},
+      {203, 91,  18,  255},
+      {76,  56,  215, 255},
+      {122, 165, 9,   255},
+      {231, 125, 76,  255},
+      {180, 10,  160, 255},
+      {3,   249, 134, 255},
+      {53,  211, 238, 255}
+  };
+
   // decagon
   std::vector<Vertex> vertexData{
       {1.0f,       0.0f      },
@@ -133,12 +150,20 @@ int main() {
   glGenBuffers(1, &arrayBufferID);
   glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
 
-  auto data = std::data(vertexData);
-  GLsizeiptr size = std::size(vertexData) * sizeof(decltype(vertexData[0]));
+  GLsizeiptr sizeOfVertices = std::size(vertexData) * sizeof(Vertex);
+  GLsizeiptr sizeOfColors = std::size(colors) * sizeof(Color);
 
-  glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeOfVertices + sizeOfColors, nullptr, GL_STATIC_DRAW);
+
+  auto vertexData_ = std::data(vertexData);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeOfVertices, vertexData_);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
+
+  auto colorData_ = std::data(colors);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeOfVertices, sizeOfColors, colorData_);
+  glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Color), nullptr);
+  glEnableVertexAttribArray(1);
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
