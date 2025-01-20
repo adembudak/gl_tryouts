@@ -107,10 +107,23 @@ int main() {
 
   glUseProgram(programID);
 
+  struct Vertex {
+    GLfloat x, y;
+  };
+
   // decagon
-  std::vector<GLfloat> vertexData{
-      0.0f,      0.0f,  1.0f, 0.0f,       0.809017f,  0.587785f,  0.309017f,  0.951057f, -0.309017f, 0.951057f, -0.809017f,
-      0.587785f, -1.0f, 0.0f, -0.809017f, -0.587785f, -0.309017f, -0.951057f, 0.309017f, -0.951057f, 0.809017f, -0.587785f};
+  std::vector<Vertex> vertexData{
+      {1.0f,       0.0f      },
+      {0.809017f,  0.587785f },
+      {0.309017f,  0.951057f },
+      {-0.309017f, 0.951057f },
+      {-0.809017f, 0.587785f },
+      {-1.0f,      0.0f      },
+      {-0.809017f, -0.587785f},
+      {-0.309017f, -0.951057f},
+      {0.309017f,  -0.951057f},
+      {0.809017f,  -0.587785f}
+  };
 
   GLuint vertexArrayID;
   glGenVertexArrays(1, &vertexArrayID);
@@ -124,17 +137,17 @@ int main() {
   GLsizeiptr size = std::size(vertexData) * sizeof(decltype(vertexData[0]));
 
   glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(vertexArrayID);
 
-    glDrawArrays(GL_TRIANGLES, 0, 25);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
