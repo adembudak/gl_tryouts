@@ -15,10 +15,10 @@ struct shaderLoader {
 
   GLuint programID;
 
-  shaderLoader &load(const std::vector<std::filesystem::path> &shaderFiles);
-  shaderLoader &compile();
-  shaderLoader &attach();
-  shaderLoader &link();
+  shaderLoader& load(const std::vector<std::filesystem::path>& shaderFiles);
+  shaderLoader& compile();
+  shaderLoader& attach();
+  shaderLoader& link();
 
   GLuint getProgramID() const {
     return programID;

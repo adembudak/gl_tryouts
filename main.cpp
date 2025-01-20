@@ -54,11 +54,20 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  if(action == GLFW_PRESS) {
+  switch(action) {
+  case GLFW_PRESS:
     switch(key) {
     case GLFW_KEY_Q:      [[fallthrough]];
     case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
     }
+    break;
+
+  case GLFW_RELEASE:
+    //
+    break;
+  case GLFW_REPEAT:
+    //
+    break;
   }
 }
 
@@ -89,8 +98,8 @@ int main() {
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(MessageCallback, 0);
 
-  util::shaderLoader shaderLoader;
-  GLuint programID = shaderLoader.load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"})
+  GLuint programID = util::shaderLoader{}
+                         .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"})
                          .compile()
                          .attach()
                          .link()
@@ -119,12 +128,12 @@ int main() {
   glEnableVertexAttribArray(0);
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(vertexArrayID);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawArrays(GL_TRIANGLES, 0, 25);
 
     glfwSwapBuffers(window);

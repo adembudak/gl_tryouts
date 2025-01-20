@@ -12,7 +12,7 @@
 
 namespace util {
 
-shaderLoader &shaderLoader::load(const std::vector<std::filesystem::path> &shaderFiles) {
+shaderLoader& shaderLoader::load(const std::vector<std::filesystem::path>& shaderFiles) {
   for(auto shaderFile : shaderFiles) {
     std::ifstream fin{shaderFile};
     fin.unsetf(std::ifstream::skipws);
@@ -32,14 +32,14 @@ shaderLoader &shaderLoader::load(const std::vector<std::filesystem::path> &shade
   return *this;
 }
 
-shaderLoader &shaderLoader::compile() {
+shaderLoader& shaderLoader::compile() {
   for(auto id : shaderIDs)
     glCompileShader(id);
 
   return *this;
 }
 
-shaderLoader &shaderLoader::attach() {
+shaderLoader& shaderLoader::attach() {
   programID = glCreateProgram();
 
   for(auto shaderID : shaderIDs)
@@ -48,7 +48,7 @@ shaderLoader &shaderLoader::attach() {
   return *this;
 }
 
-shaderLoader &shaderLoader::link() {
+shaderLoader& shaderLoader::link() {
   glLinkProgram(programID);
 
   return *this;

@@ -1,4 +1,5 @@
 #version 460 core
+#extension all: warn
 
 out vec4 color;
 
