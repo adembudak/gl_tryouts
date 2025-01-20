@@ -32,7 +32,10 @@ file(
 
 if(VERIFY_SHADERS)
   find_program(GLSLANG glslang glslangValidator REQUIRED)
-  execute_process(COMMAND ${GLSLANG} ${shaders})
+  add_custom_command(
+    TARGET vibe
+    POST_BUILD
+    COMMAND ${GLSLANG} ARGS ${shaders})
 endif()
 
 add_custom_command(
