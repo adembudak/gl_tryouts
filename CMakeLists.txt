@@ -6,8 +6,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED 1)
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
-find_package(OpenGL REQUIRED)
+option(VERIFY_SHADERS "Run Glslang on shader files" ON)
+
 find_package(glfw3 REQUIRED)
+find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(range-v3 REQUIRED)
 find_package(mpark_patterns REQUIRED)
@@ -27,6 +29,11 @@ file(
   GLOB shaders
   LIST_DIRECTORIES true
   CONFIGURE_DEPENDS "shaders/*")
+
+if(VERIFY_SHADERS)
+  find_program(GLSLANG glslang glslangValidator REQUIRED)
+  execute_process(COMMAND ${GLSLANG} ${shaders})
+endif()
 
 add_custom_command(
   TARGET vibe
