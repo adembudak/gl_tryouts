@@ -28,7 +28,7 @@ target_link_libraries(vibe PRIVATE OpenGL::GL glfw GLEW::GLEW shaderLoader)
 file(
   GLOB shaders
   LIST_DIRECTORIES true
-  CONFIGURE_DEPENDS "shaders/*")
+  CONFIGURE_DEPENDS "shaders/*.vert" "shaders/*.frag")
 
 if(VERIFY_SHADERS)
   find_program(GLSLANG glslang glslangValidator REQUIRED)
