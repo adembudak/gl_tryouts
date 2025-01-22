@@ -115,7 +115,7 @@ int main() {
     GLubyte r, g, b, a;
   };
 
-  std::vector<Color> colors = {
+  const std::vector<Color> colors = {
       {12,  85,  184, 255},
       {215, 47,  102, 255},
       {89,  202, 53,  255},
@@ -129,7 +129,7 @@ int main() {
   };
 
   // decagon
-  std::vector<Vertex> vertexData{
+  const std::vector<Vertex> vertexData = {
       {1.0f,       0.0f      },
       {0.809017f,  0.587785f },
       {0.309017f,  0.951057f },
@@ -142,6 +142,8 @@ int main() {
       {0.809017f,  -0.587785f}
   };
 
+  const std::vector<GLuint> indices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
   GLuint vertexArrayID;
   glGenVertexArrays(1, &vertexArrayID);
   glBindVertexArray(vertexArrayID);
@@ -150,29 +152,42 @@ int main() {
   glGenBuffers(1, &arrayBufferID);
   glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
 
+  GLuint elementBufferID;
+  glGenBuffers(1, &elementBufferID);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
+
+  GLsizeiptr sizeOfIndices = std::size(indices) * sizeof(decltype(indices[0])); // in bytes
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeOfIndices, std::data(indices), GL_STATIC_DRAW);
+
   GLsizeiptr sizeOfVertices = std::size(vertexData) * sizeof(Vertex);
   GLsizeiptr sizeOfColors = std::size(colors) * sizeof(Color);
 
   glBufferData(GL_ARRAY_BUFFER, sizeOfVertices + sizeOfColors, nullptr, GL_STATIC_DRAW);
 
-  auto vertexData_ = std::data(vertexData);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeOfVertices, vertexData_);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeOfVertices, std::data(vertexData));
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
 
-  auto colorData_ = std::data(colors);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeOfVertices, sizeOfColors, colorData_);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeOfVertices, sizeOfColors, std::data(colors));
   glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Color), nullptr);
   glEnableVertexAttribArray(1);
 
   glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+  glCullFace(GL_BACK);
+  glEnable(GL_CULL_FACE);
+
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(vertexArrayID);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
+    // glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
+    // glDrawElements(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr);
+    // glDrawElementsBaseVertex(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr, 0);
+    // glDrawElementsInstanced(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr, 1);
+    // glDrawElementsInstancedBaseVertex(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr, 1, 0);
+    glDrawRangeElements(GL_TRIANGLE_FAN, 0, std::size(indices), 10, GL_UNSIGNED_INT, nullptr);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
