@@ -14,16 +14,10 @@ find_package(GLEW REQUIRED)
 find_package(range-v3 REQUIRED)
 find_package(mpark_patterns REQUIRED)
 
-add_library(shaderLoader)
-target_sources(shaderLoader PRIVATE shaderLoader.cpp)
-target_sources(shaderLoader PRIVATE FILE_SET HEADERS BASE_DIRS
-                                    ${PROJECT_SOURCE_DIR} FILES shaderLoader.h)
-target_link_libraries(shaderLoader PRIVATE OpenGL::GL range-v3::range-v3
-                                           GLEW::GLEW mpark_patterns)
-
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE OpenGL::GL glfw GLEW::GLEW shaderLoader)
+target_link_libraries(vibe PRIVATE OpenGL::GL glfw GLEW::GLEW
+                                   range-v3::range-v3 mpark_patterns)
 
 file(
   GLOB shaders
@@ -35,7 +29,7 @@ if(VERIFY_SHADERS)
   add_custom_command(
     TARGET vibe
     POST_BUILD
-    COMMAND ${GLSLANG} ARGS ${shaders})
+    COMMAND ${GLSLANG} ARGS --error-column ${shaders})
 endif()
 
 add_custom_command(
