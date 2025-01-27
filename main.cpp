@@ -5,6 +5,9 @@
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/istream.hpp>
+#include <range/v3/view/iota.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/algorithm/find.hpp>
 #include <mpark/patterns/match.hpp>
 
 #include <iostream>
@@ -82,13 +85,26 @@ GLenum shaderLoader::identifyShaderType(const std::filesystem::path shaderFile) 
   // Based on: https://github.com/KhronosGroup/glslang?tab=readme-ov-file#execution-of-standalone-wrapper
   // clang-format off
   return match(shaderFile.extension())(
-      pattern(".vert") = [] { return GL_VERTEX_SHADER; },         
-      pattern(".tesc") = [] { return GL_TESS_CONTROL_SHADER; },   
+      pattern(".vert") = [] { return GL_VERTEX_SHADER; },
+      pattern(".tesc") = [] { return GL_TESS_CONTROL_SHADER; },
       pattern(".tese") = [] { return GL_TESS_EVALUATION_SHADER; },
-      pattern(".geom") = [] { return GL_GEOMETRY_SHADER; },       
-      pattern(".frag") = [] { return GL_FRAGMENT_SHADER; },       
-      pattern(".comp") = [] { return GL_COMPUTE_SHADER; }         
+      pattern(".geom") = [] { return GL_GEOMETRY_SHADER; },
+      pattern(".frag") = [] { return GL_FRAGMENT_SHADER; },
+      pattern(".comp") = [] { return GL_COMPUTE_SHADER; }
   );
+  // clang-format on
+}
+
+bool isExtensionAvailable(const std::string& ext) {
+  GLint numExtensions;
+  glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
+  // clang-format off
+  auto
+  features = ranges::views::iota(0, numExtensions)
+           | ranges::views::transform([](int i) -> std::string { return reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i)); })
+           | ranges::to<std::vector<std::string>>;
+  return ranges::find(features, ext) != std::end(features);
   // clang-format on
 }
 
