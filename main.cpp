@@ -1,7 +1,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <range/v3/all.hpp>
-#include <mpark/patterns.hpp>
+
+// #include <glm/glm.hpp>
+
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/istream.hpp>
+#include <mpark/patterns/match.hpp>
 
 #include <iostream>
 #include <sstream> // for std::ostringstream
@@ -77,7 +81,7 @@ GLenum shaderLoader::identifyShaderType(const std::filesystem::path shaderFile) 
   using namespace mpark::patterns;
   // Based on: https://github.com/KhronosGroup/glslang?tab=readme-ov-file#execution-of-standalone-wrapper
   // clang-format off
-  return match(shaderFile.extension().string())(
+  return match(shaderFile.extension())(
       pattern(".vert") = [] { return GL_VERTEX_SHADER; },         
       pattern(".tesc") = [] { return GL_TESS_CONTROL_SHADER; },   
       pattern(".tese") = [] { return GL_TESS_EVALUATION_SHADER; },
@@ -228,48 +232,44 @@ int main() {
   const std::vector<GLuint> indices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
   GLuint vertexArrayID;
-  glGenVertexArrays(1, &vertexArrayID);
+  glCreateVertexArrays(1, &vertexArrayID);
   glBindVertexArray(vertexArrayID);
 
   GLuint arrayBufferID;
-  glGenBuffers(1, &arrayBufferID);
+  glCreateBuffers(1, &arrayBufferID);
   glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
 
   GLuint elementBufferID;
-  glGenBuffers(1, &elementBufferID);
+  glCreateBuffers(1, &elementBufferID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
 
   GLsizeiptr sizeOfIndices = std::size(indices) * sizeof(decltype(indices[0])); // in bytes
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeOfIndices, std::data(indices), GL_STATIC_DRAW);
+  glNamedBufferStorage(elementBufferID, sizeOfIndices, std::data(indices), GL_MAP_READ_BIT);
 
   GLsizeiptr sizeOfVertices = std::size(vertexData) * sizeof(Vertex);
   GLsizeiptr sizeOfColors = std::size(colors) * sizeof(Color);
 
-  glBufferData(GL_ARRAY_BUFFER, sizeOfVertices + sizeOfColors, nullptr, GL_STATIC_DRAW);
+  glNamedBufferStorage(arrayBufferID, sizeOfVertices + sizeOfColors, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeOfVertices, std::data(vertexData));
+  glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexData));
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
 
-  glBufferSubData(GL_ARRAY_BUFFER, sizeOfVertices, sizeOfColors, std::data(colors));
+  glNamedBufferSubData(arrayBufferID, sizeOfVertices, sizeOfColors, std::data(colors));
   glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Color), nullptr);
   glEnableVertexAttribArray(1);
 
-  glClearColor(0.43, 0.109, 0.203, 1.0); // Claret violet
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   glCullFace(GL_BACK);
   glEnable(GL_CULL_FACE);
 
+  GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   while(!glfwWindowShouldClose(window)) {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearBufferfv(GL_COLOR, 0, backgroundColor);
+
     glBindVertexArray(vertexArrayID);
 
-    // glDrawArrays(GL_TRIANGLE_FAN, 0, 10);
-    // glDrawElements(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr);
-    // glDrawElementsBaseVertex(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr, 0);
-    // glDrawElementsInstanced(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr, 1);
-    // glDrawElementsInstancedBaseVertex(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, nullptr, 1, 0);
     glDrawRangeElements(GL_TRIANGLE_FAN, 0, std::size(indices), 10, GL_UNSIGNED_INT, nullptr);
 
     glfwSwapBuffers(window);
