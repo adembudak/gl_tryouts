@@ -134,12 +134,13 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   }
   sout << '\n';
 
-  sout << "Message: " << message << '\n';
+  if(message != nullptr)
+    sout << "Message: " << message << '\n';
 
   std::cout << sout.str();
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
@@ -155,6 +156,28 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     //
     break;
   }
+}
+
+void errorCallback(int error, const char* description) {
+  // Based on: https://www.glfw.org/docs/3.0/group__errors.html
+  std::ostringstream sout;
+
+  switch(error) {
+  case GLFW_NOT_INITIALIZED:     sout << "GLFW has not been initialized."; break;
+  case GLFW_NO_CURRENT_CONTEXT:  sout << "No context is current for this thread."; break;
+  case GLFW_INVALID_ENUM:        sout << "One of the enum parameters for the function was given an invalid enum."; break;
+  case GLFW_INVALID_VALUE:       sout << "One of the parameters for the function was given an invalid value."; break;
+  case GLFW_OUT_OF_MEMORY:       sout << "A memory allocation failed."; break;
+  case GLFW_API_UNAVAILABLE:     sout << "GLFW could not find support for the requested client API on the system."; break;
+  case GLFW_VERSION_UNAVAILABLE: sout << "The requested client API version is not available."; break;
+  case GLFW_PLATFORM_ERROR:      sout << "A platform-specific error occurred."; break;
+  case GLFW_FORMAT_UNAVAILABLE:  sout << "The clipboard did not contain data in the requested format."; break;
+  default:                       sout << "Unknown error code: " << error; break;
+  }
+
+  if(description != nullptr)
+    sout << " Description: " << description;
+  std::cout << sout.str() << '\n';
 }
 
 int main() {
@@ -176,7 +199,8 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_FALSE);
 
   glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, key_callback);
+  glfwSetKeyCallback(window, keyCallback);
+  glfwSetErrorCallback(errorCallback);
 
   if(glewInit() != GLEW_OK)
     return 3;
