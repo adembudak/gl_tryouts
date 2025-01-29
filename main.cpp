@@ -30,6 +30,8 @@ struct shaderLoader {
   shaderLoader& attach();
   shaderLoader& link();
 
+  void emitProgramBinary() const;
+
   GLuint getProgramID() const {
     return programID;
   }
@@ -71,6 +73,21 @@ shaderLoader& shaderLoader::link() {
   glLinkProgram(programID);
 
   return *this;
+}
+
+void shaderLoader::emitProgramBinary() const {
+  if(glIsProgram(programID)) {
+    GLint binarySize;
+    glGetProgramiv(programID, GL_PROGRAM_BINARY_LENGTH, &binarySize);
+
+    std::vector<char> programBinary(binarySize, '\0');
+
+    GLenum binaryFormat = GL_NONE;
+    glGetProgramBinary(programID, binarySize, nullptr, &binaryFormat, std::data(programBinary));
+
+    std::ofstream fout{"programBinary.bin", std::ios::binary};
+    fout.write(std::data(programBinary), std::size(programBinary));
+  }
 }
 
 GLenum shaderLoader::identifyShaderType(const std::filesystem::path shaderFile) const {
@@ -240,12 +257,12 @@ int main() {
                           .link()
                           .getProgramID();
 
-  GLuint program_pipeline;
-  glGenProgramPipelines(1, &program_pipeline);
-  glBindProgramPipeline(program_pipeline);
+  GLuint pipeline;
+  glGenProgramPipelines(1, &pipeline);
+  glBindProgramPipeline(pipeline);
 
-  glUseProgramStages(program_pipeline, GL_VERTEX_SHADER_BIT, vProgramID);
-  glUseProgramStages(program_pipeline, GL_FRAGMENT_SHADER_BIT, fProgramID);
+  glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vProgramID);
+  glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fProgramID);
 
   struct Vertex {
     GLfloat x, y;
