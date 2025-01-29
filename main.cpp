@@ -17,15 +17,15 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <cassert>
 
 namespace util {
 
 struct shaderLoader {
-  std::vector<GLuint> shaderIDs;
-
+  GLuint shaderID;
   GLuint programID;
 
-  shaderLoader& load(const std::vector<std::filesystem::path>& shaderFiles);
+  shaderLoader& load(const std::filesystem::path shaderFile);
   shaderLoader& compile();
   shaderLoader& attach();
   shaderLoader& link();
@@ -39,27 +39,21 @@ private:
   std::string getShaderFileSource(const std::filesystem::path shaderFile) const;
 };
 
-shaderLoader& shaderLoader::load(const std::vector<std::filesystem::path>& shaderFiles) {
-  for(auto shaderFile : shaderFiles) {
-    std::string shaderSource = this->getShaderFileSource(shaderFile);
-    auto data = std::data(shaderSource);
-    auto size = std::size(shaderSource);
+shaderLoader& shaderLoader::load(const std::filesystem::path shaderFile) {
+  std::string shaderSource = this->getShaderFileSource(shaderFile);
+  auto data = std::data(shaderSource);
+  auto size = std::size(shaderSource);
 
-    GLenum type = this->identifyShaderType(shaderFile);
+  GLenum type = this->identifyShaderType(shaderFile);
 
-    GLuint id = glCreateShader(type);
-
-    glShaderSource(id, 1, &data, nullptr);
-
-    shaderIDs.push_back(id);
-  }
+  shaderID = glCreateShader(type);
+  glShaderSource(shaderID, 1, &data, nullptr);
 
   return *this;
 }
 
 shaderLoader& shaderLoader::compile() {
-  for(auto id : shaderIDs)
-    glCompileShader(id);
+  glCompileShader(shaderID);
 
   return *this;
 }
@@ -67,13 +61,13 @@ shaderLoader& shaderLoader::compile() {
 shaderLoader& shaderLoader::attach() {
   programID = glCreateProgram();
 
-  for(auto shaderID : shaderIDs)
-    glAttachShader(programID, shaderID);
+  glAttachShader(programID, shaderID);
 
   return *this;
 }
 
 shaderLoader& shaderLoader::link() {
+  glProgramParameteri(programID, GL_PROGRAM_SEPARABLE, GL_TRUE);
   glLinkProgram(programID);
 
   return *this;
@@ -231,14 +225,27 @@ int main() {
   glEnable(GL_BLEND);
   glDebugMessageCallback(MessageCallback, 0);
 
-  GLuint programID = util::shaderLoader{}
-                         .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"})
-                         .compile()
-                         .attach()
-                         .link()
-                         .getProgramID();
+  util::shaderLoader loader;
+  GLuint vProgramID = loader
+                          .load("shaders/vertexShader.vert") //
+                          .compile()
+                          .attach()
+                          .link()
+                          .getProgramID();
 
-  glUseProgram(programID);
+  GLuint fProgramID = loader
+                          .load("shaders/fragmentShader.frag") //
+                          .compile()
+                          .attach()
+                          .link()
+                          .getProgramID();
+
+  GLuint program_pipeline;
+  glGenProgramPipelines(1, &program_pipeline);
+  glBindProgramPipeline(program_pipeline);
+
+  glUseProgramStages(program_pipeline, GL_VERTEX_SHADER_BIT, vProgramID);
+  glUseProgramStages(program_pipeline, GL_FRAGMENT_SHADER_BIT, fProgramID);
 
   struct Vertex {
     GLfloat x, y;
@@ -309,6 +316,8 @@ int main() {
 
   glCullFace(GL_BACK);
   glEnable(GL_CULL_FACE);
+
+  assert(glGetError() == GL_NO_ERROR);
 
   GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   while(!glfwWindowShouldClose(window)) {
