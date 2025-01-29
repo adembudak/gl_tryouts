@@ -36,20 +36,19 @@ struct shaderLoader {
 
 private:
   GLenum identifyShaderType(const std::filesystem::path shaderFile) const;
+  std::string getShaderFileSource(const std::filesystem::path shaderFile) const;
 };
 
 shaderLoader& shaderLoader::load(const std::vector<std::filesystem::path>& shaderFiles) {
   for(auto shaderFile : shaderFiles) {
-    std::ifstream fin{shaderFile};
-    fin.unsetf(std::ifstream::skipws);
-
-    std::string shaderSource = ranges::istream<char>(fin) | ranges::to<std::string>;
-
+    std::string shaderSource = this->getShaderFileSource(shaderFile);
     auto data = std::data(shaderSource);
     auto size = std::size(shaderSource);
 
     GLenum type = this->identifyShaderType(shaderFile);
+
     GLuint id = glCreateShader(type);
+
     glShaderSource(id, 1, &data, nullptr);
 
     shaderIDs.push_back(id);
@@ -93,6 +92,13 @@ GLenum shaderLoader::identifyShaderType(const std::filesystem::path shaderFile) 
       pattern(".comp") = [] { return GL_COMPUTE_SHADER; }
   );
   // clang-format on
+}
+
+std::string shaderLoader::getShaderFileSource(const std::filesystem::path shaderFile) const {
+  std::ifstream fin{shaderFile};
+  fin.unsetf(std::ifstream::skipws);
+
+  return ranges::istream<char>(fin) | ranges::to<std::string>;
 }
 
 bool isExtensionAvailable(const std::string& ext) {
