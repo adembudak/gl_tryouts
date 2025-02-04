@@ -1,7 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// #include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/istream.hpp>
@@ -18,14 +20,15 @@
 #include <fstream>
 #include <string>
 #include <cassert>
+#include <numbers>
 
 namespace util {
 
 struct shaderLoader {
-  GLuint shaderID;
+  std::vector<GLuint> shaderIDs;
   GLuint programID;
 
-  shaderLoader& load(const std::filesystem::path shaderFile);
+  shaderLoader& load(const std::vector<std::filesystem::path>& shaderFiles);
   shaderLoader& compile();
   shaderLoader& attach();
   shaderLoader& link();
@@ -41,21 +44,25 @@ private:
   std::string getShaderFileSource(const std::filesystem::path shaderFile) const;
 };
 
-shaderLoader& shaderLoader::load(const std::filesystem::path shaderFile) {
-  std::string shaderSource = this->getShaderFileSource(shaderFile);
-  auto data = std::data(shaderSource);
-  auto size = std::size(shaderSource);
+shaderLoader& shaderLoader::load(const std::vector<std::filesystem::path>& shaderFiles) {
+  for(auto shaderFile : shaderFiles) {
+    std::string shaderSource = this->getShaderFileSource(shaderFile);
+    auto data = std::data(shaderSource);
+    auto size = std::size(shaderSource);
 
-  GLenum type = this->identifyShaderType(shaderFile);
+    GLenum type = this->identifyShaderType(shaderFile);
 
-  shaderID = glCreateShader(type);
-  glShaderSource(shaderID, 1, &data, nullptr);
+    GLuint shaderID = glCreateShader(type);
+    glShaderSource(shaderID, 1, &data, nullptr);
+    shaderIDs.push_back(shaderID);
+  }
 
   return *this;
 }
 
 shaderLoader& shaderLoader::compile() {
-  glCompileShader(shaderID);
+  for(GLuint shaderID : shaderIDs)
+    glCompileShader(shaderID);
 
   return *this;
 }
@@ -63,13 +70,13 @@ shaderLoader& shaderLoader::compile() {
 shaderLoader& shaderLoader::attach() {
   programID = glCreateProgram();
 
-  glAttachShader(programID, shaderID);
+  for(GLuint shaderID : shaderIDs)
+    glAttachShader(programID, shaderID);
 
   return *this;
 }
 
 shaderLoader& shaderLoader::link() {
-  glProgramParameteri(programID, GL_PROGRAM_SEPARABLE, GL_TRUE);
   glLinkProgram(programID);
 
   return *this;
@@ -124,7 +131,6 @@ bool isExtensionAvailable(const std::string& ext) {
   return ranges::find(features, ext) != std::end(features);
   // clang-format on
 }
-
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
@@ -173,21 +179,41 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   std::cout << sout.str();
 }
 
+glm::mat4x4 transform = glm::mat4(1.0);
+glm::mat4x4 scale = glm::mat4(1.0);
+glm::mat4x4 rotate = glm::mat4(1.0);
+
+constexpr auto pi = std::numbers::pi_v<GLfloat>;
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
     case GLFW_KEY_Q:      [[fallthrough]];
     case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+
+    case GLFW_KEY_W:      transform = glm::translate(transform, {0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_D:      transform = glm::translate(transform, {0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_S:      transform = glm::translate(transform, {0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_A:      transform = glm::translate(transform, {-0.1, 0.0, 0.0}); break;
+
+    case GLFW_KEY_K:      transform = glm::scale(transform, {0.9, 1.0, 1.0}); break;
+    case GLFW_KEY_J:      transform = glm::scale(transform, {1.0, 0.9, 1.0}); break;
+
+    case GLFW_KEY_X:      transform = glm::rotate(transform, pi, {1.0, 0.0, 0.0}); break;
+    case GLFW_KEY_Y:      transform = glm::rotate(transform, pi, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z:      transform = glm::rotate(transform, pi, {0.0, 0.0, 1.0}); break;
+
+    default:              break;
     }
+
     break;
 
-  case GLFW_RELEASE:
-    //
-    break;
-  case GLFW_REPEAT:
-    //
-    break;
+  case GLFW_RELEASE: break;
+
+  case GLFW_REPEAT:  break;
+
+  default:           break;
   }
 }
 
@@ -242,27 +268,17 @@ int main() {
   glEnable(GL_BLEND);
   glDebugMessageCallback(MessageCallback, 0);
 
-  util::shaderLoader loader;
-  GLuint vProgramID = loader
-                          .load("shaders/vertexShader.vert") //
-                          .compile()
-                          .attach()
-                          .link()
-                          .getProgramID();
+  GLuint programID = util::shaderLoader{}
+                         .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
+                         .compile()
+                         .attach()
+                         .link()
+                         .getProgramID();
 
-  GLuint fProgramID = loader
-                          .load("shaders/fragmentShader.frag") //
-                          .compile()
-                          .attach()
-                          .link()
-                          .getProgramID();
-
-  GLuint pipeline;
-  glGenProgramPipelines(1, &pipeline);
-  glBindProgramPipeline(pipeline);
-
-  glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vProgramID);
-  glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fProgramID);
+  glUseProgram(programID);
+  GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
+  GLint scaleMatrixLocation = glGetUniformLocation(programID, "scale");
+  GLint rotateMatrixLocation = glGetUniformLocation(programID, "rotate");
 
   struct Vertex {
     GLfloat x, y;
@@ -336,10 +352,13 @@ int main() {
 
   assert(glGetError() == GL_NO_ERROR);
 
-  GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
+  const GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   while(!glfwWindowShouldClose(window)) {
     glClearBufferfv(GL_COLOR, 0, backgroundColor);
 
+    glUniformMatrix4fv(tranformMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
+    glUniformMatrix4fv(scaleMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
+    glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
     glBindVertexArray(vertexArrayID);
 
     glDrawRangeElements(GL_TRIANGLE_FAN, 0, std::size(indices), 10, GL_UNSIGNED_INT, nullptr);
