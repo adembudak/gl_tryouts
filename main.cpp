@@ -180,6 +180,12 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   std::cout << sout.str();
 }
 
+glm::vec3 eye(0.0, 0.0, 2.5);
+glm::vec3 center(0.0, 0.0, 0.0);
+glm::vec3 up(0.0, 1.0, 0.0);
+glm::mat4x4 view = glm::lookAt(eye, center, up);
+
+glm::mat4x4 projection = glm::perspective(glm::radians(45.0f), 1.33f, 0.1f, 1000.0f);
 glm::mat4x4 transform = glm::mat4(1.0);
 
 constexpr auto pi = std::numbers::pi_v<GLfloat>;
@@ -188,7 +194,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
-    case GLFW_KEY_Q:      [[fallthrough]];
     case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
 
     case GLFW_KEY_W:      transform = glm::translate(transform, {0.0, 0.1, 0.0}); break;
@@ -196,14 +201,18 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     case GLFW_KEY_S:      transform = glm::translate(transform, {0.0, -0.1, 0.0}); break;
     case GLFW_KEY_A:      transform = glm::translate(transform, {-0.1, 0.0, 0.0}); break;
 
-    case GLFW_KEY_K:      transform = glm::scale(transform, {0.9, 1.0, 1.0}); break;
-    case GLFW_KEY_J:      transform = glm::scale(transform, {1.0, 0.9, 1.0}); break;
+    case GLFW_KEY_K:
+      if(mods & GLFW_MOD_SHIFT)
+        transform = glm::scale(transform, {1.1, 1.1, 1.1});
+      else
+        transform = glm::scale(transform, {0.9, 0.9, 0.9});
+      break;
 
-    case GLFW_KEY_X:      transform = glm::rotate(transform, pi, {1.0, 0.0, 0.0}); break;
-    case GLFW_KEY_Y:      transform = glm::rotate(transform, pi, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z:      transform = glm::rotate(transform, pi, {0.0, 0.0, 1.0}); break;
+    case GLFW_KEY_X: transform = glm::rotate(transform, pi, {1.0, 0.0, 0.0}); break;
+    case GLFW_KEY_Y: transform = glm::rotate(transform, pi, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z: transform = glm::rotate(transform, pi, {0.0, 0.0, 1.0}); break;
 
-    default:              break;
+    default:         break;
     }
 
     break;
@@ -306,6 +315,8 @@ int main() {
 
   glUseProgram(programID);
   GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
+  GLint viewMatrixLocation = glGetUniformLocation(programID, "view");
+  GLint projectionMatrixLocation = glGetUniformLocation(programID, "projection");
 
   const std::vector<Color> colors = {
       {12,  85,  184, 255},
@@ -376,6 +387,8 @@ int main() {
     glClearBufferfv(GL_COLOR, 0, backgroundColor);
 
     glUniformMatrix4fv(tranformMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
     glBindVertexArray(vertexArrayID);
 
     glDrawRangeElements(GL_TRIANGLE_FAN, 0, std::size(indices), 10, GL_UNSIGNED_INT, nullptr);
