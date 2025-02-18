@@ -202,7 +202,7 @@ struct {
   }
 } mesh_struct;
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void keyInput_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
@@ -237,6 +237,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
   default:           break;
   }
+}
+
+void mouseScroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+  switch(int(yoffset)) {
+  case 1:  eye.y += 1.0; break;
+  case -1: eye.y -= 1.0; break;
+  default: break;
+  }
+
+  view = glm::lookAt(eye, center, up);
 }
 
 void errorCallback(int error, const char* description) {
@@ -280,7 +290,8 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_FALSE);
 
   glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, keyCallback);
+  glfwSetKeyCallback(window, keyInput_callback);
+  glfwSetScrollCallback(window, mouseScroll_callback);
   glfwSetErrorCallback(errorCallback);
 
   if(glewInit() != GLEW_OK)
