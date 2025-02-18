@@ -262,21 +262,6 @@ struct Vertex {
   }
 };
 
-struct Color {
-  glm::u8vec4 m_data;
-
-  Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 1.0f) :
-      m_data(r, g, b, a) {}
-
-  friend auto& operator>>(std::istream& is, Color& c) {
-    return is >> c.m_data.r >> c.m_data.g >> c.m_data.b >> c.m_data.a;
-  }
-
-  friend auto& operator<<(std::ostream& os, const Color& c) {
-    return os << c.m_data.r << c.m_data.g << c.m_data.b << c.m_data.a << '\n';
-  }
-};
-
 int main() {
   if(glfwInit() != GLFW_TRUE)
     return 1;
@@ -304,7 +289,7 @@ int main() {
 
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_BLEND);
-  glDebugMessageCallback(MessageCallback, 0);
+  glDebugMessageCallback(MessageCallback, nullptr);
 
   GLuint programID = util::shaderLoader{}
                          .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
@@ -317,19 +302,6 @@ int main() {
   GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
   GLint viewMatrixLocation = glGetUniformLocation(programID, "view");
   GLint projectionMatrixLocation = glGetUniformLocation(programID, "projection");
-
-  const std::vector<Color> colors = {
-      {12,  85,  184, 255},
-      {215, 47,  102, 255},
-      {89,  202, 53,  255},
-      {203, 91,  18,  255},
-      {76,  56,  215, 255},
-      {122, 165, 9,   255},
-      {231, 125, 76,  255},
-      {180, 10,  160, 255},
-      {3,   249, 134, 255},
-      {53,  211, 238, 255}
-  };
 
   // decagon
   const std::vector<Vertex> vertexData = {
@@ -363,17 +335,12 @@ int main() {
   glNamedBufferStorage(elementBufferID, sizeOfIndices, std::data(indices), GL_MAP_READ_BIT);
 
   GLsizeiptr sizeOfVertices = std::size(vertexData) * sizeof(Vertex);
-  GLsizeiptr sizeOfColors = std::size(colors) * sizeof(Color);
 
-  glNamedBufferStorage(arrayBufferID, sizeOfVertices + sizeOfColors, nullptr, GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferStorage(arrayBufferID, sizeOfVertices, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexData));
   glVertexAttribPointer(0, vertexData[0].m_data.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
-
-  glNamedBufferSubData(arrayBufferID, sizeOfVertices, sizeOfColors, std::data(colors));
-  glVertexAttribPointer(1, colors[0].m_data.length(), GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Color), nullptr);
-  glEnableVertexAttribArray(1);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

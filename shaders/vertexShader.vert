@@ -5,16 +5,12 @@
 #pragma debug(on)
 
 layout (location = 0) in vec4 vPosition;
-layout (location = 1) in vec4 color;
 
-layout (location = 2) uniform mat4x4 transform;
-layout (location = 3) uniform mat4x4 view;
-layout (location = 4) uniform mat4x4 projection;
-
-out vec4 fColor;
+layout (location = 1) uniform mat4x4 transform;
+layout (location = 2) uniform mat4x4 view;
+layout (location = 3) uniform mat4x4 projection;
 
 void main() {
-  fColor = color;
   gl_Position = projection * view * transform * vPosition;
 }
 
