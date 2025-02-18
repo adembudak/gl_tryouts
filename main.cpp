@@ -186,10 +186,15 @@ glm::vec3 center(0.0, 0.0, 0.0);
 glm::vec3 up(0.0, 1.0, 0.0);
 glm::mat4x4 view = glm::lookAt(eye, center, up);
 
-glm::mat4x4 projection = glm::perspective(glm::radians(45.0f), 1.33f, 0.1f, 1000.0f);
-glm::mat4x4 transform = glm::mat4(1.0);
+constexpr auto pi = std::numbers::pi_v<float>;
 
-constexpr auto pi = std::numbers::pi_v<GLfloat>;
+float field_of_view = pi / 2.0f;
+float aspectRatio = 1.333f;
+float zNear = 0.1f;
+float zFar = 1000.0f;
+
+glm::mat4x4 projection = glm::perspective(field_of_view, aspectRatio, zNear, zFar);
+glm::mat4x4 transform = glm::mat4(1.0);
 
 struct {
   std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
