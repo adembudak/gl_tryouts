@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -277,7 +278,10 @@ int main() {
   GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
 
   struct Vertex {
-    GLfloat x, y;
+    glm::vec4 m_data;
+
+    Vertex(float x, float y, float z, float w = 1.0f) :
+        m_data(x, y, z, w) {}
   };
 
   struct Color {
@@ -299,16 +303,16 @@ int main() {
 
   // decagon
   const std::vector<Vertex> vertexData = {
-      {1.0f,       0.0f      },
-      {0.809017f,  0.587785f },
-      {0.309017f,  0.951057f },
-      {-0.309017f, 0.951057f },
-      {-0.809017f, 0.587785f },
-      {-1.0f,      0.0f      },
-      {-0.809017f, -0.587785f},
-      {-0.309017f, -0.951057f},
-      {0.309017f,  -0.951057f},
-      {0.809017f,  -0.587785f}
+      {1.0f,       0.0f,       0.0f},
+      {0.809017f,  0.587785f,  0.0f},
+      {0.309017f,  0.951057f,  0.0f},
+      {-0.309017f, 0.951057f,  0.0f},
+      {-0.809017f, 0.587785f,  0.0f},
+      {-1.0f,      0.0f,       0.0f},
+      {-0.809017f, -0.587785f, 0.0f},
+      {-0.309017f, -0.951057f, 0.0f},
+      {0.309017f,  -0.951057f, 0.0f},
+      {0.809017f,  -0.587785f, 0.0f}
   };
 
   const std::vector<GLuint> indices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -334,7 +338,7 @@ int main() {
   glNamedBufferStorage(arrayBufferID, sizeOfVertices + sizeOfColors, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexData));
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+  glVertexAttribPointer(0, vertexData[0].m_data.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
 
   glNamedBufferSubData(arrayBufferID, sizeOfVertices, sizeOfColors, std::data(colors));
