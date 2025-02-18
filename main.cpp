@@ -261,21 +261,6 @@ void errorCallback(int error, const char* description) {
   std::cout << sout.str() << '\n';
 }
 
-struct Vertex {
-  glm::vec4 m_data;
-
-  Vertex(float x, float y, float z, float w = 1.0f) :
-      m_data(x, y, z, w) {}
-
-  friend auto& operator>>(std::istream& is, Vertex& v) {
-    return is >> v.m_data.x >> v.m_data.y >> v.m_data.z >> v.m_data.w;
-  }
-
-  friend auto& operator<<(std::ostream& os, const Vertex& v) {
-    return os << v.m_data.x << v.m_data.y << v.m_data.z << v.m_data.w << '\n';
-  }
-};
-
 int main() {
   if(glfwInit() != GLFW_TRUE)
     return 1;
@@ -317,6 +302,7 @@ int main() {
   GLint viewMatrixLocation = glGetUniformLocation(programID, "view");
   GLint projectionMatrixLocation = glGetUniformLocation(programID, "projection");
 
+  using Vertex = glm::vec3;
   // decagon
   const std::vector<Vertex> vertexData = {
       {1.0f,       0.0f,       0.0f},
@@ -353,7 +339,7 @@ int main() {
   glNamedBufferStorage(arrayBufferID, sizeOfVertices, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexData));
-  glVertexAttribPointer(0, vertexData[0].m_data.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+  glVertexAttribPointer(0, vertexData[0].length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
   glEnableVertexAttribArray(0);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
