@@ -238,6 +238,36 @@ void errorCallback(int error, const char* description) {
   std::cout << sout.str() << '\n';
 }
 
+struct Vertex {
+  glm::vec4 m_data;
+
+  Vertex(float x, float y, float z, float w = 1.0f) :
+      m_data(x, y, z, w) {}
+
+  friend auto& operator>>(std::istream& is, Vertex& v) {
+    return is >> v.m_data.x >> v.m_data.y >> v.m_data.z >> v.m_data.w;
+  }
+
+  friend auto& operator<<(std::ostream& os, const Vertex& v) {
+    return os << v.m_data.x << v.m_data.y << v.m_data.z << v.m_data.w << '\n';
+  }
+};
+
+struct Color {
+  glm::u8vec4 m_data;
+
+  Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 1.0f) :
+      m_data(r, g, b, a) {}
+
+  friend auto& operator>>(std::istream& is, Color& c) {
+    return is >> c.m_data.r >> c.m_data.g >> c.m_data.b >> c.m_data.a;
+  }
+
+  friend auto& operator<<(std::ostream& os, const Color& c) {
+    return os << c.m_data.r << c.m_data.g << c.m_data.b << c.m_data.a << '\n';
+  }
+};
+
 int main() {
   if(glfwInit() != GLFW_TRUE)
     return 1;
@@ -276,17 +306,6 @@ int main() {
 
   glUseProgram(programID);
   GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
-
-  struct Vertex {
-    glm::vec4 m_data;
-
-    Vertex(float x, float y, float z, float w = 1.0f) :
-        m_data(x, y, z, w) {}
-  };
-
-  struct Color {
-    GLubyte r, g, b, a;
-  };
 
   const std::vector<Color> colors = {
       {12,  85,  184, 255},
@@ -342,7 +361,7 @@ int main() {
   glEnableVertexAttribArray(0);
 
   glNamedBufferSubData(arrayBufferID, sizeOfVertices, sizeOfColors, std::data(colors));
-  glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Color), nullptr);
+  glVertexAttribPointer(1, colors[0].m_data.length(), GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Color), nullptr);
   glEnableVertexAttribArray(1);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
