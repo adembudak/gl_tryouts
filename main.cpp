@@ -17,6 +17,7 @@
 #include <sstream> // for std::ostringstream
 #include <utility> // for std::unreacheble
 #include <vector>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -190,6 +191,17 @@ glm::mat4x4 transform = glm::mat4(1.0);
 
 constexpr auto pi = std::numbers::pi_v<GLfloat>;
 
+struct {
+  std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
+  std::uint8_t i = 0;
+
+  void operator++(int) {
+    i = ++i % std::size(mode);
+    std::cout << int(i);
+    glPolygonMode(GL_FRONT_AND_BACK, mode[i]);
+  }
+} mesh_struct;
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
@@ -211,6 +223,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     case GLFW_KEY_X: transform = glm::rotate(transform, pi, {1.0, 0.0, 0.0}); break;
     case GLFW_KEY_Y: transform = glm::rotate(transform, pi, {0.0, 1.0, 0.0}); break;
     case GLFW_KEY_Z: transform = glm::rotate(transform, pi, {0.0, 0.0, 1.0}); break;
+
+    case GLFW_KEY_M: mesh_struct++; break;
 
     default:         break;
     }
