@@ -180,8 +180,6 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 }
 
 glm::mat4x4 transform = glm::mat4(1.0);
-glm::mat4x4 scale = glm::mat4(1.0);
-glm::mat4x4 rotate = glm::mat4(1.0);
 
 constexpr auto pi = std::numbers::pi_v<GLfloat>;
 
@@ -277,8 +275,6 @@ int main() {
 
   glUseProgram(programID);
   GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
-  GLint scaleMatrixLocation = glGetUniformLocation(programID, "scale");
-  GLint rotateMatrixLocation = glGetUniformLocation(programID, "rotate");
 
   struct Vertex {
     GLfloat x, y;
@@ -357,8 +353,6 @@ int main() {
     glClearBufferfv(GL_COLOR, 0, backgroundColor);
 
     glUniformMatrix4fv(tranformMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
-    glUniformMatrix4fv(scaleMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
-    glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
     glBindVertexArray(vertexArrayID);
 
     glDrawRangeElements(GL_TRIANGLE_FAN, 0, std::size(indices), 10, GL_UNSIGNED_INT, nullptr);
