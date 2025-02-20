@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <glm/vec4.hpp>
+#include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -207,6 +207,11 @@ struct {
   }
 } mesh_struct;
 
+float rotateX = 0;
+float rotateY = 0;
+float rotateZ = 0;
+const float rotateAmount = pi / 180.0;
+
 void keyInput_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
@@ -225,9 +230,14 @@ void keyInput_callback(GLFWwindow* window, int key, int scancode, int action, in
         transform = glm::scale(transform, {0.9, 0.9, 0.9});
       break;
 
-    case GLFW_KEY_X: transform = glm::rotate(transform, pi, {1.0, 0.0, 0.0}); break;
-    case GLFW_KEY_Y: transform = glm::rotate(transform, pi, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z: transform = glm::rotate(transform, pi, {0.0, 0.0, 1.0}); break;
+    case GLFW_KEY_X:
+      if(mods & GLFW_MOD_SHIFT)
+        transform = glm::rotate(transform, rotateX -= rotateAmount, {0.1, 0.0, 0.0});
+      else
+        transform = glm::rotate(transform, rotateX += rotateAmount, {0.1, 0.0, 0.0});
+      break;
+    case GLFW_KEY_Y: transform = glm::rotate(transform, rotateY += rotateAmount, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z: transform = glm::rotate(transform, rotateZ += rotateAmount, {0.0, 0.0, 1.0}); break;
 
     case GLFW_KEY_M: mesh_struct++; break;
 
@@ -319,25 +329,23 @@ int main() {
   GLint projectionMatrixLocation = glGetUniformLocation(programID, "projection");
 
   using Vertex = glm::vec3;
-  // decagon
   const std::vector<Vertex> vertexData = {
-      {1.0f,       0.0f,       0.0f},
-      {0.809017f,  0.587785f,  0.0f},
-      {0.309017f,  0.951057f,  0.0f},
-      {-0.309017f, 0.951057f,  0.0f},
-      {-0.809017f, 0.587785f,  0.0f},
-      {-1.0f,      0.0f,       0.0f},
-      {-0.809017f, -0.587785f, 0.0f},
-      {-0.309017f, -0.951057f, 0.0f},
-      {0.309017f,  -0.951057f, 0.0f},
-      {0.809017f,  -0.587785f, 0.0f}
+      {-0.5f, -0.5f, -0.5f},
+      {0.5f,  -0.5f, -0.5f},
+      {0.5f,  0.5f,  -0.5f},
+      {-0.5f, 0.5f,  -0.5f},
+      {-0.5f, -0.5f, 0.5f },
+      {0.5f,  -0.5f, 0.5f },
+      {0.5f,  0.5f,  0.5f },
+      {-0.5f, 0.5f,  0.5f }
   };
 
-  const std::vector<GLuint> indices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
+                                       1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
 
-  GLuint vertexArrayID;
-  glCreateVertexArrays(1, &vertexArrayID);
-  glBindVertexArray(vertexArrayID);
+  GLuint vertexArrayObject;
+  glCreateVertexArrays(1, &vertexArrayObject);
+  glBindVertexArray(vertexArrayObject);
 
   GLuint arrayBufferID;
   glCreateBuffers(1, &arrayBufferID);
@@ -360,8 +368,7 @@ int main() {
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  glCullFace(GL_BACK);
-  glEnable(GL_CULL_FACE);
+  glDisable(GL_CULL_FACE);
 
   assert(glGetError() == GL_NO_ERROR);
 
@@ -372,9 +379,9 @@ int main() {
     glUniformMatrix4fv(tranformMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
-    glBindVertexArray(vertexArrayID);
+    glBindVertexArray(vertexArrayObject);
 
-    glDrawRangeElements(GL_TRIANGLE_FAN, 0, std::size(indices), 10, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, nullptr);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
