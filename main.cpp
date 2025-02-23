@@ -411,8 +411,6 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
   std::cout << sout.str();
 }
 
-///
-
 struct Camera {
   glm::vec3 eye{0.0, 0.0, 2.5};    // Gaze direction
   glm::vec3 center{0.0, 0.0, 0.0}; // where to look point camera
@@ -606,11 +604,12 @@ int main() {
   if(glewInit() != GLEW_OK)
     return 3;
 
-  glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_BLEND);
 
-  if(util::isExtensionAvailable("GL_ARB_debug_output"))
+  if(util::isExtensionAvailable("GL_ARB_debug_output")) {
+    glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, nullptr);
+  }
 
   GLuint programID = util::shaderLoader{}
                          .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
@@ -624,8 +623,7 @@ int main() {
   GLint viewMatrixLocation = glGetUniformLocation(programID, "view");
   GLint projectionMatrixLocation = glGetUniformLocation(programID, "projection");
 
-  using Vertex = glm::vec3;
-  const std::vector<Vertex> vertexData = {
+  const std::vector<glm::vec3> vertexData = {
       {-0.5f, -0.5f, -0.5f},
       {0.5f,  -0.5f, -0.5f},
       {0.5f,  0.5f,  -0.5f},
@@ -644,7 +642,6 @@ int main() {
   GLuint vertexArrayID = cube.load().getVertexArrayID();
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
   glDisable(GL_CULL_FACE);
 
   assert(glGetError() == GL_NO_ERROR);
