@@ -365,6 +365,75 @@ bool isExtensionAvailable(const std::string& ext) {
 }
 }
 
+class AppBase {
+private:
+  bool isExtensionAvailable(const std::string& ext);
+
+protected:
+  GLFWwindow* window;
+  bool running = true;
+
+public:
+  struct APPINFO {
+    std::string title;
+    int windowWidth;
+    int windowHeight;
+    int majorVersion;
+    int minorVersion;
+    int samples;
+    union {
+      struct {
+        std::uint8_t fullscreen : 1;
+        std::uint8_t vsync : 1;
+        std::uint8_t cursor : 1;
+        std::uint8_t stereo : 1;
+        std::uint8_t debug : 1;
+        std::uint8_t robust : 1;
+        std::uint8_t : 2;
+      };
+      std::uint8_t all;
+    } flags;
+    static_assert(sizeof(decltype(flags)) == sizeof(std::uint8_t));
+  };
+
+public:
+  virtual void init() = 0;
+  virtual void startUp() = 0;
+  virtual void render(double t) = 0;
+  virtual void shutdown() = 0;
+
+  void run();
+};
+
+void AppBase::run() {
+  if(!glfwInit())
+    return;
+
+  window = glfwCreateWindow(1, 1, "", nullptr, nullptr);
+  init();
+
+  glfwMakeContextCurrent(window);
+  glewInit();
+
+  startUp();
+
+  while(running) {
+    render(glfwGetTime());
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  shutdown();
+};
+
+class Thing : AppBase {
+public:
+  virtual void init() override;
+  virtual void startUp() override;
+  virtual void render(double t) override;
+  virtual void shutdown() override;
+};
+
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                 const GLchar* message, const void* userParam) {
 
@@ -429,6 +498,7 @@ struct Model {
   std::vector<GLuint> indices;
   std::vector<glm::vec3> texturePositons;
   std::vector<glm::vec3> colors;
+  glm::mat4x4 transform = glm::mat4(1.0);
 
   GLuint vertexArrayID;
 
