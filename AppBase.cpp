@@ -3,6 +3,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <range/v3/view/iota.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/algorithm/find.hpp>
+
 #include <iostream>
 #include <sstream>
 
@@ -184,6 +189,19 @@ void GLAPIENTRY AppBase::MessageCallback(GLenum source, GLenum type, GLuint id, 
     sout << "Message: " << message << '\n';
 
   std::cout << sout.str();
+}
+
+bool AppBase::isExtensionAvailable(const std::string& ext) {
+  GLint numExtensions;
+  glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
+  // clang-format off
+  auto
+  features = ranges::views::iota(0, numExtensions)
+           | ranges::views::transform([](int i) -> std::string { return reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i)); })
+           | ranges::to<std::vector<std::string>>;
+  return ranges::find(features, ext) != std::end(features);
+  // clang-format on
 }
 
 }
