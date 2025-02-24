@@ -40,7 +40,7 @@ void AppBase::glfw_onResize(GLFWwindow* window, int w, int h) {
 }
 
 void AppBase::glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  app->onKey(key, action);
+  app->onKey(key, action, mods);
 }
 
 void AppBase::glfw_onMouseButton(GLFWwindow* window, int button, int action, int mods) {
@@ -136,7 +136,7 @@ void AppBase::run(AppBase* the_app) {
   shutdown();
 }
 
-void AppBase::onKey(int key, int action) {}
+void AppBase::onKey(int key, int action, int mods) {}
 void AppBase::onMouseButton(int button, int action) {}
 void AppBase::onMouseMove(int x, int y) {}
 void AppBase::onMouseWheel(int pos) {}

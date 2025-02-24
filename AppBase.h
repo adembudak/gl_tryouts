@@ -62,7 +62,7 @@ public:
 
   void run(AppBase* the_app);
 
-  virtual void onKey(int key, int action);
+  virtual void onKey(int key, int action, int mods);
   virtual void onMouseButton(int button, int action);
   virtual void onMouseMove(int x, int y);
   virtual void onMouseWheel(int pos);
