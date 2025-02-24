@@ -15,6 +15,11 @@ find_package(glm REQUIRED)
 find_package(range-v3 REQUIRED)
 find_package(mpark_patterns REQUIRED)
 
+add_library(AppBase)
+target_sources(AppBase PRIVATE AppBase.cpp)
+target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm
+                                     range-v3::range-v3 mpark_patterns)
+
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
 target_link_libraries(vibe PRIVATE glfw OpenGL::GL GLEW::GLEW glm::glm
