@@ -22,8 +22,7 @@ target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm
 
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE glfw OpenGL::GL GLEW::GLEW glm::glm
-                                   range-v3::range-v3 mpark_patterns)
+target_link_libraries(vibe PRIVATE AppBase)
 
 file(
   GLOB shaders

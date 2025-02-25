@@ -1,3 +1,5 @@
+#include "AppBase.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -15,9 +17,6 @@
 #include <range/v3/algorithm/find.hpp>
 #include <mpark/patterns/match.hpp>
 
-#include <iostream>
-#include <sstream> // for std::ostringstream
-#include <utility> // for std::unreacheble
 #include <vector>
 #include <array>
 #include <filesystem>
@@ -27,6 +26,22 @@
 #include <numbers>
 #include <cstdint>
 #include <iterator>
+
+constexpr auto pi = std::numbers::pi_v<float>;
+
+const std::vector<glm::vec3> vertexData = {
+    {-0.5f, -0.5f, -0.5f},
+    {0.5f,  -0.5f, -0.5f},
+    {0.5f,  0.5f,  -0.5f},
+    {-0.5f, 0.5f,  -0.5f},
+    {-0.5f, -0.5f, 0.5f },
+    {0.5f,  -0.5f, 0.5f },
+    {0.5f,  0.5f,  0.5f },
+    {-0.5f, 0.5f,  0.5f }
+};
+
+const std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
+                                     1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
 
 namespace util {
 
@@ -351,133 +366,6 @@ std::string shaderLoader::getShaderFileSource(const std::filesystem::path shader
   return ranges::istream<char>(fin) | ranges::to<std::string>;
 }
 
-bool isExtensionAvailable(const std::string& ext) {
-  GLint numExtensions;
-  glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-
-  // clang-format off
-  auto
-  features = ranges::views::iota(0, numExtensions)
-           | ranges::views::transform([](int i) -> std::string { return reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i)); })
-           | ranges::to<std::vector<std::string>>;
-  return ranges::find(features, ext) != std::end(features);
-  // clang-format on
-}
-}
-
-class AppBase {
-private:
-  bool isExtensionAvailable(const std::string& ext);
-
-protected:
-  GLFWwindow* window;
-  bool running = true;
-
-public:
-  struct APPINFO {
-    std::string title;
-    int windowWidth;
-    int windowHeight;
-    int majorVersion;
-    int minorVersion;
-    int samples;
-    union {
-      struct {
-        std::uint8_t fullscreen : 1;
-        std::uint8_t vsync : 1;
-        std::uint8_t cursor : 1;
-        std::uint8_t stereo : 1;
-        std::uint8_t debug : 1;
-        std::uint8_t robust : 1;
-        std::uint8_t : 2;
-      };
-      std::uint8_t all;
-    } flags;
-    static_assert(sizeof(decltype(flags)) == sizeof(std::uint8_t));
-  };
-
-public:
-  virtual void init() = 0;
-  virtual void startUp() = 0;
-  virtual void render(double t) = 0;
-  virtual void shutdown() = 0;
-
-  void run();
-};
-
-void AppBase::run() {
-  if(!glfwInit())
-    return;
-
-  window = glfwCreateWindow(1, 1, "", nullptr, nullptr);
-  init();
-
-  glfwMakeContextCurrent(window);
-  glewInit();
-
-  startUp();
-
-  while(running) {
-    render(glfwGetTime());
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  }
-
-  shutdown();
-};
-
-class Thing : AppBase {
-public:
-  virtual void init() override;
-  virtual void startUp() override;
-  virtual void render(double t) override;
-  virtual void shutdown() override;
-};
-
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                const GLchar* message, const void* userParam) {
-
-  std::ostringstream sout;
-  sout << '\n';
-
-  switch(sout << "Source: "; source) {
-  case GL_DEBUG_SOURCE_API:             sout << "API"; break;
-  case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   sout << "Window system"; break;
-  case GL_DEBUG_SOURCE_SHADER_COMPILER: sout << "Shader compiler"; break;
-  case GL_DEBUG_SOURCE_THIRD_PARTY:     sout << "Third party"; break;
-  case GL_DEBUG_SOURCE_APPLICATION:     sout << "Application"; break;
-  case GL_DEBUG_SOURCE_OTHER:           sout << "Other"; break;
-  default:                              std::unreachable(); break;
-  }
-  sout << '\n';
-
-  switch(sout << "Type: "; type) {
-  case GL_DEBUG_TYPE_ERROR:               sout << "Error"; break;
-  case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: sout << "Deprecated behavior"; break;
-  case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  sout << "Undefined behavior"; break;
-  case GL_DEBUG_TYPE_PORTABILITY:         sout << "Portability"; break;
-  case GL_DEBUG_TYPE_PERFORMANCE:         sout << "Performance"; break;
-  case GL_DEBUG_TYPE_MARKER:              sout << "Marker"; break;
-  case GL_DEBUG_TYPE_PUSH_GROUP:          sout << "Push group"; break;
-  case GL_DEBUG_TYPE_POP_GROUP:           sout << "Pop group"; break;
-  case GL_DEBUG_TYPE_OTHER:               sout << "Other"; break;
-  default:                                std::unreachable(); break;
-  }
-  sout << '\n';
-
-  switch(sout << "Severity: "; severity) {
-  case GL_DEBUG_SEVERITY_LOW:          sout << "Low"; break;
-  case GL_DEBUG_SEVERITY_MEDIUM:       sout << "Medium"; break;
-  case GL_DEBUG_SEVERITY_HIGH:         sout << "High"; break;
-  case GL_DEBUG_SEVERITY_NOTIFICATION: sout << "Notification"; break;
-  default:                             std::unreachable(); break;
-  }
-  sout << '\n';
-
-  if(message != nullptr)
-    sout << "Message: " << message << '\n';
-
-  std::cout << sout.str();
 }
 
 struct Camera {
@@ -485,22 +373,35 @@ struct Camera {
   glm::vec3 center{0.0, 0.0, 0.0}; // where to look point camera
   glm::vec3 up{0.0, 1.0, 0.0};     // camera orientation
 
+  float field_of_view = pi / 2.0f;
+  float aspectRatio = 1.333f;
+  float zNear = 0.1f;
+  float zFar = 1000.0f;
+
+  glm::mat4x4 projection = glm::perspective(field_of_view, aspectRatio, zNear, zFar);
+
 public:
   glm::mat4x4 update(double t) {
     return glm::lookAt(eye, center, up);
   }
 };
 
-Camera cam;
-
 struct Model {
+  static constexpr float rotateAmount = pi / 180.0;
+
   std::vector<glm::vec3> vertexPositions;
   std::vector<GLuint> indices;
   std::vector<glm::vec3> texturePositons;
   std::vector<glm::vec3> colors;
   glm::mat4x4 transform = glm::mat4(1.0);
 
+  GLuint transformMatrixLocation;
+
   GLuint vertexArrayID;
+
+  float rotateX = 0;
+  float rotateY = 0;
+  float rotateZ = 0;
 
   // void load(std::filesystem::path& modelFile);
   Model& load();
@@ -514,6 +415,7 @@ private:
 };
 
 Model& Model::load() {
+
   glCreateVertexArrays(1, &vertexArrayID);
   glBindVertexArray(vertexArrayID);
 
@@ -550,58 +452,69 @@ Model& Model::loadIndices() {
   return *this;
 }
 
-constexpr auto pi = std::numbers::pi_v<float>;
-
-float field_of_view = pi / 2.0f;
-float aspectRatio = 1.333f;
-float zNear = 0.1f;
-float zFar = 1000.0f;
-
-glm::mat4x4 projection = glm::perspective(field_of_view, aspectRatio, zNear, zFar);
-glm::mat4x4 transform = glm::mat4(1.0);
-
 struct {
   std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
   std::uint8_t i = 0;
 
   void operator++(int) {
     i = ++i % std::size(mode);
-    std::cout << int(i);
     glPolygonMode(GL_FRONT_AND_BACK, mode[i]);
   }
 } mesh_struct;
 
-float rotateX = 0;
-float rotateY = 0;
-float rotateZ = 0;
-const float rotateAmount = pi / 180.0;
+class Thing : public Application::AppBase {
+private:
+  GLuint programID;
+  GLuint vertexArrayObject;
 
-void keyInput_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  GLuint viewMatrixLocation;
+  GLuint projectionMatrixLocation;
+
+  Model cube;
+  Camera camera;
+
+public:
+  virtual void init() override;
+  virtual void startup() override;
+  virtual void render(double t) override;
+  virtual void shutdown() override;
+
+  virtual void onKey(int key, int action, int mods) override;
+  virtual void onMouseWheel(int pos) override;
+};
+
+void Thing::onKey(int key, int action, int mods) {
+
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
-    case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+    case GLFW_KEY_ESCAPE: AppBase::running = false; break;
 
-    case GLFW_KEY_W:      transform = glm::translate(transform, {0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_D:      transform = glm::translate(transform, {0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_S:      transform = glm::translate(transform, {0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_A:      transform = glm::translate(transform, {-0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_W:      cube.transform = glm::translate(cube.transform, {0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_D:      cube.transform = glm::translate(cube.transform, {0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_S:      cube.transform = glm::translate(cube.transform, {0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_A:      cube.transform = glm::translate(cube.transform, {-0.1, 0.0, 0.0}); break;
 
     case GLFW_KEY_K:
       if(mods & GLFW_MOD_SHIFT)
-        transform = glm::scale(transform, {1.1, 1.1, 1.1});
+        cube.transform = glm::scale(cube.transform, {1.1, 1.1, 1.1});
       else
-        transform = glm::scale(transform, {0.9, 0.9, 0.9});
+        cube.transform = glm::scale(cube.transform, {0.9, 0.9, 0.9});
       break;
 
     case GLFW_KEY_X:
       if(mods & GLFW_MOD_SHIFT)
-        transform = glm::rotate(transform, rotateX -= rotateAmount, {0.1, 0.0, 0.0});
+        cube.transform = glm::rotate(cube.transform, cube.rotateX -= Model::rotateAmount, {0.1, 0.0, 0.0});
       else
-        transform = glm::rotate(transform, rotateX += rotateAmount, {0.1, 0.0, 0.0});
+        cube.transform = glm::rotate(cube.transform, cube.rotateX += Model::rotateAmount, {0.1, 0.0, 0.0});
       break;
-    case GLFW_KEY_Y: transform = glm::rotate(transform, rotateY += rotateAmount, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z: transform = glm::rotate(transform, rotateZ += rotateAmount, {0.0, 0.0, 1.0}); break;
+
+    case GLFW_KEY_Y:
+      cube.transform = glm::rotate(cube.transform, cube.rotateY += Model::rotateAmount, {0.0, 1.0, 0.0});
+      break;
+    case GLFW_KEY_Z:
+      cube.transform = glm::rotate(cube.transform, cube.rotateZ += Model::rotateAmount, {0.0, 0.0, 1.0});
+      break;
 
     case GLFW_KEY_M: mesh_struct++; break;
 
@@ -618,119 +531,66 @@ void keyInput_callback(GLFWwindow* window, int key, int scancode, int action, in
   }
 }
 
-void mouseScroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-  switch(int(yoffset)) {
-  case 1:  cam.eye.y += 1.0; break;
-  case -1: cam.eye.y -= 1.0; break;
+void Thing::onMouseWheel(int pos) {
+  switch(pos) {
+  case 1:  camera.eye.y += 1.0; break;
+  case -1: camera.eye.y -= 1.0; break;
   default: break;
   }
 }
 
-void errorCallback(int error, const char* description) {
-  // Based on: https://www.glfw.org/docs/3.0/group__errors.html
-  std::ostringstream sout;
-
-  switch(error) {
-  case GLFW_NOT_INITIALIZED:     sout << "GLFW has not been initialized."; break;
-  case GLFW_NO_CURRENT_CONTEXT:  sout << "No context is current for this thread."; break;
-  case GLFW_INVALID_ENUM:        sout << "One of the enum parameters for the function was given an invalid enum."; break;
-  case GLFW_INVALID_VALUE:       sout << "One of the parameters for the function was given an invalid value."; break;
-  case GLFW_OUT_OF_MEMORY:       sout << "A memory allocation failed."; break;
-  case GLFW_API_UNAVAILABLE:     sout << "GLFW could not find support for the requested client API on the system."; break;
-  case GLFW_VERSION_UNAVAILABLE: sout << "The requested client API version is not available."; break;
-  case GLFW_PLATFORM_ERROR:      sout << "A platform-specific error occurred."; break;
-  case GLFW_FORMAT_UNAVAILABLE:  sout << "The clipboard did not contain data in the requested format."; break;
-  default:                       sout << "Unknown error code: " << error; break;
-  }
-
-  if(description != nullptr)
-    sout << " Description: " << description;
-  std::cout << sout.str() << '\n';
+void Thing::init() {
+  info.title = "something something";
+  AppBase::init();
 }
 
-int main() {
-  if(glfwInit() != GLFW_TRUE)
-    return 1;
-
-  GLFWwindow* window = glfwCreateWindow(640, 480, "GL", NULL, NULL);
-
-  if(window == nullptr) {
-    glfwTerminate();
-    return 2;
-  }
-
-  glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-  glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_FALSE);
-
-  glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, keyInput_callback);
-  glfwSetScrollCallback(window, mouseScroll_callback);
-  glfwSetErrorCallback(errorCallback);
-
-  if(glewInit() != GLEW_OK)
-    return 3;
-
-  glEnable(GL_BLEND);
-
-  if(util::isExtensionAvailable("GL_ARB_debug_output")) {
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, nullptr);
-  }
-
-  GLuint programID = util::shaderLoader{}
-                         .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
-                         .compile()
-                         .attach()
-                         .link()
-                         .getProgramID();
+void Thing::startup() {
+  programID = util::shaderLoader{}
+                  .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
+                  .compile()
+                  .attach()
+                  .link()
+                  .getProgramID();
 
   glUseProgram(programID);
-  GLint tranformMatrixLocation = glGetUniformLocation(programID, "transform");
-  GLint viewMatrixLocation = glGetUniformLocation(programID, "view");
-  GLint projectionMatrixLocation = glGetUniformLocation(programID, "projection");
 
-  const std::vector<glm::vec3> vertexData = {
-      {-0.5f, -0.5f, -0.5f},
-      {0.5f,  -0.5f, -0.5f},
-      {0.5f,  0.5f,  -0.5f},
-      {-0.5f, 0.5f,  -0.5f},
-      {-0.5f, -0.5f, 0.5f },
-      {0.5f,  -0.5f, 0.5f },
-      {0.5f,  0.5f,  0.5f },
-      {-0.5f, 0.5f,  0.5f }
-  };
-
-  const std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
-                                       1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
-  Model cube;
   cube.vertexPositions = std::move(vertexData);
   cube.indices = std::move(indices);
-  GLuint vertexArrayID = cube.load().getVertexArrayID();
+
+  cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
+  cube.vertexPositions = std::move(vertexData);
+  cube.indices = std::move(indices);
+  cube.load();
+
+  viewMatrixLocation = glGetUniformLocation(programID, "view");
+  projectionMatrixLocation = glGetUniformLocation(programID, "projection");
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
 
   assert(glGetError() == GL_NO_ERROR);
+}
 
-  const GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
-  while(!glfwWindowShouldClose(window)) {
-    glClearBufferfv(GL_COLOR, 0, backgroundColor);
+void Thing::render(double t) {
+  constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
+  glClearBufferfv(GL_COLOR, 0, backgroundColor);
 
-    glUniformMatrix4fv(tranformMatrixLocation, 1, GL_FALSE, glm::value_ptr(transform));
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(cam.update(0.0)));
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
-    glBindVertexArray(vertexArrayID);
+  glUniformMatrix4fv(cube.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(cube.transform));
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.update(0.0)));
+  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projection));
+  glBindVertexArray(cube.load().getVertexArrayID());
 
-    glDrawElements(GL_TRIANGLES, std::size(indices), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, std::size(cube.indices), GL_UNSIGNED_INT, nullptr);
+}
 
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  }
+void Thing::shutdown() {
+  glDeleteVertexArrays(1, &vertexArrayObject);
+  glDeleteProgram(programID);
+}
 
-  glfwTerminate();
+int main() {
+  Thing* an_app = new Thing;
+  an_app->run(an_app);
+  delete an_app;
   return 0;
 }
