@@ -8,13 +8,11 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/istream.hpp>
-#include <range/v3/view/iota.hpp>
-#include <range/v3/view/transform.hpp>
 #include <range/v3/algorithm/equal.hpp>
-#include <range/v3/algorithm/find.hpp>
 #include <mpark/patterns/match.hpp>
 
 #include <vector>
@@ -23,11 +21,10 @@
 #include <fstream>
 #include <string>
 #include <cassert>
-#include <numbers>
 #include <cstdint>
 #include <iterator>
 
-constexpr auto pi = std::numbers::pi_v<float>;
+constexpr auto pi = glm::pi<float>();
 
 const std::vector<glm::vec3> vertexData = {
     {-0.5f, -0.5f, -0.5f},
