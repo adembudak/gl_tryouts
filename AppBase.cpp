@@ -75,7 +75,7 @@ void AppBase::init() {
 
 void AppBase::run(AppBase* the_app) {
   app = the_app;
-  bool running = true;
+  running = true;
 
   if(!glfwInit())
     return;
