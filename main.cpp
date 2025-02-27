@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
@@ -39,6 +40,56 @@ const std::vector<glm::vec3> vertexData = {
 
 const std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
                                      1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
+
+const std::vector<glm::vec2> textureCoords = {
+    // front
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 1.0f},
+
+    // back
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 1.0f},
+
+    // left
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 1.0f},
+
+    // right
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 1.0f},
+
+    // top
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 1.0f},
+
+    // bottom
+    {0.0f, 0.0f},
+    {1.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 0.0f},
+    {1.0f, 1.0f},
+    {0.0f, 1.0f}
+};
 
 namespace util {
 
@@ -259,7 +310,6 @@ bool ktxLoader::load(const std::filesystem::path& textureFile) {
 
 struct textureLoader {
   GLuint textureID;
-  std::vector<glm::vec4> texels;
 
   bool load(const std::filesystem::path& textureFile);
 
@@ -388,7 +438,7 @@ struct Model {
 
   std::vector<glm::vec3> vertexPositions;
   std::vector<GLuint> indices;
-  std::vector<glm::vec3> texturePositons;
+  std::vector<glm::vec2> texturePositions;
   std::vector<glm::vec3> colors;
   glm::mat4x4 transform = glm::mat4(1.0);
 
@@ -552,6 +602,7 @@ void Thing::startup() {
   glUseProgram(programID);
 
   cube.vertexPositions = std::move(vertexData);
+  cube.texturePositions = std::move(textureCoords);
   cube.indices = std::move(indices);
 
   cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
