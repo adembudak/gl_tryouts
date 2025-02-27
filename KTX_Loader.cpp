@@ -1,17 +1,18 @@
 #include "KTX_Loader.h"
 
-#include <range/v3/algorithm/equal.hpp>
+#include <GL/glew.h>
 
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <cassert>
 
 namespace ktx { namespace v1_0 {
 
 constexpr std::array<ubyte, 12> identifierExpected{0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A};
 
 bool ktxLoader::is_ktx() const {
-  return ranges::equal(header.identifier, identifierExpected);
+  return header.identifier == identifierExpected;
 }
 
 uint32 ktxLoader::calculate_stride(uint32 width, uint32 pad) const {
@@ -127,7 +128,6 @@ bool ktxLoader::load(const std::filesystem::path& textureFile) {
       glTextureStorage2D(textureID, h.nMipmapLevel, h.glInternalFormat, h.pixelWidth, h.pixelHeight);
       glTextureSubImage2D(textureID, 0, 0, 0, h.pixelWidth, h.pixelHeight, h.glFormat, h.glType, std::data(texels));
 
-      /*
       uint32 pixelWidth = h.pixelWidth;
       uint32 pixelHeight = h.pixelHeight;
 
@@ -146,7 +146,6 @@ bool ktxLoader::load(const std::filesystem::path& textureFile) {
         if(!pixelWidth)
           pixelWidth = 1;
       }
-      */
     }
     break;
 

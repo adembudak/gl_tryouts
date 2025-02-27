@@ -20,6 +20,10 @@ target_sources(AppBase PRIVATE AppBase.cpp)
 target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm
                                      range-v3::range-v3 mpark_patterns)
 
+add_library(KTX_Loader)
+target_sources(KTX_Loader PRIVATE KTX_Loader.cpp)
+target_link_libraries(KTX_Loader PUBLIC OpenGL::GL GLEW::GLEW)
+
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
 target_link_libraries(vibe PRIVATE AppBase)

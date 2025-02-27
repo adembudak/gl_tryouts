@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <vector>
+#include <array>
 
 namespace ktx { namespace v1_0 {
 // KTX file format loader:
@@ -16,7 +17,7 @@ using ubyte = std::uint8_t;
 using uint32 = std::uint32_t;
 
 struct Header_t {
-  ubyte identifier[12];
+  std::array<ubyte, 12> identifier;
   uint32 endianness;
   uint32 glType;
   uint32 glTypeSize;
