@@ -419,7 +419,7 @@ void Thing::startup() {
 
   glUseProgram(programID);
 
-  util::textureLoader{}.load("/home/adem/gl_tryouts/textures/Konyaalti.ktx");
+  util::textureLoader{}.load("textures/Konyaalti.ktx");
 
   cube.vertexPositions = std::move(vertexData);
   cube.texturePositions = std::move(textureCoords);

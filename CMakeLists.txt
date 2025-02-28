@@ -26,17 +26,27 @@ add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
 target_link_libraries(vibe PRIVATE AppBase KTX::ktx tinygltf::tinygltf)
 
-file(
-  GLOB shaders
-  LIST_DIRECTORIES true
-  CONFIGURE_DEPENDS "shaders/*.vert" "shaders/*.frag")
+set(textures ${PROJECT_SOURCE_DIR}/textures)
+set(shaders ${PROJECT_SOURCE_DIR}/shaders)
 
 add_custom_command(
   TARGET vibe
   POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy ${shaders} "$<TARGET_FILE_DIR:vibe>")
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory ${shaders}
+          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
+
+add_custom_command(
+  TARGET vibe
+  POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory ${textures}
+          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,textures>")
 
 if(VERIFY_SHADERS)
+  file(
+    GLOB shaders
+    LIST_DIRECTORIES true
+    CONFIGURE_DEPENDS "shaders/*.vert" "shaders/*.frag")
+
   find_program(GLSLANG glslang glslangValidator REQUIRED)
   add_custom_command(
     TARGET vibe
