@@ -142,7 +142,6 @@ shaderLoader& shaderLoader::load(const std::vector<std::filesystem::path>& shade
   for(auto shaderFile : shaderFiles) {
     std::string shaderSource = this->getShaderFileSource(shaderFile);
     auto data = std::data(shaderSource);
-    auto size = std::size(shaderSource);
 
     GLenum type = this->identifyShaderType(shaderFile);
 
@@ -258,6 +257,7 @@ struct Model {
 
 private:
   Model& loadVertexPositions();
+  Model& loadTexturePositions();
   Model& loadIndices();
 };
 
@@ -289,7 +289,22 @@ Model& Model::loadVertexPositions() {
   return *this;
 }
 
-Model& Model::loadTexturePositions() {}
+Model& Model::loadTexturePositions() {
+  GLuint arrayBufferID;
+  glCreateBuffers(1, &arrayBufferID);
+  glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
+
+  GLsizeiptr sizeOfTexelElement = sizeof(decltype(textureCoords[0]));
+  GLsizeiptr sizeOfTexels = std::size(textureCoords) * sizeOfTexelElement;
+  glNamedBufferStorage(arrayBufferID, sizeOfTexels, nullptr, GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferSubData(arrayBufferID, 0, sizeOfTexels, std::data(textureCoords));
+
+  glVertexAttribPointer(1, textureCoords[0].length(), GL_FLOAT, GL_FALSE, sizeOfTexelElement, nullptr);
+  glEnableVertexAttribArray(1);
+
+  return *this;
+}
+
 Model& Model::loadIndices() {
   GLuint elementBufferID;
   glCreateBuffers(1, &elementBufferID);
@@ -409,10 +424,7 @@ void Thing::startup() {
   cube.vertexPositions = std::move(vertexData);
   cube.texturePositions = std::move(textureCoords);
   cube.indices = std::move(indices);
-
   cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
-  cube.vertexPositions = std::move(vertexData);
-  cube.indices = std::move(indices);
   cube.load();
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
@@ -431,13 +443,13 @@ void Thing::render(double t) {
   glUniformMatrix4fv(cube.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(cube.transform));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.update(0.0)));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projection));
-  glBindVertexArray(cube.load().getVertexArrayID());
+  glBindVertexArray(cube.getVertexArrayID());
 
   glDrawElements(GL_TRIANGLES, std::size(cube.indices), GL_UNSIGNED_INT, nullptr);
 }
 
 void Thing::shutdown() {
-  glDeleteVertexArrays(1, &vertexArrayObject);
+  glDeleteVertexArrays(1, &cube.vertexArrayID);
   glDeleteProgram(programID);
 }
 
