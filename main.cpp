@@ -242,7 +242,7 @@ struct Model {
   }
 
 private:
-  Model& loadPositionVertices();
+  Model& loadVertexPositions();
   Model& loadIndices();
 };
 
@@ -251,12 +251,13 @@ Model& Model::load() {
   glCreateVertexArrays(1, &vertexArrayID);
   glBindVertexArray(vertexArrayID);
 
-  loadPositionVertices().loadIndices();
+  loadVertexPositions();
+  loadIndices();
 
   return *this;
 }
 
-Model& Model::loadPositionVertices() {
+Model& Model::loadVertexPositions() {
   GLuint arrayBufferID;
   glCreateBuffers(1, &arrayBufferID);
   glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
