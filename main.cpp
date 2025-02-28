@@ -1,4 +1,5 @@
 #include "AppBase.h"
+#include "Model.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -28,6 +29,7 @@
 #include <iterator>
 
 constexpr auto pi = glm::pi<float>();
+constexpr float rotateAmount = pi / 180.0;
 
 const std::vector<glm::vec3> vertexData = {
     {-0.5f, -0.5f, -0.5f},
@@ -232,91 +234,6 @@ public:
   }
 };
 
-struct Model {
-  static constexpr float rotateAmount = pi / 180.0;
-
-  std::vector<glm::vec3> vertexPositions;
-  std::vector<GLuint> indices;
-  std::vector<glm::vec2> texturePositions;
-  std::vector<glm::vec3> colors;
-  glm::mat4x4 transform = glm::mat4(1.0);
-
-  GLuint transformMatrixLocation;
-
-  GLuint vertexArrayID;
-
-  float rotateX = 0;
-  float rotateY = 0;
-  float rotateZ = 0;
-
-  // void load(std::filesystem::path& modelFile);
-  Model& load();
-  GLuint getVertexArrayID() const {
-    return vertexArrayID;
-  }
-
-private:
-  Model& loadVertexPositions();
-  Model& loadTexturePositions();
-  Model& loadIndices();
-};
-
-Model& Model::load() {
-
-  glCreateVertexArrays(1, &vertexArrayID);
-  glBindVertexArray(vertexArrayID);
-
-  loadVertexPositions();
-  loadTexturePositions();
-  loadIndices();
-
-  return *this;
-}
-
-Model& Model::loadVertexPositions() {
-  GLuint arrayBufferID;
-  glCreateBuffers(1, &arrayBufferID);
-  glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
-
-  GLsizeiptr sizeOfVertex = sizeof(decltype(vertexPositions[0]));
-  GLsizeiptr sizeOfVertices = std::size(vertexPositions) * sizeOfVertex;
-  glNamedBufferStorage(arrayBufferID, sizeOfVertices, nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexPositions));
-
-  glVertexAttribPointer(0, vertexPositions[0].length(), GL_FLOAT, GL_FALSE, sizeOfVertex, nullptr);
-  glEnableVertexAttribArray(0);
-
-  return *this;
-}
-
-Model& Model::loadTexturePositions() {
-  GLuint arrayBufferID;
-  glCreateBuffers(1, &arrayBufferID);
-  glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
-
-  GLsizeiptr sizeOfTexelElement = sizeof(decltype(textureCoords[0]));
-  GLsizeiptr sizeOfTexels = std::size(textureCoords) * sizeOfTexelElement;
-  glNamedBufferStorage(arrayBufferID, sizeOfTexels, nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferSubData(arrayBufferID, 0, sizeOfTexels, std::data(textureCoords));
-
-  glVertexAttribPointer(1, textureCoords[0].length(), GL_FLOAT, GL_FALSE, sizeOfTexelElement, nullptr);
-  glEnableVertexAttribArray(1);
-
-  return *this;
-}
-
-Model& Model::loadIndices() {
-  GLuint elementBufferID;
-  glCreateBuffers(1, &elementBufferID);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
-
-  GLsizeiptr sizeOfIndex = sizeof(decltype(indices[0]));
-  GLsizeiptr sizeOfIndices = std::size(indices) * sizeOfIndex; // in bytes
-  glNamedBufferStorage(elementBufferID, sizeOfIndices, std::data(indices), GL_MAP_READ_BIT);
-
-  return *this;
-}
-
 struct {
   std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
   std::uint8_t i = 0;
@@ -349,37 +266,32 @@ public:
 };
 
 void Thing::onKey(int key, int action, int mods) {
-
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
     case GLFW_KEY_ESCAPE: AppBase::running = false; break;
 
-    case GLFW_KEY_W:      cube.transform = glm::translate(cube.transform, {0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_D:      cube.transform = glm::translate(cube.transform, {0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_S:      cube.transform = glm::translate(cube.transform, {0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_A:      cube.transform = glm::translate(cube.transform, {-0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_W:      cube.translate({0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_D:      cube.translate({0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_S:      cube.translate({0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_A:      cube.translate({-0.1, 0.0, 0.0}); break;
 
     case GLFW_KEY_K:
       if(mods & GLFW_MOD_SHIFT)
-        cube.transform = glm::scale(cube.transform, {1.1, 1.1, 1.1});
+        cube.scale(glm::vec3{1.1, 1.1, 1.1});
       else
-        cube.transform = glm::scale(cube.transform, {0.9, 0.9, 0.9});
+        cube.scale(glm::vec3{0.9, 0.9, 0.9});
       break;
 
     case GLFW_KEY_X:
       if(mods & GLFW_MOD_SHIFT)
-        cube.transform = glm::rotate(cube.transform, cube.rotateX -= Model::rotateAmount, {0.1, 0.0, 0.0});
+        cube.rotate(-rotateAmount, {0.1, 0.0, 0.0});
       else
-        cube.transform = glm::rotate(cube.transform, cube.rotateX += Model::rotateAmount, {0.1, 0.0, 0.0});
+        cube.rotate(rotateAmount, {0.1, 0.0, 0.0});
       break;
 
-    case GLFW_KEY_Y:
-      cube.transform = glm::rotate(cube.transform, cube.rotateY += Model::rotateAmount, {0.0, 1.0, 0.0});
-      break;
-    case GLFW_KEY_Z:
-      cube.transform = glm::rotate(cube.transform, cube.rotateZ += Model::rotateAmount, {0.0, 0.0, 1.0});
-      break;
+    case GLFW_KEY_Y: cube.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z: cube.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
     case GLFW_KEY_M: mesh_struct++; break;
 
@@ -421,11 +333,8 @@ void Thing::startup() {
 
   util::textureLoader{}.load("textures/Konyaalti.ktx");
 
-  cube.vertexPositions = std::move(vertexData);
-  cube.texturePositions = std::move(textureCoords);
-  cube.indices = std::move(indices);
   cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
-  cube.load();
+  cube.load(vertexData, indices, textureCoords);
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
@@ -448,7 +357,7 @@ void Thing::render(double t) {
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projection));
   glBindVertexArray(cube.getVertexArrayID());
 
-  glDrawElements(GL_TRIANGLES, std::size(cube.indices), GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, cube.indiceSize, GL_UNSIGNED_INT, nullptr);
 }
 
 void Thing::shutdown() {
