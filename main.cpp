@@ -432,13 +432,16 @@ void Thing::startup() {
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
 
   assert(glGetError() == GL_NO_ERROR);
 }
 
 void Thing::render(double t) {
   constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
-  glClearBufferfv(GL_COLOR, 0, backgroundColor);
+  constexpr GLfloat clearDepth = 1.0;
+  glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
+  glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
   glUniformMatrix4fv(cube.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(cube.transform));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.update(0.0)));
