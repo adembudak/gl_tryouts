@@ -12,6 +12,8 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
+find_package(Ktx REQUIRED)
+find_package(TinyGLTF REQUIRED)
 find_package(range-v3 REQUIRED)
 find_package(mpark_patterns REQUIRED)
 
@@ -22,7 +24,7 @@ target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm
 
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE AppBase)
+target_link_libraries(vibe PRIVATE AppBase KTX::ktx tinygltf::tinygltf)
 
 file(
   GLOB shaders
