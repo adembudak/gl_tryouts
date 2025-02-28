@@ -1,8 +1,11 @@
 #version 460 core
 #extension all: warn
 
+layout (binding = 0) uniform sampler2D s;
+
+in vec2 textureCoordinate;
 out vec4 color;
 
 void main() {
-  color = vec4(0.337, 0.443, 0.537, 1.0);
+  color = texture(s, textureCoordinate);
 }

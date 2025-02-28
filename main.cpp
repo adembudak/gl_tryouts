@@ -16,6 +16,8 @@
 #include <range/v3/algorithm/equal.hpp>
 #include <mpark/patterns/match.hpp>
 
+#include <ktx.h>
+
 #include <vector>
 #include <array>
 #include <filesystem>
@@ -95,6 +97,7 @@ namespace util {
 
 struct textureLoader {
   GLuint textureID;
+  GLenum target;
 
   bool load(const std::filesystem::path& textureFile);
 
@@ -102,6 +105,18 @@ struct textureLoader {
     return textureID;
   }
 };
+
+bool textureLoader::load(const std::filesystem::path& textureFile) {
+  assert(std::filesystem::exists(textureFile));
+
+  ktxTexture* kTexture;
+  KTX_error_code ret = ktxTexture_CreateFromNamedFile(textureFile.c_str(), KTX_TEXTURE_CREATE_NO_FLAGS, &kTexture);
+
+  glGenTextures(1, &textureID);
+  ret = ktxTexture_GLUpload(kTexture, &textureID, &target, nullptr);
+
+  return true;
+}
 
 struct shaderLoader {
   std::vector<GLuint> shaderIDs;
@@ -252,6 +267,7 @@ Model& Model::load() {
   glBindVertexArray(vertexArrayID);
 
   loadVertexPositions();
+  loadTexturePositions();
   loadIndices();
 
   return *this;
@@ -273,6 +289,7 @@ Model& Model::loadVertexPositions() {
   return *this;
 }
 
+Model& Model::loadTexturePositions() {}
 Model& Model::loadIndices() {
   GLuint elementBufferID;
   glCreateBuffers(1, &elementBufferID);
@@ -386,6 +403,8 @@ void Thing::startup() {
                   .getProgramID();
 
   glUseProgram(programID);
+
+  util::textureLoader{}.load("/home/adem/gl_tryouts/textures/Konyaalti.ktx");
 
   cube.vertexPositions = std::move(vertexData);
   cube.texturePositions = std::move(textureCoords);
