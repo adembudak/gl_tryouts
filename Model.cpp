@@ -39,8 +39,9 @@ Model& Model::loadVertexPositions(const std::vector<glm::vec3>& vertexPositions)
   glNamedBufferStorage(arrayBufferID, sizeOfVertices, nullptr, GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexPositions));
 
-  glVertexAttribPointer(0, vertexPositions[0].length(), GL_FLOAT, GL_FALSE, sizeOfVertex, nullptr);
-  glEnableVertexAttribArray(0);
+  glVertexArrayVertexBuffer(vertexArrayID, 0, arrayBufferID, 0, sizeOfVertex);
+  glVertexArrayAttribFormat(vertexArrayID, 0, vertexPositions[0].length(), GL_FLOAT, GL_FALSE, 0);
+  glEnableVertexArrayAttrib(vertexArrayID, 0);
 
   return *this;
 }
@@ -55,8 +56,9 @@ Model& Model::loadTexturePositions(const std::vector<glm::vec2>& textureCoords) 
   glNamedBufferStorage(arrayBufferID, sizeOfTexels, nullptr, GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferSubData(arrayBufferID, 0, sizeOfTexels, std::data(textureCoords));
 
-  glVertexAttribPointer(1, textureCoords[0].length(), GL_FLOAT, GL_FALSE, sizeOfTexelElement, nullptr);
-  glEnableVertexAttribArray(1);
+  glVertexArrayVertexBuffer(vertexArrayID, 1, arrayBufferID, 0, sizeOfTexelElement);
+  glVertexArrayAttribFormat(vertexArrayID, 1, textureCoords[0].length(), GL_FLOAT, GL_FALSE, 0);
+  glEnableVertexArrayAttrib(vertexArrayID, 1);
 
   return *this;
 }
