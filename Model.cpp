@@ -32,7 +32,6 @@ void Model::translate(const glm::vec3& v) {
 Model& Model::loadVertexPositions(const std::vector<glm::vec3>& vertexPositions) {
   GLuint arrayBufferID;
   glCreateBuffers(1, &arrayBufferID);
-  glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
 
   GLsizeiptr sizeOfVertex = sizeof(decltype(vertexPositions[0]));
   GLsizeiptr sizeOfVertices = std::size(vertexPositions) * sizeOfVertex;
@@ -49,7 +48,6 @@ Model& Model::loadVertexPositions(const std::vector<glm::vec3>& vertexPositions)
 Model& Model::loadTexturePositions(const std::vector<glm::vec2>& textureCoords) {
   GLuint arrayBufferID;
   glCreateBuffers(1, &arrayBufferID);
-  glBindBuffer(GL_ARRAY_BUFFER, arrayBufferID);
 
   GLsizeiptr sizeOfTexelElement = sizeof(decltype(textureCoords[0]));
   GLsizeiptr sizeOfTexels = std::size(textureCoords) * sizeOfTexelElement;
