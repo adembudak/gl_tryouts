@@ -42,11 +42,7 @@ add_custom_command(
   TARGET vibe
   POST_BUILD
   COMMAND "${CMAKE_COMMAND}" -E copy_directory ${shaders}
-          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
-
-add_custom_command(
-  TARGET vibe
-  POST_BUILD
+          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>"
   COMMAND "${CMAKE_COMMAND}" -E copy_directory ${textures}
           "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,textures>")
 
