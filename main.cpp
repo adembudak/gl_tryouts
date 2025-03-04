@@ -1,5 +1,6 @@
 #include "AppBase.h"
 #include "Model.h"
+#include "ShaderLoader.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,21 +13,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <range/v3/range/conversion.hpp>
-#include <range/v3/view/istream.hpp>
-#include <range/v3/algorithm/equal.hpp>
-#include <mpark/patterns/match.hpp>
-
 #include <ktx.h>
 
 #include <vector>
 #include <array>
 #include <filesystem>
-#include <fstream>
 #include <string>
 #include <cassert>
 #include <cstdint>
-#include <iterator>
 
 constexpr auto pi = glm::pi<float>();
 constexpr float rotateAmount = pi / 180.0;
@@ -120,100 +114,6 @@ bool textureLoader::load(const std::filesystem::path& textureFile) {
   return true;
 }
 
-struct shaderLoader {
-  std::vector<GLuint> shaderIDs;
-  GLuint programID;
-
-  shaderLoader& load(const std::vector<std::filesystem::path>& shaderFiles);
-  shaderLoader& compile();
-  shaderLoader& attach();
-  shaderLoader& link();
-
-  void emitProgramBinary() const;
-
-  GLuint getProgramID() const {
-    return programID;
-  }
-
-private:
-  GLenum identifyShaderType(const std::filesystem::path shaderFile) const;
-  std::string getShaderFileSource(const std::filesystem::path shaderFile) const;
-};
-
-shaderLoader& shaderLoader::load(const std::vector<std::filesystem::path>& shaderFiles) {
-  for(auto shaderFile : shaderFiles) {
-    std::string shaderSource = this->getShaderFileSource(shaderFile);
-    auto data = std::data(shaderSource);
-
-    GLenum type = this->identifyShaderType(shaderFile);
-
-    GLuint shaderID = glCreateShader(type);
-    glShaderSource(shaderID, 1, &data, nullptr);
-    shaderIDs.push_back(shaderID);
-  }
-
-  return *this;
-}
-
-shaderLoader& shaderLoader::compile() {
-  for(GLuint shaderID : shaderIDs)
-    glCompileShader(shaderID);
-
-  return *this;
-}
-
-shaderLoader& shaderLoader::attach() {
-  programID = glCreateProgram();
-
-  for(GLuint shaderID : shaderIDs)
-    glAttachShader(programID, shaderID);
-
-  return *this;
-}
-
-shaderLoader& shaderLoader::link() {
-  glLinkProgram(programID);
-
-  return *this;
-}
-
-void shaderLoader::emitProgramBinary() const {
-  if(glIsProgram(programID)) {
-    GLint binarySize;
-    glGetProgramiv(programID, GL_PROGRAM_BINARY_LENGTH, &binarySize);
-
-    std::vector<char> programBinary(binarySize, '\0');
-
-    GLenum binaryFormat = GL_NONE;
-    glGetProgramBinary(programID, binarySize, nullptr, &binaryFormat, std::data(programBinary));
-
-    std::ofstream fout{"programBinary.bin", std::ios::binary};
-    fout.write(std::data(programBinary), std::size(programBinary));
-  }
-}
-
-GLenum shaderLoader::identifyShaderType(const std::filesystem::path shaderFile) const {
-  using namespace mpark::patterns;
-  // Based on: https://github.com/KhronosGroup/glslang?tab=readme-ov-file#execution-of-standalone-wrapper
-  // clang-format off
-  return match(shaderFile.extension())(
-      pattern(".vert") = [] { return GL_VERTEX_SHADER; },
-      pattern(".tesc") = [] { return GL_TESS_CONTROL_SHADER; },
-      pattern(".tese") = [] { return GL_TESS_EVALUATION_SHADER; },
-      pattern(".geom") = [] { return GL_GEOMETRY_SHADER; },
-      pattern(".frag") = [] { return GL_FRAGMENT_SHADER; },
-      pattern(".comp") = [] { return GL_COMPUTE_SHADER; }
-  );
-  // clang-format on
-}
-
-std::string shaderLoader::getShaderFileSource(const std::filesystem::path shaderFile) const {
-  std::ifstream fin{shaderFile};
-  fin.unsetf(std::ifstream::skipws);
-
-  return ranges::istream<char>(fin) | ranges::to<std::string>;
-}
-
 }
 
 struct Camera {
@@ -251,6 +151,9 @@ private:
 
   GLuint viewMatrixLocation;
   GLuint projectionMatrixLocation;
+
+  util::textureLoader textureLoader;
+  util::ShaderLoader shaderLoader;
 
   Model cube;
   Camera camera;
@@ -322,7 +225,7 @@ void Thing::init() {
 }
 
 void Thing::startup() {
-  programID = util::shaderLoader{}
+  programID = shaderLoader
                   .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
                   .compile()
                   .attach()
@@ -331,7 +234,7 @@ void Thing::startup() {
 
   glUseProgram(programID);
 
-  util::textureLoader{}.load("textures/Konyaalti.ktx");
+  textureLoader.load("textures/Konyaalti.ktx");
 
   cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
   cube.load(vertexData, indices, textureCoords);
@@ -357,6 +260,7 @@ void Thing::render(double t) {
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projection));
   glBindVertexArray(cube.getVertexArrayID());
 
+  glBindTextureUnit(0, textureLoader.textureID);
   glDrawElements(GL_TRIANGLES, cube.indiceSize, GL_UNSIGNED_INT, nullptr);
 }
 

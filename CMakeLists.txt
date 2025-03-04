@@ -19,17 +19,21 @@ find_package(mpark_patterns REQUIRED)
 
 add_library(AppBase)
 target_sources(AppBase PRIVATE AppBase.cpp)
-target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm
-                                     range-v3::range-v3 mpark_patterns)
+target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm)
 
 add_library(Model)
 target_sources(Model PRIVATE Model.cpp)
 target_link_libraries(Model PRIVATE OpenGL::GL GLEW::GLEW glm::glm
                                     tinygltf::tinygltf)
 
+add_library(ShaderLoader)
+target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
+target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW
+                                           range-v3::range-v3 mpark_patterns)
+
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE AppBase Model KTX::ktx)
+target_link_libraries(vibe PRIVATE AppBase Model ShaderLoader KTX::ktx)
 
 set(textures ${PROJECT_SOURCE_DIR}/textures)
 set(shaders ${PROJECT_SOURCE_DIR}/shaders)
