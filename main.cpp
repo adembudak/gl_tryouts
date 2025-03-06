@@ -20,7 +20,6 @@
 #include <cassert>
 
 #include <iostream>
-#include <iomanip>
 
 constexpr auto pi = glm::pi<float>();
 constexpr float rotateAmount = pi / 180.0;
@@ -230,24 +229,16 @@ void Thing::startup() {
   glEnable(GL_DEPTH_TEST);
 
   assert(glGetError() == GL_NO_ERROR);
-
-  //  std::cout << "Current time\tLast time\tDelta time\n";
-  //  std::cout << std::setprecision(8);
 }
 
 void Thing::render(double currentTime) {
   const double deltaTime = currentTime - lastTime;
 
-  //  std::cout                  //
-  //      << currentTime << '\t' //
-  //      << lastTime << '\t'    //
-  //      << deltaTime <<        //
-  //      '\n';
-
   lastTime = currentTime;
-
+  elapsedTime += deltaTime;
   ++frameCount;
-  if(elapsedTime += deltaTime; elapsedTime >= 1.0) {
+
+  if(elapsedTime >= 1.0) {
     std::cout << frameCount << '\n';
     frameCount = 0;
     elapsedTime = 0;
