@@ -118,16 +118,6 @@ void Camera::lookAround(float angleX, float angleY, float angleZ) {
   yawPitchRoll = glm::yawPitchRoll(angleX, angleY, 0.0f);
 }
 
-struct {
-  const std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
-  std::uint8_t i = 0;
-
-  void operator++(int) {
-    i = ++i % std::size(mode);
-    glPolygonMode(GL_FRONT_AND_BACK, mode[i]);
-  }
-} mesh_struct;
-
 class Thing : public Application::AppBase {
 private:
   GLuint programID;
@@ -181,7 +171,7 @@ void Thing::onKey(int key, int action, int mods) {
     case GLFW_KEY_Y: cube.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
     case GLFW_KEY_Z: cube.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
-    case GLFW_KEY_M: mesh_struct++; break;
+    case GLFW_KEY_M: Model::switchMeshMode(); break;
 
     default:         break;
     }

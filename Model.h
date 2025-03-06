@@ -7,6 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 #include <vector>
+#include <array>
 
 struct Model {
   glm::mat4x4 transform = glm::mat4(1.0);
@@ -31,8 +32,12 @@ struct Model {
   void rotate(const float amount, const glm::vec3& around);
   void translate(const glm::vec3& v);
 
+  static void switchMeshMode();
+
 private:
   Model& loadVertexPositions(const std::vector<glm::vec3>& vertexPositions);
   Model& loadTexturePositions(const std::vector<glm::vec2>& textureCoords);
   Model& loadIndices(const std::vector<GLuint>& indices);
+
+  static constexpr std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
 };
