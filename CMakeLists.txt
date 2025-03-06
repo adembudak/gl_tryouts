@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED 1)
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
-option(VERIFY_SHADERS "Run Glslang on shader files" ON)
+option(VERIFY_SHADERS "Run Glslang on shader files" 1)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -45,20 +45,20 @@ set(shaders ${PROJECT_SOURCE_DIR}/shaders)
 add_custom_command(
   TARGET vibe
   POST_BUILD
-  COMMAND "${CMAKE_COMMAND}" -E copy_directory ${shaders}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${shaders}
           "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>"
-  COMMAND "${CMAKE_COMMAND}" -E copy_directory ${textures}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${textures}
           "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,textures>")
 
 if(VERIFY_SHADERS)
   file(
-    GLOB shaders
+    GLOB shader_files
     LIST_DIRECTORIES true
     CONFIGURE_DEPENDS "shaders/*.vert" "shaders/*.frag")
 
-  find_program(GLSLANG glslang glslangValidator REQUIRED)
+  find_program(GLSLANG_COMMAND glslang glslangValidator REQUIRED)
   add_custom_command(
     TARGET vibe
     POST_BUILD
-    COMMAND ${GLSLANG} ARGS --error-column ${shaders})
+    COMMAND ${GLSLANG_COMMAND} ARGS --error-column ${shader_files})
 endif()
