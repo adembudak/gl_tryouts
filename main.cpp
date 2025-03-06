@@ -93,7 +93,7 @@ const std::vector<glm::vec2> textureCoords = {
 };
 
 struct Camera {
-  glm::vec3 eye{0.0, 0.0, 2.5};    // Gaze direction
+  glm::vec3 eye{0.0, 0.0, 2.5};    // Gaze position
   glm::vec3 center{0.0, 0.0, 0.0}; // where to look point camera
   glm::vec3 up{0.0, 1.0, 0.0};     // camera orientation
 
@@ -105,29 +105,21 @@ struct Camera {
   glm::mat4x4 yawPitchRoll = glm::mat4x4(1);
   glm::mat4x4 projection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 
-  void lookUp(float angle);
-  void lookRight(float angle);
-  void lookDown(float angle);
-  void lookLeft(float angle);
   void lookAround(float angleX, float angleY, float angleZ);
 
-  void moveUp(float angle);
-  void moveRight(float angle);
-  void moveDown(float angle);
-  void moveLeft(float angle);
-  void moveAround(float angleX, float angleY, float angleZ);
-
-  glm::mat4x4 update(double dT) {
-    return yawPitchRoll * glm::lookAt(eye, center, up);
-  }
+  glm::mat4x4 update(double dT);
 };
+
+glm::mat4x4 Camera::update(double dT) {
+  return yawPitchRoll * glm::lookAt(eye, center, up);
+}
 
 void Camera::lookAround(float angleX, float angleY, float angleZ) {
   yawPitchRoll = glm::yawPitchRoll(angleX, angleY, 0.0f);
 }
 
 struct {
-  std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
+  const std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
   std::uint8_t i = 0;
 
   void operator++(int) {
