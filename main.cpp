@@ -19,6 +19,9 @@
 #include <string>
 #include <cassert>
 
+#include <iostream>
+#include <iomanip>
+
 constexpr auto pi = glm::pi<float>();
 constexpr float rotateAmount = pi / 180.0;
 
@@ -88,8 +91,8 @@ const std::vector<glm::vec2> textureCoords = {
 
 struct Camera {
   glm::vec3 eye{0.0, 0.0, 2.5};    // Gaze position
-  glm::vec3 center{0.0, 0.0, 0.0}; // where to look point camera
-  glm::vec3 up{0.0, 1.0, 0.0};     // camera orientation
+  glm::vec3 center{0.0, 0.0, 0.0}; // where to point the camera
+  glm::vec3 Y_up{0.0, 1.0, 0.0};   // camera orientation
 
   float fieldOfView = pi / 2.0f;
   float aspectRatio = 1.333f;
@@ -105,7 +108,7 @@ struct Camera {
 };
 
 glm::mat4x4 Camera::update(double dT) {
-  return yawPitchRoll * glm::lookAt(eye, center, up);
+  return yawPitchRoll * glm::lookAt(eye, center, Y_up);
 }
 
 void Camera::lookAround(float angleX, float angleY, float angleZ) {
@@ -126,10 +129,14 @@ private:
   Model cube;
   Camera camera;
 
+  double lastTime = 0;
+  double elapsedTime = 0;
+  int frameCount = 0;
+
 public:
   virtual void init() override;
   virtual void startup() override;
-  virtual void render(double t) override;
+  virtual void render(double currentTime) override;
   virtual void shutdown() override;
 
   virtual void onKey(int key, int action, int mods) override;
@@ -141,21 +148,24 @@ void Thing::onKey(int key, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
-    case GLFW_KEY_ESCAPE: AppBase::running = false; break;
+    case GLFW_KEY_ESCAPE:
+      AppBase::running = false;
+      break;
 
-    case GLFW_KEY_W:      cube.translate({0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_D:      cube.translate({0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_S:      cube.translate({0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_A:      cube.translate({-0.1, 0.0, 0.0}); break;
+      // Translate
+    case GLFW_KEY_W: cube.translate({0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_D: cube.translate({0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_S: cube.translate({0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_A: cube.translate({-0.1, 0.0, 0.0}); break;
 
-    case GLFW_KEY_K:
+    case GLFW_KEY_K: // Scale
       if(mods & GLFW_MOD_SHIFT)
         cube.scale(glm::vec3{1.1, 1.1, 1.1});
       else
         cube.scale(glm::vec3{0.9, 0.9, 0.9});
       break;
 
-    case GLFW_KEY_X:
+    case GLFW_KEY_X: // Rotate
       if(mods & GLFW_MOD_SHIFT)
         cube.rotate(-rotateAmount, {0.1, 0.0, 0.0});
       else
@@ -220,9 +230,29 @@ void Thing::startup() {
   glEnable(GL_DEPTH_TEST);
 
   assert(glGetError() == GL_NO_ERROR);
+
+  //  std::cout << "Current time\tLast time\tDelta time\n";
+  //  std::cout << std::setprecision(8);
 }
 
-void Thing::render(double t) {
+void Thing::render(double currentTime) {
+  const double deltaTime = currentTime - lastTime;
+
+  //  std::cout                  //
+  //      << currentTime << '\t' //
+  //      << lastTime << '\t'    //
+  //      << deltaTime <<        //
+  //      '\n';
+
+  lastTime = currentTime;
+
+  ++frameCount;
+  if(elapsedTime += deltaTime; elapsedTime >= 1.0) {
+    std::cout << frameCount << '\n';
+    frameCount = 0;
+    elapsedTime = 0;
+  }
+
   constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   constexpr GLfloat clearDepth = 1.0;
   glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
