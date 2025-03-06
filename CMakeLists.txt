@@ -31,9 +31,13 @@ target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
 target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW
                                            range-v3::range-v3 mpark_patterns)
 
+add_library(TextureLoader)
+target_sources(TextureLoader PRIVATE TextureLoader.cpp)
+target_link_libraries(TextureLoader PRIVATE OpenGL::GL GLEW::GLEW KTX::ktx)
+
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE AppBase Model ShaderLoader KTX::ktx)
+target_link_libraries(vibe PRIVATE AppBase Model ShaderLoader TextureLoader)
 
 set(textures ${PROJECT_SOURCE_DIR}/textures)
 set(shaders ${PROJECT_SOURCE_DIR}/shaders)

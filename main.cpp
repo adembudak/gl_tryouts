@@ -1,6 +1,7 @@
 #include "AppBase.h"
 #include "Model.h"
 #include "ShaderLoader.h"
+#include "TextureLoader.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -91,33 +92,6 @@ const std::vector<glm::vec2> textureCoords = {
     {0.0f, 1.0f}
 };
 
-namespace util {
-
-struct textureLoader {
-  GLuint textureID;
-  GLenum target;
-
-  bool load(const std::filesystem::path& textureFile);
-
-  GLuint getTextureID() const {
-    return textureID;
-  }
-};
-
-bool textureLoader::load(const std::filesystem::path& textureFile) {
-  assert(std::filesystem::exists(textureFile));
-
-  ktxTexture* kTexture;
-  KTX_error_code ret = ktxTexture_CreateFromNamedFile(textureFile.c_str(), KTX_TEXTURE_CREATE_NO_FLAGS, &kTexture);
-
-  glGenTextures(1, &textureID);
-  ret = ktxTexture_GLUpload(kTexture, &textureID, &target, nullptr);
-
-  return true;
-}
-
-}
-
 struct Camera {
   glm::vec3 eye{0.0, 0.0, 2.5};    // Gaze direction
   glm::vec3 center{0.0, 0.0, 0.0}; // where to look point camera
@@ -170,7 +144,7 @@ private:
   GLuint viewMatrixLocation;
   GLuint projectionMatrixLocation;
 
-  util::textureLoader textureLoader;
+  util::TextureLoader textureLoader;
   util::ShaderLoader shaderLoader;
 
   Model cube;
