@@ -19,8 +19,6 @@
 #include <string>
 #include <cassert>
 
-#include <iostream>
-
 constexpr auto pi = glm::pi<float>();
 constexpr float rotateAmount = pi / 180.0;
 
@@ -129,8 +127,6 @@ private:
   Camera camera;
 
   double lastTime = 0;
-  double elapsedTime = 0;
-  int frameCount = 0;
 
 public:
   virtual void init() override;
@@ -232,17 +228,8 @@ void Thing::startup() {
 }
 
 void Thing::render(double currentTime) {
-  const double deltaTime = currentTime - lastTime;
-
+  const double delta = currentTime - lastTime;
   lastTime = currentTime;
-  elapsedTime += deltaTime;
-  ++frameCount;
-
-  if(elapsedTime >= 1.0) {
-    std::cout << frameCount << '\n';
-    frameCount = 0;
-    elapsedTime = 0;
-  }
 
   constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   constexpr GLfloat clearDepth = 1.0;
@@ -250,7 +237,7 @@ void Thing::render(double currentTime) {
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
   glUniformMatrix4fv(cube.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(cube.transform));
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.update(0.0)));
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.update(delta)));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projection));
   glBindVertexArray(cube.getVertexArrayID());
 
