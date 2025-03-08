@@ -97,6 +97,7 @@ struct Camera {
   float zFar = 1000.0f;
 
   glm::mat4x4 yawPitchRoll = glm::mat4x4(1);
+  glm::mat4x4 position = glm::mat4x4(1);
   glm::mat4x4 projection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 
   void lookAround(float angleX, float angleY, float angleZ);
@@ -105,7 +106,7 @@ struct Camera {
 };
 
 glm::mat4x4 Camera::update(double dT) {
-  return yawPitchRoll * glm::lookAt(eye, center, Y_up);
+  return position * yawPitchRoll * glm::lookAt(eye, center, Y_up);
 }
 
 void Camera::lookAround(float angleX, float angleY, float angleZ) {
@@ -143,36 +144,40 @@ void Thing::onKey(int key, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
-    case GLFW_KEY_ESCAPE:
-      AppBase::running = false;
+    case GLFW_KEY_ESCAPE: AppBase::running = false; break;
+
+    case GLFW_KEY_W:      break;
+    case GLFW_KEY_D:      break;
+    case GLFW_KEY_S:      break;
+    case GLFW_KEY_A:
       break;
 
-      // Translate
-    case GLFW_KEY_W: cube.translate({0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_D: cube.translate({0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_S: cube.translate({0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_A: cube.translate({-0.1, 0.0, 0.0}); break;
+      // Translate model
+    case GLFW_KEY_K: cube.translate({0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_L: cube.translate({0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_J: cube.translate({0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_H: cube.translate({-0.1, 0.0, 0.0}); break;
 
-    case GLFW_KEY_K: // Scale
+    case GLFW_KEY_M: // Scale model
       if(mods & GLFW_MOD_SHIFT)
         cube.scale(glm::vec3{1.1, 1.1, 1.1});
       else
         cube.scale(glm::vec3{0.9, 0.9, 0.9});
       break;
 
-    case GLFW_KEY_X: // Rotate
+    case GLFW_KEY_X: // Rotate model
       if(mods & GLFW_MOD_SHIFT)
         cube.rotate(-rotateAmount, {0.1, 0.0, 0.0});
       else
         cube.rotate(rotateAmount, {0.1, 0.0, 0.0});
       break;
 
-    case GLFW_KEY_Y: cube.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z: cube.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
+    case GLFW_KEY_Y:     cube.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z:     cube.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
-    case GLFW_KEY_M: Model::switchMeshMode(); break;
+    case GLFW_KEY_SPACE: Model::switchMeshMode(); break;
 
-    default:         break;
+    default:             break;
     }
 
     break;
@@ -194,7 +199,9 @@ void Thing::onMouseWheel(int pos) {
 }
 
 void Thing::onMouseMove(int x, int y) {
-  camera.lookAround(glm::radians(double(x)), glm::radians(double(y)), 0.0);
+  float x_ = float(x) - (info.windowWidth / 2.0f);
+  float y_ = float(y) - (info.windowHeight / 2.0f);
+  camera.lookAround(glm::radians(x_), glm::radians(y_), 0.0f);
 }
 
 void Thing::init() {
