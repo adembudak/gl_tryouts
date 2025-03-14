@@ -193,8 +193,8 @@ void Thing::onKey(int key, int action, int mods) {
 
 void Thing::onMouseWheel(int pos) {
   switch(pos) {
-  case 1:  camera.eye.y += 1.0; break;
-  case -1: camera.eye.y -= 1.0; break;
+  case 1:  camera.eye.z -= 1.0; break;
+  case -1: camera.eye.z += 1.0; break;
   default: break;
   }
 }
