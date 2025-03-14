@@ -14,6 +14,7 @@
 #include <glm/gtc/constants.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/vec_swizzle.hpp>
 
 #include <vector>
 #include <string>
@@ -88,8 +89,7 @@ std::vector<glm::vec2> textureCoords = {
 };
 
 struct Camera {
-  glm::vec3 eye{0.0, 0.0, 2.5};        // Gaze position
-  glm::vec3 center{0.0, 0.0, 0.0};     // Where to point the camera
+  glm::vec3 eye{0.0, 0.0, 5.0};
   const glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
 
   float fieldOfView = pi / 2.0f;
@@ -97,17 +97,43 @@ struct Camera {
   float zNear = 0.1f;
   float zFar = 1000.0f;
 
+  enum class direction { left, right, front, back } dir;
+
+  float delta = 0.0;
+
   glm::mat4x4 yawPitchRoll = glm::mat4x4(1);
-  glm::mat4x4 position = glm::mat4x4(1);
   glm::mat4x4 projection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 
   void lookAround(float angleX, float angleY, float angleZ);
+  void moveAround(direction dir);
 
-  glm::mat4x4 update(double dT);
+  void update(double dT);
+
+  glm::mat4x4 viewMatrix() const;
+  glm::mat4x4 projectionMatrix() const;
 };
 
-glm::mat4x4 Camera::update(double dT) {
-  return position * yawPitchRoll * glm::lookAt(eye, center, Y_up);
+void Camera::update(double dT) {
+  delta = dT;
+}
+
+glm::mat4x4 Camera::projectionMatrix() const {
+  return projection;
+}
+
+glm::mat4x4 Camera::viewMatrix() const {
+  return yawPitchRoll * glm::lookAt(eye, glm::vec3(xy(eye), eye.z - 5.0f), Y_up);
+}
+
+void Camera::moveAround(direction dir) {
+  float speed = delta * 2.0;
+  switch(dir) {
+    using enum direction;
+  case left:  eye += speed * glm::normalize(cross({0.0, 0.0, -5.0}, Y_up)); break;
+  case right: eye += speed * glm::normalize(cross(Y_up, {0.0, 0.0, -5.0})); break;
+  case front: eye += (speed * glm::vec3(0.0, 0.0, -5.0)); break;
+  case back:  eye += (-speed * glm::vec3(0.0, 0.0, -5.0)); break;
+  }
 }
 
 void Camera::lookAround(float angleX, float angleY, float angleZ) {
@@ -145,14 +171,9 @@ void Thing::onKey(int key, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
-    case GLFW_KEY_ESCAPE: AppBase::running = false; break;
-
-    case GLFW_KEY_W:      break;
-    case GLFW_KEY_D:      break;
-    case GLFW_KEY_S:      break;
-    case GLFW_KEY_A:
+    case GLFW_KEY_ESCAPE:
+      AppBase::running = false;
       break;
-
       // Translate model
     case GLFW_KEY_K: cube.translate({0.0, 0.1, 0.0}); break;
     case GLFW_KEY_L: cube.translate({0.1, 0.0, 0.0}); break;
@@ -185,9 +206,16 @@ void Thing::onKey(int key, int action, int mods) {
 
   case GLFW_RELEASE: break;
 
-  case GLFW_REPEAT:  break;
+  case GLFW_REPEAT:
+    switch(key) {
+    case GLFW_KEY_W: camera.moveAround(Camera::direction::front); break;
+    case GLFW_KEY_D: camera.moveAround(Camera::direction::right); break;
+    case GLFW_KEY_S: camera.moveAround(Camera::direction::back); break;
+    case GLFW_KEY_A: camera.moveAround(Camera::direction::left); break;
+    }
+    break;
 
-  default:           break;
+  default: break;
   }
 }
 
@@ -239,14 +267,16 @@ void Thing::render(double currentTime) {
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
 
+  camera.update(delta);
+
   constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   constexpr GLfloat clearDepth = 1.0;
   glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
   glUniformMatrix4fv(cube.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(cube.transform));
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.update(delta)));
-  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projection));
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
+  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
   glBindVertexArray(cube.getVertexArrayID());
 
   glBindTextureUnit(0, textureLoader.textureID);
