@@ -22,7 +22,7 @@
 constexpr auto pi = glm::pi<float>();
 constexpr float rotateAmount = pi / 180.0;
 
-const std::vector<glm::vec3> vertexData = {
+std::vector<glm::vec3> vertexData = {
     {-0.5f, -0.5f, -0.5f},
     {0.5f,  -0.5f, -0.5f},
     {0.5f,  0.5f,  -0.5f},
@@ -33,10 +33,10 @@ const std::vector<glm::vec3> vertexData = {
     {-0.5f, 0.5f,  0.5f }
 };
 
-const std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
-                                     1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
+std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
+                               1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
 
-const std::vector<glm::vec2> textureCoords = {
+std::vector<glm::vec2> textureCoords = {
     // front
     {0.0f, 0.0f},
     {1.0f, 0.0f},
@@ -87,9 +87,9 @@ const std::vector<glm::vec2> textureCoords = {
 };
 
 struct Camera {
-  glm::vec3 eye{0.0, 0.0, 2.5};    // Gaze position
-  glm::vec3 center{0.0, 0.0, 0.0}; // where to point the camera
-  glm::vec3 Y_up{0.0, 1.0, 0.0};   // camera orientation
+  glm::vec3 eye{0.0, 0.0, 2.5};        // Gaze position
+  glm::vec3 center{0.0, 0.0, 0.0};     // Where to point the camera
+  const glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
 
   float fieldOfView = pi / 2.0f;
   float aspectRatio = 1.333f;
