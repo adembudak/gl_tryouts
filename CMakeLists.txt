@@ -39,10 +39,22 @@ add_library(Camera)
 target_sources(Camera PRIVATE Camera.cpp)
 target_link_libraries(Camera PRIVATE OpenGL::GL GLEW::GLEW glm::glm)
 
+add_library(Thing)
+target_sources(Thing PRIVATE Thing.cpp)
+target_link_libraries(
+  Thing
+  PUBLIC OpenGL::GL
+         GLEW::GLEW
+         glm::glm
+         AppBase
+         Model
+         ShaderLoader
+         TextureLoader
+         Camera)
+
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE AppBase Model ShaderLoader TextureLoader
-                                   Camera)
+target_link_libraries(vibe PRIVATE Thing)
 
 set(textures ${PROJECT_SOURCE_DIR}/textures)
 set(shaders ${PROJECT_SOURCE_DIR}/shaders)
