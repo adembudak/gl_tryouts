@@ -51,18 +51,19 @@ ShaderLoader& ShaderLoader::link() {
 }
 
 void ShaderLoader::emitProgramBinary() const {
-  if(glIsProgram(programID)) {
-    GLint binarySize;
-    glGetProgramiv(programID, GL_PROGRAM_BINARY_LENGTH, &binarySize);
+  if(!glIsProgram(programID))
+    return;
 
-    std::vector<char> programBinary(binarySize, '\0');
+  GLint binarySize;
+  glGetProgramiv(programID, GL_PROGRAM_BINARY_LENGTH, &binarySize);
 
-    GLenum binaryFormat = GL_NONE;
-    glGetProgramBinary(programID, binarySize, nullptr, &binaryFormat, std::data(programBinary));
+  std::vector<char> programBinary(binarySize, '\0');
 
-    std::ofstream fout{"programBinary.bin", std::ios::binary};
-    fout.write(std::data(programBinary), std::size(programBinary));
-  }
+  GLenum binaryFormat = GL_NONE;
+  glGetProgramBinary(programID, binarySize, nullptr, &binaryFormat, std::data(programBinary));
+
+  std::ofstream fout{"programBinary.bin", std::ios::binary};
+  fout.write(std::data(programBinary), std::size(programBinary));
 }
 
 GLenum ShaderLoader::identifyShaderType(const std::filesystem::path shaderFile) const {
@@ -86,5 +87,4 @@ std::string ShaderLoader::getShaderFileSource(const std::filesystem::path shader
 
   return ranges::istream<char>(fin) | ranges::to<std::string>;
 }
-
 }
