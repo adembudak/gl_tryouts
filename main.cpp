@@ -18,6 +18,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <utility>
 
 constexpr auto pi = glm::pi<float>();
 constexpr float rotateAmount = pi / 180.0;
@@ -236,7 +237,7 @@ void Thing::startup() {
 
 void Thing::render(double currentTime) {
   const double delta = currentTime - lastTime;
-  lastTime = currentTime;
+  std::exchange(lastTime, currentTime);
 
   constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   constexpr GLfloat clearDepth = 1.0;
