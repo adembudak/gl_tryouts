@@ -35,9 +35,14 @@ add_library(TextureLoader)
 target_sources(TextureLoader PRIVATE TextureLoader.cpp)
 target_link_libraries(TextureLoader PRIVATE OpenGL::GL GLEW::GLEW KTX::ktx)
 
+add_library(Camera)
+target_sources(Camera PRIVATE Camera.cpp)
+target_link_libraries(Camera PRIVATE OpenGL::GL GLEW::GLEW glm::glm)
+
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE AppBase Model ShaderLoader TextureLoader)
+target_link_libraries(vibe PRIVATE AppBase Model ShaderLoader TextureLoader
+                                   Camera)
 
 set(textures ${PROJECT_SOURCE_DIR}/textures)
 set(shaders ${PROJECT_SOURCE_DIR}/shaders)
