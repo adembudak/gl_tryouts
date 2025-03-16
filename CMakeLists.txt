@@ -37,7 +37,7 @@ target_link_libraries(TextureLoader PRIVATE OpenGL::GL GLEW::GLEW KTX::ktx)
 
 add_library(Camera)
 target_sources(Camera PRIVATE Camera.cpp)
-target_link_libraries(Camera PRIVATE OpenGL::GL GLEW::GLEW glm::glm)
+target_link_libraries(Camera PRIVATE glm::glm)
 
 add_library(Thing)
 target_sources(Thing PRIVATE Thing.cpp)
