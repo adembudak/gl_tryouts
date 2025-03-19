@@ -19,7 +19,7 @@ find_package(mpark_patterns QUIET REQUIRED)
 
 add_library(AppBase)
 target_sources(AppBase PRIVATE AppBase.cpp)
-target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW glm::glm)
+target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
 
 add_library(Model)
 target_sources(Model PRIVATE Model.cpp)
@@ -41,16 +41,8 @@ target_link_libraries(Camera PRIVATE glm::glm)
 
 add_library(Thing)
 target_sources(Thing PRIVATE Thing.cpp)
-target_link_libraries(
-  Thing
-  PUBLIC OpenGL::GL
-         GLEW::GLEW
-         glm::glm
-         AppBase
-         Model
-         ShaderLoader
-         TextureLoader
-         Camera)
+target_link_libraries(Thing PUBLIC AppBase Model ShaderLoader TextureLoader
+                                   Camera)
 
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
