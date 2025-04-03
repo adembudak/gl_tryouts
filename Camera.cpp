@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/vec_swizzle.hpp>
