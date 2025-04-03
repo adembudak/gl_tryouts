@@ -16,10 +16,13 @@ struct Model {
   std::size_t indiceSize = 0;
 
   GLuint vertexArrayID;
+  GLuint m_programID;
 
   float rotate_ = 0;
 
   // void load(std::filesystem::path& modelFile);
+
+  void setProgramID(GLuint programID);
 
   Model& load(const std::vector<glm::vec3>& vertexData, const std::vector<GLuint>& indices,
               const std::vector<glm::vec2>& textureCoords);

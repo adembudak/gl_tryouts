@@ -154,6 +154,7 @@ void Thing::startup() {
 
   textureLoader.load("textures/Konyaalti.ktx");
 
+  cube.setProgramID(programID);
   cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
   cube.load(vertexData, indices, textureCoords);
 

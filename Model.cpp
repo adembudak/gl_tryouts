@@ -3,6 +3,10 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
 
+void Model::setProgramID(GLuint programID) {
+  m_programID = programID;
+}
+
 Model& Model::load(const std::vector<glm::vec3>& vertexData, const std::vector<GLuint>& indices,
                    const std::vector<glm::vec2>& textureCoords) {
   indiceSize = indices.size();
@@ -38,9 +42,11 @@ Model& Model::loadVertexPositions(const std::vector<glm::vec3>& vertexPositions)
   glNamedBufferStorage(arrayBufferID, sizeOfVertices, nullptr, GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexPositions));
 
-  glVertexArrayVertexBuffer(vertexArrayID, 0, arrayBufferID, 0, sizeOfVertex);
-  glVertexArrayAttribFormat(vertexArrayID, 0, vertexPositions[0].length(), GL_FLOAT, GL_FALSE, 0);
-  glEnableVertexArrayAttrib(vertexArrayID, 0);
+  GLint vPosition = glGetAttribLocation(m_programID, "vPosition"); // binding index
+
+  glVertexArrayVertexBuffer(vertexArrayID, vPosition, arrayBufferID, 0, sizeOfVertex);
+  glVertexArrayAttribFormat(vertexArrayID, vPosition, vertexPositions[0].length(), GL_FLOAT, GL_FALSE, 0);
+  glEnableVertexArrayAttrib(vertexArrayID, vPosition);
 
   return *this;
 }
@@ -54,9 +60,11 @@ Model& Model::loadTexturePositions(const std::vector<glm::vec2>& textureCoords) 
   glNamedBufferStorage(arrayBufferID, sizeOfTexels, nullptr, GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferSubData(arrayBufferID, 0, sizeOfTexels, std::data(textureCoords));
 
-  glVertexArrayVertexBuffer(vertexArrayID, 1, arrayBufferID, 0, sizeOfTexelElement);
-  glVertexArrayAttribFormat(vertexArrayID, 1, textureCoords[0].length(), GL_FLOAT, GL_FALSE, 0);
-  glEnableVertexArrayAttrib(vertexArrayID, 1);
+  GLint tPosition = glGetAttribLocation(m_programID, "tPosition");
+
+  glVertexArrayVertexBuffer(vertexArrayID, tPosition, arrayBufferID, 0, sizeOfTexelElement);
+  glVertexArrayAttribFormat(vertexArrayID, tPosition, textureCoords[0].length(), GL_FLOAT, GL_FALSE, 0);
+  glEnableVertexArrayAttrib(vertexArrayID, tPosition);
 
   return *this;
 }
