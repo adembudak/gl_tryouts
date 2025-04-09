@@ -55,6 +55,7 @@ protected:
   void setVsync(bool enable);
 
 public:
+  virtual ~AppBase() = default;
   virtual void init();
   virtual void startup() = 0;
   virtual void render(double t) = 0;

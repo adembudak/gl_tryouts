@@ -83,6 +83,7 @@ Model& Model::loadIndices(const std::vector<GLuint>& indices) {
 
 void Model::switchMeshMode() {
   static std::uint8_t i = 0;
-  i = ++i % std::size(mode);
+  ++i;
+  i = i % std::size(mode);
   glPolygonMode(GL_FRONT_AND_BACK, mode[i]);
 }
