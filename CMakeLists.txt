@@ -24,8 +24,8 @@ target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
 
 add_library(Model)
 target_sources(Model PRIVATE Model.cpp)
-target_link_libraries(Model PRIVATE OpenGL::GL GLEW::GLEW glm::glm
-                                    tinygltf::tinygltf)
+target_link_libraries(Model PUBLIC OpenGL::GL GLEW::GLEW glm::glm
+                                   tinygltf::tinygltf)
 
 add_library(ShaderLoader)
 target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
