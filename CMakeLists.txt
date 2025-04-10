@@ -4,6 +4,7 @@ project(GL_tryouts CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED 1)
+set(CMAKE_CXX_EXTENSIONS 0)
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
 option(VERIFY_SHADERS "Run Glslang on shader files" 1)
