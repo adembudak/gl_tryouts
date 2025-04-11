@@ -192,4 +192,7 @@ void Thing::render(double currentTime) {
 void Thing::shutdown() {
   glDeleteVertexArrays(1, &cube.vertexArrayID);
   glDeleteProgram(programID);
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
 }
