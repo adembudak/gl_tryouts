@@ -17,10 +17,11 @@ find_package(Ktx QUIET REQUIRED CONFIG)
 find_package(TinyGLTF QUIET REQUIRED CONFIG)
 find_package(range-v3 QUIET REQUIRED CONFIG)
 find_package(mpark_patterns QUIET REQUIRED CONFIG)
+find_package(imgui QUIET REQUIRED CONFIG)
 
 add_library(AppBase)
 target_sources(AppBase PRIVATE AppBase.cpp)
-target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
+target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW imgui::imgui)
 
 add_library(Model)
 target_sources(Model PRIVATE Model.cpp)
