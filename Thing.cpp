@@ -153,6 +153,8 @@ void Thing::startup() {
 
   ImGuiIO& io = ImGui::GetIO();
 
+  ImGui::StyleColorsDark();
+
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 460");
 
