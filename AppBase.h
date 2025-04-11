@@ -9,6 +9,23 @@ struct GLFWwindow;
 
 namespace Application {
 
+/*
+ * void run() {
+ *   glfwInit()
+ *   this->init()
+ *   glewInit();
+ *
+ *   this->startup();
+ *
+ *   while(running) {
+ *     this->render();
+ *     gflwPollEvents();
+ *   }
+ *
+ *  this->shutdown();
+ * }
+ */
+
 class AppBase {
 private:
   static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,

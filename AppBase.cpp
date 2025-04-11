@@ -80,7 +80,7 @@ void AppBase::run(AppBase* the_app) {
   if(!glfwInit())
     return;
 
-  init();
+  this->init();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, info.majorVersion);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, info.minorVersion);
@@ -125,15 +125,15 @@ void AppBase::run(AppBase* the_app) {
     }
   }
 
-  startup();
+  this->startup();
 
   while(running) {
-    render(glfwGetTime());
+    this->render(glfwGetTime());
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  shutdown();
+  this->shutdown();
 }
 
 void AppBase::onKey(int key, int action, int mods) {}
