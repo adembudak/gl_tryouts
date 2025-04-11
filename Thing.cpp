@@ -187,6 +187,15 @@ void Thing::render(double currentTime) {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
+
+  ImGui::Begin("Main");
+  ImGui::Checkbox("Demo Window", &show_imgui_demo_window);
+  ImGui::End();
+
+  if(show_imgui_demo_window) {
+    ImGui::ShowDemoWindow(&show_imgui_demo_window);
+  }
+
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
 

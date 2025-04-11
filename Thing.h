@@ -22,6 +22,8 @@ private:
 
   double lastTime = 0;
 
+  bool show_imgui_demo_window = 1;
+
 public:
   virtual void init() override;
   virtual void startup() override;
