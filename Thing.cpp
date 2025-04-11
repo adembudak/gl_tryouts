@@ -184,6 +184,9 @@ void Thing::startup() {
 }
 
 void Thing::render(double currentTime) {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
 
@@ -201,6 +204,9 @@ void Thing::render(double currentTime) {
 
   glBindTextureUnit(0, textureLoader.textureID);
   glDrawElements(GL_TRIANGLES, cube.indiceSize, GL_UNSIGNED_INT, nullptr);
+
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Thing::shutdown() {
