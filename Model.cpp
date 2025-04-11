@@ -15,7 +15,7 @@ Model& Model::load(const std::vector<glm::vec3>& vertexData, const std::vector<G
 
   loadVertexPositions(vertexData);
   loadTexturePositions(textureCoords);
-  loadIndices(indices);
+  loadDrawIndices(indices);
 
   return *this;
 }
@@ -69,7 +69,7 @@ Model& Model::loadTexturePositions(const std::vector<glm::vec2>& textureCoords) 
   return *this;
 }
 
-Model& Model::loadIndices(const std::vector<GLuint>& indices) {
+Model& Model::loadDrawIndices(const std::vector<GLuint>& indices) {
   GLuint elementBufferID;
   glCreateBuffers(1, &elementBufferID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);

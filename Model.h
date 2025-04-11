@@ -40,7 +40,7 @@ struct Model {
 private:
   Model& loadVertexPositions(const std::vector<glm::vec3>& vertexPositions);
   Model& loadTexturePositions(const std::vector<glm::vec2>& textureCoords);
-  Model& loadIndices(const std::vector<GLuint>& indices);
+  Model& loadDrawIndices(const std::vector<GLuint>& indices);
 
   static constexpr std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
 };
