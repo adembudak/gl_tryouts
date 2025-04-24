@@ -1,10 +1,18 @@
 #include "Model.h"
 
+#include <tiny_gltf.h>
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include <filesystem>
+
 void Model::setProgramID(GLuint programID) {
   m_programID = programID;
+}
+
+void Model::load(const std::filesystem::path& modelFile) {
+  tinygltf::TinyGLTF{}.LoadASCIIFromFile(&model, nullptr, nullptr, modelFile);
 }
 
 Model& Model::load(const std::vector<glm::vec3>& vertexData, const std::vector<GLuint>& indices,

@@ -6,10 +6,15 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
+#include <tiny_gltf.h>
+
 #include <vector>
 #include <array>
+#include <filesystem>
 
 struct Model {
+  tinygltf::Model model;
+
   glm::mat4x4 transform = glm::mat4(1.0);
   GLuint transformMatrixLocation;
 
@@ -20,7 +25,7 @@ struct Model {
 
   float rotate_ = 0;
 
-  // void load(std::filesystem::path& modelFile);
+  void load(const std::filesystem::path& modelFile);
 
   void setProgramID(GLuint programID);
 
