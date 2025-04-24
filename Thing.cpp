@@ -12,70 +12,6 @@
 
 constexpr float rotateAmount = pi / 180.0;
 
-std::vector<glm::vec3> vertexData = {
-    {-0.5f, -0.5f, -0.5f},
-    {0.5f,  -0.5f, -0.5f},
-    {0.5f,  0.5f,  -0.5f},
-    {-0.5f, 0.5f,  -0.5f},
-    {-0.5f, -0.5f, 0.5f },
-    {0.5f,  -0.5f, 0.5f },
-    {0.5f,  0.5f,  0.5f },
-    {-0.5f, 0.5f,  0.5f }
-};
-
-std::vector<GLuint> indices = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 3, 7, 0, 7, 4,
-                               1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4, 3, 2, 6, 3, 6, 7};
-
-std::vector<glm::vec2> textureCoords = {
-    // front
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 1.0f},
-
-    // back
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 1.0f},
-
-    // left
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 1.0f},
-
-    // right
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 1.0f},
-
-    // top
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 1.0f},
-
-    // bottom
-    {0.0f, 0.0f},
-    {1.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 0.0f},
-    {1.0f, 1.0f},
-    {0.0f, 1.0f}
-};
-
 void Thing::onKey(int key, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
@@ -84,27 +20,27 @@ void Thing::onKey(int key, int action, int mods) {
       AppBase::running = false;
       break;
       // Translate model
-    case GLFW_KEY_K: cube.translate({0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_L: cube.translate({0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_J: cube.translate({0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_H: cube.translate({-0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_K: my_model.translate({0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_L: my_model.translate({0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_J: my_model.translate({0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_H: my_model.translate({-0.1, 0.0, 0.0}); break;
 
     case GLFW_KEY_M: // Scale model
       if(mods & GLFW_MOD_SHIFT)
-        cube.scale(glm::vec3{1.1, 1.1, 1.1});
+        my_model.scale(glm::vec3{1.1, 1.1, 1.1});
       else
-        cube.scale(glm::vec3{0.9, 0.9, 0.9});
+        my_model.scale(glm::vec3{0.9, 0.9, 0.9});
       break;
 
     case GLFW_KEY_X: // Rotate model
       if(mods & GLFW_MOD_SHIFT)
-        cube.rotate(-rotateAmount, {0.1, 0.0, 0.0});
+        my_model.rotate(-rotateAmount, {0.1, 0.0, 0.0});
       else
-        cube.rotate(rotateAmount, {0.1, 0.0, 0.0});
+        my_model.rotate(rotateAmount, {0.1, 0.0, 0.0});
       break;
 
-    case GLFW_KEY_Y:     cube.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z:     cube.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
+    case GLFW_KEY_Y:     my_model.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z:     my_model.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
     case GLFW_KEY_SPACE: Model::switchMeshMode(); break;
 
@@ -169,9 +105,9 @@ void Thing::startup() {
 
   textureLoader.load("textures/Konyaalti.ktx");
 
-  cube.setProgramID(programID);
-  cube.transformMatrixLocation = glGetUniformLocation(programID, "transform");
-  cube.load(vertexData, indices, textureCoords);
+  my_model.setProgramID(programID);
+  my_model.transformMatrixLocation = glGetUniformLocation(programID, "transform");
+  my_model.load("models/Triangle/glTF/Triangle.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
@@ -206,20 +142,20 @@ void Thing::render(double currentTime) {
   glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
-  glUniformMatrix4fv(cube.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(cube.transform));
+  glUniformMatrix4fv(my_model.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_model.transform));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
-  glBindVertexArray(cube.getVertexArrayID());
+  glBindVertexArray(my_model.getVertexArrayID());
 
   glBindTextureUnit(0, textureLoader.textureID);
-  glDrawElements(GL_TRIANGLES, cube.indiceSize, GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, my_model.indiceSize, GL_UNSIGNED_INT, nullptr);
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Thing::shutdown() {
-  glDeleteVertexArrays(1, &cube.vertexArrayID);
+  glDeleteVertexArrays(1, &my_model.vertexArrayID);
   glDeleteProgram(programID);
 
   ImGui_ImplOpenGL3_Shutdown();

@@ -17,7 +17,7 @@ private:
   util::TextureLoader textureLoader;
   util::ShaderLoader shaderLoader;
 
-  Model cube;
+  Model my_model;
   Camera camera;
 
   double lastTime = 0;
