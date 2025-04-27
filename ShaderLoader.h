@@ -24,8 +24,8 @@ struct ShaderLoader {
   }
 
 private:
-  GLenum identifyShaderType(const std::filesystem::path shaderFile) const;
-  std::string getShaderFileSource(const std::filesystem::path shaderFile) const;
+  GLenum identifyShaderType(const std::filesystem::path& shaderFile) const;
+  std::string getShaderFileSource(const std::filesystem::path& shaderFile) const;
 };
 
 }

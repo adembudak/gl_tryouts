@@ -14,7 +14,7 @@
 namespace util {
 
 ShaderLoader& ShaderLoader::load(const std::vector<std::filesystem::path>& shaderFiles) {
-  for(auto shaderFile : shaderFiles) {
+  for(const auto& shaderFile : shaderFiles) {
     std::string shaderSource = this->getShaderFileSource(shaderFile);
     auto data = std::data(shaderSource);
 
@@ -47,6 +47,9 @@ ShaderLoader& ShaderLoader::attach() {
 ShaderLoader& ShaderLoader::link() {
   glLinkProgram(programID);
 
+  for(GLuint shaderID : shaderIDs)
+    glDetachShader(programID, shaderID);
+
   return *this;
 }
 
@@ -66,7 +69,7 @@ void ShaderLoader::emitProgramBinary() const {
   fout.write(std::data(programBinary), std::size(programBinary));
 }
 
-GLenum ShaderLoader::identifyShaderType(const std::filesystem::path shaderFile) const {
+GLenum ShaderLoader::identifyShaderType(const std::filesystem::path& shaderFile) const {
   using namespace mpark::patterns;
   // Based on: https://github.com/KhronosGroup/glslang?tab=readme-ov-file#execution-of-standalone-wrapper
   // clang-format off
@@ -81,7 +84,7 @@ GLenum ShaderLoader::identifyShaderType(const std::filesystem::path shaderFile) 
   // clang-format on
 }
 
-std::string ShaderLoader::getShaderFileSource(const std::filesystem::path shaderFile) const {
+std::string ShaderLoader::getShaderFileSource(const std::filesystem::path& shaderFile) const {
   std::ifstream fin{shaderFile};
   fin.unsetf(std::ifstream::skipws);
 
