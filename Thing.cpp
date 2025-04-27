@@ -154,15 +154,11 @@ void Thing::render(double currentTime) {
     glDrawElements(buffer.element.mode, buffer.element.count, buffer.element.componentType, nullptr);
   }
 
-  glBindTextureUnit(0, textureLoader.textureID);
-  glDrawElements(GL_TRIANGLES, my_model.indiceSize, GL_UNSIGNED_INT, nullptr);
-
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Thing::shutdown() {
-  //  glDeleteVertexArrays(1, &my_model.vertexArrayID);
   glDeleteProgram(programID);
 
   ImGui_ImplOpenGL3_Shutdown();
