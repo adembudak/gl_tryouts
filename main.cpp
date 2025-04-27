@@ -1,8 +1,9 @@
 #include "Thing.h"
 
+#include <memory>
+
 int main() {
-  Thing* an_app = new Thing;
-  an_app->run(an_app);
-  delete an_app;
+  auto an_app = std::make_unique<Thing>();
+  an_app->run(std::move(an_app));
   return 0;
 }

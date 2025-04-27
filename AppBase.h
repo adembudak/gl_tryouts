@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 struct GLFWwindow;
@@ -59,7 +60,7 @@ protected:
   bool running;
   APPINFO info;
 
-  static AppBase* app;
+  static std::unique_ptr<AppBase> app;
 
   static void error_callback(int error, const char* description);
   static void glfw_onResize(GLFWwindow* window, int w, int h);
@@ -77,7 +78,7 @@ public:
   virtual void render(double t) = 0;
   virtual void shutdown() = 0;
 
-  void run(AppBase* the_app);
+  void run(std::unique_ptr<AppBase>&& the_app);
 
   virtual void onKey(int key, int action, int mods);
   virtual void onMouseButton(int button, int action);

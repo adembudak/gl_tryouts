@@ -6,9 +6,10 @@
 #include <utility>
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 namespace Application {
-AppBase* AppBase::app = nullptr;
+std::unique_ptr<AppBase> AppBase::app = nullptr;
 
 void AppBase::error_callback(int error, const char* description) {
   std::ostringstream sout;
@@ -69,8 +70,8 @@ void AppBase::init() {
 #endif
 }
 
-void AppBase::run(AppBase* the_app) {
-  app = the_app;
+void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
+  app = std::move(the_app);
   running = true;
 
   if(!glfwInit())
