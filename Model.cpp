@@ -8,24 +8,23 @@
 #include <filesystem>
 
 void Model::setProgramID(GLuint programID) {
-  m_programID = programID;
+  this->programID = programID;
 }
 
 void Model::load(const std::filesystem::path& modelFile) {
-  tinygltf::TinyGLTF{}.LoadASCIIFromFile(&model, nullptr, nullptr, modelFile);
-}
+  tn::TinyGLTF{}.LoadASCIIFromFile(&model, nullptr, nullptr, modelFile);
 
-Model& Model::load(const std::vector<glm::vec3>& vertexData, const std::vector<GLuint>& indices,
-                   const std::vector<glm::vec2>& textureCoords) {
-  indiceSize = indices.size();
-  glCreateVertexArrays(1, &vertexArrayID);
-  glBindVertexArray(vertexArrayID);
-
-  loadVertexPositions(vertexData);
-  loadTexturePositions(textureCoords);
-  loadDrawIndices(indices);
-
-  return *this;
+  for(const tn::Scene& scene : model.scenes) {
+    for(int nodeIndex : scene.nodes) {
+      const tn::Node& node = model.nodes[nodeIndex];
+      if(!node.children.empty()) {
+        for(int nodeIndex : node.children)
+          visitNode(model.nodes[nodeIndex]);
+      } else {
+        visitNode(node);
+      }
+    }
+  }
 }
 
 void Model::scale(const glm::vec3& v) {
@@ -41,52 +40,98 @@ void Model::translate(const glm::vec3& v) {
   transform = glm::translate(transform, v);
 }
 
-Model& Model::loadVertexPositions(const std::vector<glm::vec3>& vertexPositions) {
-  GLuint arrayBufferID;
-  glCreateBuffers(1, &arrayBufferID);
+void Model::loadModelPositionData(buffer_t& buffer, int accessorIndex) {
+  GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
 
-  GLsizeiptr sizeOfVertex = sizeof(decltype(vertexPositions[0]));
-  GLsizeiptr sizeOfVertices = std::size(vertexPositions) * sizeOfVertex;
-  glNamedBufferStorage(arrayBufferID, sizeOfVertices, nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferSubData(arrayBufferID, 0, sizeOfVertices, std::data(vertexPositions));
+  const tn::Accessor& accessor = model.accessors[accessorIndex];
+  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bv.buffer];
 
-  GLint vPosition = glGetAttribLocation(m_programID, "vPosition"); // binding index
+  GLuint arrayBufferID = createArrayBuffer(bv.target);
+  buffer.arrayBufferIDs.push_back(arrayBufferID);
 
-  glVertexArrayVertexBuffer(vertexArrayID, vPosition, arrayBufferID, 0, sizeOfVertex);
-  glVertexArrayAttribFormat(vertexArrayID, vPosition, vertexPositions[0].length(), GL_FLOAT, GL_FALSE, 0);
-  glEnableVertexArrayAttrib(vertexArrayID, vPosition);
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
 
-  return *this;
+  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, arrayBufferID, accessor.byteOffset, accessor.ByteStride(bv));
+  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type),
+                            accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 }
 
-Model& Model::loadTexturePositions(const std::vector<glm::vec2>& textureCoords) {
-  GLuint arrayBufferID;
-  glCreateBuffers(1, &arrayBufferID);
-
-  GLsizeiptr sizeOfTexelElement = sizeof(decltype(textureCoords[0]));
-  GLsizeiptr sizeOfTexels = std::size(textureCoords) * sizeOfTexelElement;
-  glNamedBufferStorage(arrayBufferID, sizeOfTexels, nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferSubData(arrayBufferID, 0, sizeOfTexels, std::data(textureCoords));
-
-  GLint tPosition = glGetAttribLocation(m_programID, "tPosition");
-
-  glVertexArrayVertexBuffer(vertexArrayID, tPosition, arrayBufferID, 0, sizeOfTexelElement);
-  glVertexArrayAttribFormat(vertexArrayID, tPosition, textureCoords[0].length(), GL_FLOAT, GL_FALSE, 0);
-  glEnableVertexArrayAttrib(vertexArrayID, tPosition);
-
-  return *this;
+GLuint Model::createArrayBuffer(int target) const {
+  GLuint id;
+  glCreateBuffers(1, &id);
+  glBindBuffer(target, id);
+  return id;
 }
 
-Model& Model::loadDrawIndices(const std::vector<GLuint>& indices) {
-  GLuint elementBufferID;
-  glCreateBuffers(1, &elementBufferID);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
+bool Model::deleteArrayBuffer(GLuint id) const {
+  if(!glIsBuffer(id))
+    return false;
 
-  GLsizeiptr sizeOfIndex = sizeof(decltype(indices[0]));
-  GLsizeiptr sizeOfIndices = std::size(indices) * sizeOfIndex; // in bytes
-  glNamedBufferStorage(elementBufferID, sizeOfIndices, std::data(indices), GL_MAP_READ_BIT);
+  glDeleteBuffers(1, &id);
+  return true;
+}
 
-  return *this;
+GLuint Model::createVertexArrayBuffer() const {
+  GLuint id;
+  glGenVertexArrays(1, &id);
+  glBindVertexArray(id);
+  return id;
+}
+
+bool Model::deleteVertexArrayBuffer(GLuint id) const {
+  if(!glIsVertexArray(id))
+    return false;
+
+  glDeleteVertexArrays(1, &id);
+  return true;
+}
+
+void Model::visitNode(const tn::Node& node) {
+  int meshIndex = node.mesh;
+  // Node MAY contain a mesh:
+  //  https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#geometry-overview
+  if(meshIndex == -1)
+    return;
+
+  const tn::Mesh& mesh = model.meshes[meshIndex];
+  visitMesh(mesh);
+}
+
+void Model::visitMesh(const tn::Mesh& mesh) {
+  buffer_t buffer;
+  GLuint vertexArrayID = createVertexArrayBuffer();
+  buffer.vertexArrayID = vertexArrayID;
+
+  for(const tn::Primitive& primitive : mesh.primitives)
+    visitPrimitive(buffer, primitive);
+
+  buffers.push_back(buffer);
+}
+
+void Model::visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive) {
+  for(const auto& [attribute, accessorIndex] : primitive.attributes)
+    if(attribute == "POSITION")
+      loadModelPositionData(buffer, accessorIndex);
+
+  if(primitive.indices != -1) {
+    buffer.element.mode = primitive.mode;
+    loadModelDrawIndices(buffer, primitive.indices);
+  }
+}
+
+void Model::loadModelDrawIndices(buffer_t& buffer, int accessorIndex) {
+  const tn::Accessor& accessor = model.accessors[accessorIndex];
+  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bv.buffer];
+
+  GLuint elementBufferID = createArrayBuffer(bv.target);
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+
+  buffer.element.elementBufferID = elementBufferID;
+  buffer.element.componentType = accessor.componentType;
+  buffer.element.count = accessor.count;
 }
 
 void Model::switchMeshMode() {

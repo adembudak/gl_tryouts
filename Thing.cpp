@@ -107,7 +107,7 @@ void Thing::startup() {
 
   my_model.setProgramID(programID);
   my_model.transformMatrixLocation = glGetUniformLocation(programID, "transform");
-  my_model.load("models/Triangle/glTF/Triangle.gltf");
+  my_model.load("models/Models/Triangle/glTF/Triangle.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
@@ -145,7 +145,12 @@ void Thing::render(double currentTime) {
   glUniformMatrix4fv(my_model.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_model.transform));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
-  glBindVertexArray(my_model.getVertexArrayID());
+
+  const std::vector<buffer_t>& buffers = my_model.getBuffers();
+  for(const buffer_t& buffer : buffers) {
+    glBindVertexArray(buffer.vertexArrayID);
+    glDrawElements(buffer.element.mode, buffer.element.count, buffer.element.componentType, nullptr);
+  }
 
   glBindTextureUnit(0, textureLoader.textureID);
   glDrawElements(GL_TRIANGLES, my_model.indiceSize, GL_UNSIGNED_INT, nullptr);
@@ -155,7 +160,7 @@ void Thing::render(double currentTime) {
 }
 
 void Thing::shutdown() {
-  glDeleteVertexArrays(1, &my_model.vertexArrayID);
+  //  glDeleteVertexArrays(1, &my_model.vertexArrayID);
   glDeleteProgram(programID);
 
   ImGui_ImplOpenGL3_Shutdown();

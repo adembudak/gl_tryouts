@@ -12,16 +12,28 @@
 #include <array>
 #include <filesystem>
 
+namespace tn = tinygltf;
+
+struct buffer_t {
+  GLuint vertexArrayID;
+  std::vector<GLuint> arrayBufferIDs;
+
+  struct element_t {
+    GLuint elementBufferID;
+    int mode;
+    int componentType;
+    size_t count;
+  } element;
+};
+
 struct Model {
-  tinygltf::Model model;
+  tn::Model model;
 
   glm::mat4x4 transform = glm::mat4(1.0);
   GLuint transformMatrixLocation;
 
   std::size_t indiceSize = 0;
-
-  GLuint vertexArrayID;
-  GLuint m_programID;
+  GLuint programID;
 
   float rotate_ = 0;
 
@@ -29,11 +41,10 @@ struct Model {
 
   void setProgramID(GLuint programID);
 
-  Model& load(const std::vector<glm::vec3>& vertexData, const std::vector<GLuint>& indices,
-              const std::vector<glm::vec2>& textureCoords);
+  std::vector<buffer_t> buffers;
 
-  GLuint getVertexArrayID() const {
-    return vertexArrayID;
+  const std::vector<buffer_t>& getBuffers() const {
+    return buffers;
   }
 
   void scale(const glm::vec3& v);
@@ -43,9 +54,18 @@ struct Model {
   static void switchMeshMode();
 
 private:
-  Model& loadVertexPositions(const std::vector<glm::vec3>& vertexPositions);
-  Model& loadTexturePositions(const std::vector<glm::vec2>& textureCoords);
-  Model& loadDrawIndices(const std::vector<GLuint>& indices);
+  void loadModelPositionData(buffer_t& buffer, int accessorIndex);
+  void loadModelDrawIndices(buffer_t& buffer, int accessorIndex);
+
+  GLuint createArrayBuffer(int target) const;
+  bool deleteArrayBuffer(GLuint id) const;
+
+  GLuint createVertexArrayBuffer() const;
+  bool deleteVertexArrayBuffer(GLuint id) const;
+
+  void visitNode(const tn::Node& node);
+  void visitMesh(const tn::Mesh& mesh);
+  void visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
 
   static constexpr std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
 };
