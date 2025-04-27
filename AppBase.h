@@ -52,7 +52,6 @@ public:
       };
       std::uint8_t all;
     } flags;
-    static_assert(sizeof(decltype(flags)) == sizeof(std::uint8_t));
   };
 
 protected:

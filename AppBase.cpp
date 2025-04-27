@@ -127,6 +127,8 @@ void AppBase::run(AppBase* the_app) {
     this->render(glfwGetTime());
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    running = !glfwWindowShouldClose(window);
   }
 
   this->shutdown();
