@@ -16,6 +16,7 @@ struct ShaderLoader {
   ShaderLoader& compile();
   ShaderLoader& attach();
   ShaderLoader& link();
+  void unload();
 
   void emitProgramBinary() const;
 

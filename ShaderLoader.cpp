@@ -50,7 +50,16 @@ ShaderLoader& ShaderLoader::link() {
   for(GLuint shaderID : shaderIDs)
     glDetachShader(programID, shaderID);
 
+  glUseProgram(programID);
+
   return *this;
+}
+
+void ShaderLoader::unload() {
+  for(GLuint shaderID : shaderIDs)
+    glDeleteShader(shaderID);
+
+  glDeleteProgram(programID);
 }
 
 void ShaderLoader::emitProgramBinary() const {

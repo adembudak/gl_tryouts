@@ -101,8 +101,6 @@ void Thing::startup() {
                   .link()
                   .getProgramID();
 
-  glUseProgram(programID);
-
   textureLoader.load("textures/Konyaalti.ktx");
 
   my_model.setProgramID(programID);
