@@ -124,6 +124,7 @@ void Thing::render(double currentTime) {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
+  /*
   ImGui::Begin("Main");
   ImGui::Checkbox("Demo Window", &show_imgui_demo_window);
   ImGui::End();
@@ -131,6 +132,7 @@ void Thing::render(double currentTime) {
   if(show_imgui_demo_window) {
     ImGui::ShowDemoWindow(&show_imgui_demo_window);
   }
+  */
 
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
