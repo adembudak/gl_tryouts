@@ -11,6 +11,7 @@ struct TextureLoader {
   GLenum target;
 
   bool load(const std::filesystem::path& textureFile);
+  void unload();
 
   GLuint getTextureID() const {
     return textureID;

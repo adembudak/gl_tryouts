@@ -27,6 +27,14 @@ void Model::load(const std::filesystem::path& modelFile) {
   }
 }
 
+void Model::unload() {
+  for(const buffer_t& buffer : buffers) {
+    glDeleteVertexArrays(1, &buffer.vertexArrayID);
+    glDeleteBuffers(buffer.arrayBufferIDs.size(), buffer.arrayBufferIDs.data());
+    glDeleteBuffers(1, &buffer.element.elementBufferID);
+  }
+}
+
 void Model::scale(const glm::vec3& v) {
   transform = glm::scale(transform, v);
 }

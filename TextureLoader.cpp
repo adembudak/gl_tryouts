@@ -19,4 +19,8 @@ bool TextureLoader::load(const std::filesystem::path& textureFile) {
   return true;
 }
 
+void TextureLoader::unload() {
+  glDeleteTextures(1, &textureID);
+}
+
 }

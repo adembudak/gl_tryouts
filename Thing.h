@@ -9,7 +9,6 @@
 class Thing : public Application::AppBase {
 private:
   GLuint programID;
-  GLuint vertexArrayObject;
 
   GLuint viewMatrixLocation;
   GLuint projectionMatrixLocation;

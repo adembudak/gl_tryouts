@@ -157,7 +157,9 @@ void Thing::render(double currentTime) {
 }
 
 void Thing::shutdown() {
-  glDeleteProgram(programID);
+  shaderLoader.unload();
+  my_model.unload();
+  textureLoader.unload();
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();

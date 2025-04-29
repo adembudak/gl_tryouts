@@ -38,6 +38,7 @@ struct Model {
   float rotate_ = 0;
 
   void load(const std::filesystem::path& modelFile);
+  void unload();
 
   void setProgramID(GLuint programID);
 
