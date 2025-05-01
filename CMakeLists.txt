@@ -10,7 +10,7 @@ set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 option(VERIFY_SHADERS "Run Glslang on shader files" 1)
 
 find_package(glfw3 QUIET REQUIRED CONFIG)
-find_package(OpenGL QUIET REQUIRED)
+find_package(opengl_system QUIET REQUIRED)
 find_package(GLEW QUIET REQUIRED CONFIG)
 find_package(glm QUIET REQUIRED CONFIG)
 find_package(Ktx QUIET REQUIRED CONFIG)
@@ -21,21 +21,22 @@ find_package(imgui QUIET REQUIRED CONFIG)
 
 add_library(AppBase)
 target_sources(AppBase PRIVATE AppBase.cpp)
-target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW imgui::imgui)
+target_link_libraries(AppBase PUBLIC glfw opengl::opengl GLEW::GLEW
+                                     imgui::imgui)
 
 add_library(Model)
 target_sources(Model PRIVATE Model.cpp)
-target_link_libraries(Model PUBLIC OpenGL::GL GLEW::GLEW glm::glm
-                                   tinygltf::tinygltf)
+target_link_libraries(Model PUBLIC opengl::opengl GLEW::GLEW glm::glm
+                                   TinyGLTF::TinyGLTF)
 
 add_library(ShaderLoader)
 target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
-target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW
+target_link_libraries(ShaderLoader PRIVATE opengl::opengl GLEW::GLEW
                                            range-v3::range-v3 mpark_patterns)
 
 add_library(TextureLoader)
 target_sources(TextureLoader PRIVATE TextureLoader.cpp)
-target_link_libraries(TextureLoader PRIVATE OpenGL::GL GLEW::GLEW KTX::ktx)
+target_link_libraries(TextureLoader PRIVATE opengl::opengl GLEW::GLEW KTX::ktx)
 
 add_library(Camera)
 target_sources(Camera PRIVATE Camera.cpp)
