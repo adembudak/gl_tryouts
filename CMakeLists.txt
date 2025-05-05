@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED 1)
 set(CMAKE_CXX_EXTENSIONS 0)
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
-option(VERIFY_SHADERS "Run Glslang on shader files" 1)
+option(VERIFY_SHADERS "Run Glslang on shader files" 0)
+option(VISUALIZE_TARGETS "Run Graphviz on targets to see linkage graph" 0)
 
 find_package(glfw3 QUIET REQUIRED CONFIG)
 find_package(opengl_system QUIET REQUIRED)
@@ -72,4 +73,14 @@ if(VERIFY_SHADERS)
     TARGET vibe
     POST_BUILD
     COMMAND ${GLSLANG_COMMAND} ARGS --error-column ${shader_files})
+endif()
+
+if(VISUALIZE_TARGETS)
+  find_program(DOT_COMMAND dot REQUIRED)
+
+  add_custom_target(
+    graphviz ALL
+    COMMAND ${CMAKE_COMMAND} --graphviz=tgt.dot ${PROJECT_BINARY_DIR}
+    COMMAND ${DOT_COMMAND} -Tpng tgt.dot -o targets.png
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
