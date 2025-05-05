@@ -3,10 +3,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
 #include <vector>
 #include <utility>
 
@@ -84,15 +80,6 @@ void Thing::init() {
 }
 
 void Thing::startup() {
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-
-  ImGuiIO& io = ImGui::GetIO();
-
-  ImGui::StyleColorsDark();
-
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
-  ImGui_ImplOpenGL3_Init("#version 460");
 
   programID = shaderLoader
                   .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
@@ -118,20 +105,6 @@ void Thing::startup() {
 }
 
 void Thing::render(double currentTime) {
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
-  /*
-  ImGui::Begin("Main");
-  ImGui::Checkbox("Demo Window", &show_imgui_demo_window);
-  ImGui::End();
-
-  if(show_imgui_demo_window) {
-    ImGui::ShowDemoWindow(&show_imgui_demo_window);
-  }
-  */
-
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
 
@@ -151,19 +124,12 @@ void Thing::render(double currentTime) {
     glBindVertexArray(buffer.vertexArrayID);
     glDrawElements(buffer.element.mode, buffer.element.count, buffer.element.componentType, nullptr);
   }
-
-  ImGui::Render();
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Thing::shutdown() {
   shaderLoader.unload();
   my_model.unload();
   textureLoader.unload();
-
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
 
   glfwDestroyWindow(window);
   glfwTerminate();
