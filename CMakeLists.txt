@@ -10,19 +10,19 @@ set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 option(VERIFY_SHADERS "Run Glslang on shader files" 0)
 option(VISUALIZE_TARGETS "Run Graphviz on targets to see linkage graph" 0)
 
+include(FindGLEW)
+
 find_package(glfw3 QUIET REQUIRED CONFIG)
 find_package(OpenGL QUIET REQUIRED)
-find_package(GLEW QUIET REQUIRED CONFIG)
 find_package(glm QUIET REQUIRED CONFIG)
 find_package(Ktx QUIET REQUIRED CONFIG)
 find_package(TinyGLTF QUIET REQUIRED CONFIG)
 find_package(range-v3 QUIET REQUIRED CONFIG)
 find_package(mpark_patterns QUIET REQUIRED CONFIG)
-find_package(imgui QUIET REQUIRED CONFIG)
 
 add_library(AppBase)
 target_sources(AppBase PRIVATE AppBase.cpp)
-target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW imgui::imgui)
+target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
 
 add_library(Model)
 target_sources(Model PRIVATE Model.cpp)
