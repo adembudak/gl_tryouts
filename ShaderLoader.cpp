@@ -4,6 +4,7 @@
 
 #include <range/v3/range/conversion.hpp>
 #include <range/v3/view/istream.hpp>
+#include <mpark/patterns/match.hpp>
 
 #include <fstream>
 #include <filesystem>
@@ -78,15 +79,17 @@ void ShaderLoader::emitProgramBinary() const {
 }
 
 GLenum ShaderLoader::identifyShaderType(const std::filesystem::path& shaderFile) const {
+  using namespace mpark::patterns;
   // Based on: https://github.com/KhronosGroup/glslang?tab=readme-ov-file#execution-of-standalone-wrapper
   // clang-format off
-   const auto ext = shaderFile.extension();
-   if(ext == ".vert") return GL_VERTEX_SHADER;
-   if(ext == ".tesc") return GL_TESS_CONTROL_SHADER;
-   if(ext == ".tese") return GL_TESS_EVALUATION_SHADER;
-   if(ext == ".geom") return GL_GEOMETRY_SHADER;
-   if(ext == ".frag") return GL_FRAGMENT_SHADER;
-   if(ext == ".comp") return GL_COMPUTE_SHADER;
+  return match(shaderFile.extension())(
+      pattern(".vert") = [] { return GL_VERTEX_SHADER; },
+      pattern(".tesc") = [] { return GL_TESS_CONTROL_SHADER; },
+      pattern(".tese") = [] { return GL_TESS_EVALUATION_SHADER; },
+      pattern(".geom") = [] { return GL_GEOMETRY_SHADER; },
+      pattern(".frag") = [] { return GL_FRAGMENT_SHADER; },
+      pattern(".comp") = [] { return GL_COMPUTE_SHADER; }
+  );
   // clang-format on
 }
 

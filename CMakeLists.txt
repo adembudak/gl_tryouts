@@ -17,6 +17,7 @@ find_package(glm QUIET REQUIRED CONFIG)
 find_package(Ktx QUIET REQUIRED CONFIG)
 find_package(TinyGLTF QUIET REQUIRED CONFIG)
 find_package(range-v3 QUIET REQUIRED CONFIG)
+find_package(mpark_patterns QUIET REQUIRED CONFIG)
 find_package(imgui QUIET REQUIRED CONFIG)
 
 add_library(AppBase)
@@ -32,7 +33,7 @@ target_link_libraries(Model PUBLIC opengl::opengl GLEW::GLEW glm::glm
 add_library(ShaderLoader)
 target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
 target_link_libraries(ShaderLoader PRIVATE opengl::opengl GLEW::GLEW
-                                           range-v3::range-v3)
+                                           range-v3::range-v3 mpark_patterns)
 
 add_library(TextureLoader)
 target_sources(TextureLoader PRIVATE TextureLoader.cpp)
