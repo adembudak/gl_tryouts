@@ -3,7 +3,6 @@
 #include "AppBase.h"
 #include "Model.h"
 #include "ShaderLoader.h"
-#include "TextureLoader.h"
 #include "Camera.h"
 
 class Thing : public Application::AppBase {
@@ -13,15 +12,12 @@ private:
   GLuint viewMatrixLocation;
   GLuint projectionMatrixLocation;
 
-  util::TextureLoader textureLoader;
   util::ShaderLoader shaderLoader;
 
   Model my_model;
   Camera camera;
 
   double lastTime = 0;
-
-  bool show_imgui_demo_window = 1;
 
 public:
   virtual void init() override;

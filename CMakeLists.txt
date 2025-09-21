@@ -15,7 +15,6 @@ include(FindGLEW)
 find_package(glfw3 QUIET REQUIRED CONFIG)
 find_package(OpenGL QUIET REQUIRED)
 find_package(glm QUIET REQUIRED CONFIG)
-find_package(Ktx QUIET REQUIRED CONFIG)
 find_package(TinyGLTF QUIET REQUIRED CONFIG)
 find_package(range-v3 QUIET REQUIRED CONFIG)
 find_package(mpark_patterns QUIET REQUIRED CONFIG)
@@ -34,33 +33,25 @@ target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
 target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW
                                            range-v3::range-v3 mpark_patterns)
 
-add_library(TextureLoader)
-target_sources(TextureLoader PRIVATE TextureLoader.cpp)
-target_link_libraries(TextureLoader PRIVATE OpenGL::GL GLEW::GLEW KTX::ktx)
-
 add_library(Camera)
 target_sources(Camera PRIVATE Camera.cpp)
 target_link_libraries(Camera PRIVATE glm::glm)
 
 add_library(Thing)
 target_sources(Thing PRIVATE Thing.cpp)
-target_link_libraries(Thing PUBLIC AppBase Model ShaderLoader TextureLoader
-                                   Camera)
+target_link_libraries(Thing PUBLIC AppBase Model ShaderLoader Camera)
 
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
 target_link_libraries(vibe PRIVATE Thing)
 
-set(textures ${PROJECT_SOURCE_DIR}/textures)
 set(shaders ${PROJECT_SOURCE_DIR}/shaders)
 
 add_custom_command(
   TARGET vibe
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${shaders}
-          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${textures}
-          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,textures>")
+          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
 
 if(VERIFY_SHADERS)
   file(

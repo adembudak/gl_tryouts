@@ -88,8 +88,6 @@ void Thing::startup() {
                   .link()
                   .getProgramID();
 
-  textureLoader.load("textures/Konyaalti.ktx");
-
   my_model.setProgramID(programID);
   my_model.transformMatrixLocation = glGetUniformLocation(programID, "transform");
   my_model.load("models/Models/Triangle/glTF/Triangle.gltf");
@@ -129,7 +127,6 @@ void Thing::render(double currentTime) {
 void Thing::shutdown() {
   shaderLoader.unload();
   my_model.unload();
-  textureLoader.unload();
 
   glfwDestroyWindow(window);
   glfwTerminate();
