@@ -11,52 +11,6 @@
 namespace Application {
 std::unique_ptr<AppBase> AppBase::app = nullptr;
 
-void AppBase::error_callback(int error, const char* description) {
-  std::ostringstream sout;
-
-  switch(error) {
-  case GLFW_NOT_INITIALIZED:     sout << "GLFW has not been initialized."; break;
-  case GLFW_NO_CURRENT_CONTEXT:  sout << "No context is current for this thread."; break;
-  case GLFW_INVALID_ENUM:        sout << "One of the enum parameters for the function was given an invalid enum."; break;
-  case GLFW_INVALID_VALUE:       sout << "One of the parameters for the function was given an invalid value."; break;
-  case GLFW_OUT_OF_MEMORY:       sout << "A memory allocation failed."; break;
-  case GLFW_API_UNAVAILABLE:     sout << "GLFW could not find support for the requested client API on the system."; break;
-  case GLFW_VERSION_UNAVAILABLE: sout << "The requested client API version is not available."; break;
-  case GLFW_PLATFORM_ERROR:      sout << "A platform-specific error occurred."; break;
-  case GLFW_FORMAT_UNAVAILABLE:  sout << "The clipboard did not contain data in the requested format."; break;
-  default:                       sout << "Unknown error code: " << error; break;
-  }
-
-  if(description != nullptr)
-    sout << " Description: " << description;
-  std::cout << sout.str() << '\n';
-}
-
-void AppBase::glfw_onResize(GLFWwindow* window, int w, int h) {
-  app->onResize(w, h);
-}
-
-void AppBase::glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  app->onKey(key, action, mods);
-}
-
-void AppBase::glfw_onMouseButton(GLFWwindow* window, int button, int action, int mods) {
-  app->onMouseButton(button, action);
-}
-
-void AppBase::glfw_onMouseMove(GLFWwindow* window, double x, double y) {
-  app->onMouseMove(static_cast<int>(x), static_cast<int>(y));
-}
-
-void AppBase::glfw_onMouseWheel(GLFWwindow* window, double xoffset, double yoffset) {
-  app->onMouseWheel(static_cast<int>(yoffset));
-}
-
-void AppBase::setVsync(bool enable) {
-  info.flags.vsync = enable ? 1 : 0;
-  glfwSwapInterval(info.flags.vsync);
-}
-
 void AppBase::init() {
   info.windowWidth = 800;
   info.windowHeight = 600;
@@ -67,6 +21,8 @@ void AppBase::init() {
   info.flags.cursor = 1;
 #ifndef NDEBUG
   info.flags.debug = 1;
+#else
+  info.flags.debug = 0;
 #endif
 }
 
@@ -82,11 +38,9 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, info.majorVersion);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, info.minorVersion);
 
-#ifndef NDEBUG
   if(info.flags.debug) {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
   }
-#endif
 
   if(info.flags.robust)
     glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_LOSE_CONTEXT_ON_RESET);
@@ -96,13 +50,14 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
   glfwWindowHint(GLFW_SAMPLES, info.samples);
   glfwWindowHint(GLFW_STEREO, info.flags.stereo ? GLFW_TRUE : GLFW_FALSE);
 
-  window = glfwCreateWindow(info.windowWidth, info.windowHeight, info.title.c_str(),
+  glfwSetErrorCallback(error_callback);
+
+  this->window = glfwCreateWindow(info.windowWidth, info.windowHeight, info.title.c_str(),
                             info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
   glewInit();
 
-  glfwSetErrorCallback(error_callback);
   glfwSetWindowSizeCallback(window, glfw_onResize);
   glfwSetKeyCallback(window, glfw_onKey);
   glfwSetMouseButtonCallback(window, glfw_onMouseButton);
@@ -144,6 +99,54 @@ void AppBase::onResize(int w, int h) {
   info.windowHeight = h;
 }
 
+// protected member functions
+void AppBase::setVsync(bool enable) {
+  info.flags.vsync = enable ? 1 : 0;
+  glfwSwapInterval(info.flags.vsync);
+}
+
+void AppBase::error_callback(int error, const char* description) {
+  std::ostringstream sout;
+
+  switch(error) {
+  case GLFW_NOT_INITIALIZED:     sout << "GLFW has not been initialized."; break;
+  case GLFW_NO_CURRENT_CONTEXT:  sout << "No context is current for this thread."; break;
+  case GLFW_INVALID_ENUM:        sout << "One of the enum parameters for the function was given an invalid enum."; break;
+  case GLFW_INVALID_VALUE:       sout << "One of the parameters for the function was given an invalid value."; break;
+  case GLFW_OUT_OF_MEMORY:       sout << "A memory allocation failed."; break;
+  case GLFW_API_UNAVAILABLE:     sout << "GLFW could not find support for the requested client API on the system."; break;
+  case GLFW_VERSION_UNAVAILABLE: sout << "The requested client API version is not available."; break;
+  case GLFW_PLATFORM_ERROR:      sout << "A platform-specific error occurred."; break;
+  case GLFW_FORMAT_UNAVAILABLE:  sout << "The clipboard did not contain data in the requested format."; break;
+  default:                       sout << "Unknown error code: " << error; break;
+  }
+
+  if(description != nullptr)
+    sout << " Description: " << description;
+  std::cout << sout.str() << '\n';
+}
+
+void AppBase::glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  app->onKey(key, action, mods);
+}
+
+void AppBase::glfw_onMouseButton(GLFWwindow* window, int button, int action, int mods) {
+  app->onMouseButton(button, action);
+}
+
+void AppBase::glfw_onMouseMove(GLFWwindow* window, double x, double y) {
+  app->onMouseMove(static_cast<int>(x), static_cast<int>(y));
+}
+
+void AppBase::glfw_onMouseWheel(GLFWwindow* window, double xoffset, double yoffset) {
+  app->onMouseWheel(static_cast<int>(yoffset));
+}
+
+void AppBase::glfw_onResize(GLFWwindow* window, int w, int h) {
+  app->onResize(w, h);
+}
+
+// private member function
 void GLAPIENTRY AppBase::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                          const GLchar* message, const void* userParam) {
 

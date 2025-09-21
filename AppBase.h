@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <GL/glew.h> // For GLenum, GLuint ...
 
 #include <cstdint>
 #include <memory>
@@ -28,11 +28,6 @@ namespace Application {
  */
 
 class AppBase {
-private:
-  static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                         const GLchar* message, const void* userParam);
-  bool isExtensionAvailable(const std::string& ext);
-
 public:
   struct APPINFO {
     std::string title;
@@ -55,23 +50,6 @@ public:
     } flags;
   };
 
-protected:
-  GLFWwindow* window;
-  bool running;
-  APPINFO info;
-
-  static std::unique_ptr<AppBase> app;
-
-  static void error_callback(int error, const char* description);
-  static void glfw_onResize(GLFWwindow* window, int w, int h);
-  static void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
-  static void glfw_onMouseButton(GLFWwindow* window, int button, int action, int mods);
-  static void glfw_onMouseMove(GLFWwindow* window, double x, double y);
-  static void glfw_onMouseWheel(GLFWwindow* window, double xoffset, double yoffset);
-
-  void setVsync(bool enable);
-
-public:
   virtual ~AppBase() = default;
   virtual void init();
   virtual void startup() = 0;
@@ -85,6 +63,27 @@ public:
   virtual void onMouseMove(int x, int y);
   virtual void onMouseWheel(int pos);
   virtual void onResize(int w, int h);
+
+protected:
+  GLFWwindow* window;
+  bool running;
+  APPINFO info;
+
+  void setVsync(bool enable);
+
+  static std::unique_ptr<AppBase> app;
+
+  static void error_callback(int error, const char* description);
+
+  static void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
+  static void glfw_onMouseButton(GLFWwindow* window, int button, int action, int mods);
+  static void glfw_onMouseMove(GLFWwindow* window, double x, double y);
+  static void glfw_onMouseWheel(GLFWwindow* window, double xoffset, double yoffset);
+  static void glfw_onResize(GLFWwindow* window, int w, int h);
+
+private:
+  static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                         const GLchar* message, const void* userParam);
 };
 
 }
