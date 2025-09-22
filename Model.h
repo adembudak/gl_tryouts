@@ -28,11 +28,11 @@ struct buffer_t {
 
 struct Model {
   tn::Model model;
+  std::vector<buffer_t> buffers;
 
   glm::mat4x4 transform = glm::mat4(1.0);
   GLuint transformMatrixLocation;
 
-  std::size_t indiceSize = 0;
   GLuint programID;
 
   float rotate_ = 0;
@@ -42,8 +42,6 @@ struct Model {
 
   void setProgramID(GLuint programID);
 
-  std::vector<buffer_t> buffers;
-
   const std::vector<buffer_t>& getBuffers() const {
     return buffers;
   }
@@ -52,9 +50,13 @@ struct Model {
   void rotate(const float amount, const glm::vec3& around);
   void translate(const glm::vec3& v);
 
-  static void switchMeshMode();
+  void switchMeshMode();
 
 private:
+  void visitNode(const tn::Node& node);
+  void visitMesh(const tn::Mesh& mesh);
+  void visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
+
   void loadModelPositionData(buffer_t& buffer, int accessorIndex);
   void loadModelDrawIndices(buffer_t& buffer, int accessorIndex);
 
@@ -64,9 +66,6 @@ private:
   GLuint createVertexArrayBuffer() const;
   bool deleteVertexArrayBuffer(GLuint id) const;
 
-  void visitNode(const tn::Node& node);
-  void visitMesh(const tn::Mesh& mesh);
-  void visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
-
-  static constexpr std::array<GLenum, 3> mode = {GL_POINT, GL_LINE, GL_FILL};
+  enum primitive_mode_t : GLenum { point = GL_POINT, line = GL_LINE, fill = GL_FILL };
+  primitive_mode_t mode = primitive_mode_t::fill;
 };

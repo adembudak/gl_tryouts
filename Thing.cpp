@@ -38,7 +38,7 @@ void Thing::onKey(int key, int action, int mods) {
     case GLFW_KEY_Y:     my_model.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
     case GLFW_KEY_Z:     my_model.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
-    case GLFW_KEY_SPACE: Model::switchMeshMode(); break;
+    case GLFW_KEY_SPACE: my_model.switchMeshMode(); break;
 
     default:             break;
     }

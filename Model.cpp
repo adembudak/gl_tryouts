@@ -48,52 +48,14 @@ void Model::translate(const glm::vec3& v) {
   transform = glm::translate(transform, v);
 }
 
-void Model::loadModelPositionData(buffer_t& buffer, int accessorIndex) {
-  GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
+void Model::switchMeshMode() {
+  switch(mode) {
+  case primitive_mode_t::point: mode = line; break;
+  case primitive_mode_t::line:  mode = fill; break;
+  case primitive_mode_t::fill:  mode = point; break;
+  }
 
-  const tn::Accessor& accessor = model.accessors[accessorIndex];
-  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
-  const tn::Buffer& buf = model.buffers[bv.buffer];
-
-  GLuint arrayBufferID = createArrayBuffer(bv.target);
-  buffer.arrayBufferIDs.push_back(arrayBufferID);
-
-  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
-
-  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, arrayBufferID, accessor.byteOffset, accessor.ByteStride(bv));
-  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type),
-                            accessor.componentType, accessor.normalized, accessor.byteOffset);
-  glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
-}
-
-GLuint Model::createArrayBuffer(int target) const {
-  GLuint id;
-  glCreateBuffers(1, &id);
-  glBindBuffer(target, id);
-  return id;
-}
-
-bool Model::deleteArrayBuffer(GLuint id) const {
-  if(!glIsBuffer(id))
-    return false;
-
-  glDeleteBuffers(1, &id);
-  return true;
-}
-
-GLuint Model::createVertexArrayBuffer() const {
-  GLuint id;
-  glGenVertexArrays(1, &id);
-  glBindVertexArray(id);
-  return id;
-}
-
-bool Model::deleteVertexArrayBuffer(GLuint id) const {
-  if(!glIsVertexArray(id))
-    return false;
-
-  glDeleteVertexArrays(1, &id);
-  return true;
+  glPolygonMode(GL_FRONT_AND_BACK, mode);
 }
 
 void Model::visitNode(const tn::Node& node) {
@@ -129,6 +91,24 @@ void Model::visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive) {
   }
 }
 
+void Model::loadModelPositionData(buffer_t& buffer, int accessorIndex) {
+  GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
+
+  const tn::Accessor& accessor = model.accessors[accessorIndex];
+  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bv.buffer];
+
+  GLuint arrayBufferID = createArrayBuffer(bv.target);
+  buffer.arrayBufferIDs.push_back(arrayBufferID);
+
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+
+  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, arrayBufferID, accessor.byteOffset, accessor.ByteStride(bv));
+  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type),
+                            accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
+}
+
 void Model::loadModelDrawIndices(buffer_t& buffer, int accessorIndex) {
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
@@ -142,9 +122,32 @@ void Model::loadModelDrawIndices(buffer_t& buffer, int accessorIndex) {
   buffer.element.count = accessor.count;
 }
 
-void Model::switchMeshMode() {
-  static std::uint8_t i = 0;
-  ++i;
-  i = i % std::size(mode);
-  glPolygonMode(GL_FRONT_AND_BACK, mode[i]);
+GLuint Model::createArrayBuffer(int target) const {
+  GLuint id;
+  glCreateBuffers(1, &id);
+  glBindBuffer(target, id);
+  return id;
+}
+
+bool Model::deleteArrayBuffer(GLuint id) const {
+  if(!glIsBuffer(id))
+    return false;
+
+  glDeleteBuffers(1, &id);
+  return true;
+}
+
+GLuint Model::createVertexArrayBuffer() const {
+  GLuint id;
+  glGenVertexArrays(1, &id);
+  glBindVertexArray(id);
+  return id;
+}
+
+bool Model::deleteVertexArrayBuffer(GLuint id) const {
+  if(!glIsVertexArray(id))
+    return false;
+
+  glDeleteVertexArrays(1, &id);
+  return true;
 }
