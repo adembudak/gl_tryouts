@@ -74,9 +74,9 @@ void App::onMouseMove(int x, int y) {
   camera.lookAround(glm::radians(x_), glm::radians(y_), 0.0f);
 }
 
-void App::init() {
+void App::setConfigDefaults() {
   info.title = "something something";
-  AppBase::init();
+  AppBase::setConfigDefaults();
 }
 
 void App::startup() {

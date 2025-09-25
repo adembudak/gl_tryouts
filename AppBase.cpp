@@ -11,7 +11,7 @@
 namespace Application {
 std::unique_ptr<AppBase> AppBase::app = nullptr;
 
-void AppBase::init() {
+void AppBase::setConfigDefaults() {
   info.windowWidth = 800;
   info.windowHeight = 600;
   info.majorVersion = 4;
@@ -33,7 +33,7 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
   if(!glfwInit())
     return;
 
-  this->init();
+  this->setConfigDefaults();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, info.majorVersion);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, info.minorVersion);
@@ -53,7 +53,7 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
   glfwSetErrorCallback(error_callback);
 
   this->window = glfwCreateWindow(info.windowWidth, info.windowHeight, info.title.c_str(),
-                            info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+                                  info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
   glewInit();

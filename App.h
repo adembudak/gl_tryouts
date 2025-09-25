@@ -20,7 +20,7 @@ private:
   double lastTime = 0;
 
 public:
-  virtual void init() override;
+  virtual void setConfigDefaults() override;
   virtual void startup() override;
   virtual void render(double currentTime) override;
   virtual void shutdown() override;

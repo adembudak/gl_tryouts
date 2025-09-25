@@ -13,7 +13,7 @@ namespace Application {
 /*
  * void run() {
  *   glfwInit()
- *   this->init()
+ *   this->setConfigDefaults()
  *   glewInit();
  *
  *   this->startup();
@@ -51,7 +51,7 @@ public:
   };
 
   virtual ~AppBase() = default;
-  virtual void init();
+  virtual void setConfigDefaults();
   virtual void startup() = 0;
   virtual void render(double t) = 0;
   virtual void shutdown() = 0;
