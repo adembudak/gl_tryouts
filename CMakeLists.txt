@@ -37,13 +37,13 @@ add_library(Camera)
 target_sources(Camera PRIVATE Camera.cpp)
 target_link_libraries(Camera PRIVATE glm::glm)
 
-add_library(Thing)
-target_sources(Thing PRIVATE Thing.cpp)
-target_link_libraries(Thing PUBLIC AppBase Model ShaderLoader Camera)
+add_library(App)
+target_sources(App PRIVATE App.cpp)
+target_link_libraries(App PUBLIC AppBase Model ShaderLoader Camera)
 
 add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE Thing)
+target_link_libraries(vibe PRIVATE App)
 
 set(shaders ${PROJECT_SOURCE_DIR}/shaders)
 

@@ -5,7 +5,7 @@
 #include "ShaderLoader.h"
 #include "Camera.h"
 
-class Thing : public Application::AppBase {
+class App : public Application::AppBase {
 private:
   GLuint programID;
 

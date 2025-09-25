@@ -1,4 +1,4 @@
-#include "Thing.h"
+#include "App.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -8,7 +8,7 @@
 
 constexpr float rotateAmount = pi / 180.0;
 
-void Thing::onKey(int key, int action, int mods) {
+void App::onKey(int key, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
@@ -60,7 +60,7 @@ void Thing::onKey(int key, int action, int mods) {
   }
 }
 
-void Thing::onMouseWheel(int pos) {
+void App::onMouseWheel(int pos) {
   switch(pos) {
   case 1:  camera.eye.z -= 1.0; break;
   case -1: camera.eye.z += 1.0; break;
@@ -68,18 +68,18 @@ void Thing::onMouseWheel(int pos) {
   }
 }
 
-void Thing::onMouseMove(int x, int y) {
+void App::onMouseMove(int x, int y) {
   float x_ = float(x) - (info.windowWidth / 2.0f);
   float y_ = float(y) - (info.windowHeight / 2.0f);
   camera.lookAround(glm::radians(x_), glm::radians(y_), 0.0f);
 }
 
-void Thing::init() {
+void App::init() {
   info.title = "something something";
   AppBase::init();
 }
 
-void Thing::startup() {
+void App::startup() {
 
   programID = shaderLoader
                   .load({"shaders/vertexShader.vert", "shaders/fragmentShader.frag"}) //
@@ -102,7 +102,7 @@ void Thing::startup() {
   assert(glGetError() == GL_NO_ERROR);
 }
 
-void Thing::render(double currentTime) {
+void App::render(double currentTime) {
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
 
@@ -124,7 +124,7 @@ void Thing::render(double currentTime) {
   }
 }
 
-void Thing::shutdown() {
+void App::shutdown() {
   shaderLoader.unload();
   my_model.unload();
 
