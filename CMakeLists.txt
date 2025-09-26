@@ -45,33 +45,27 @@ add_executable(vibe)
 target_sources(vibe PRIVATE main.cpp)
 target_link_libraries(vibe PRIVATE App)
 
-set(shaders ${PROJECT_SOURCE_DIR}/shaders)
+cmake_path(SET shaders_path "${PROJECT_SOURCE_DIR}/shaders")
 
-add_custom_command(
-  TARGET vibe
+add_custom_command(TARGET vibe
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${shaders}
-          "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${shaders_path} "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
 
 if(VERIFY_SHADERS)
-  file(
-    GLOB shader_files
+  file(GLOB shader_files
     LIST_DIRECTORIES true
-    CONFIGURE_DEPENDS "shaders/*.vert" "shaders/*.frag")
+    CONFIGURE_DEPENDS "${shaders_path}/*.vert" "${shaders_path}/*.frag")
 
   find_program(GLSLANG_COMMAND glslang glslangValidator REQUIRED)
-  add_custom_command(
-    TARGET vibe
-    POST_BUILD
-    COMMAND ${GLSLANG_COMMAND} ARGS --error-column ${shader_files})
+  add_custom_command(TARGET vibe
+    POST_BUILD COMMAND ${GLSLANG_COMMAND} ARGS --error-column ${shader_files})
 endif()
 
 if(VISUALIZE_TARGETS)
   find_program(DOT_COMMAND dot REQUIRED)
 
-  add_custom_target(
-    graphviz ALL
-    COMMAND ${CMAKE_COMMAND} --graphviz=tgt.dot ${PROJECT_BINARY_DIR}
-    COMMAND ${DOT_COMMAND} -Tpng tgt.dot -o targets.png
+  add_custom_target(graph ALL
+    COMMAND ${CMAKE_COMMAND} --graphviz=targets.dot ${PROJECT_BINARY_DIR}
+    COMMAND ${DOT_COMMAND} -Tsvg targets.dot -o targets.svg
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
