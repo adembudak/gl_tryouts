@@ -1,9 +1,13 @@
-configure:
-	cmake -G "Ninja Multi-Config" -S . -B build
+buildDir := 'build'
 
-build:
-	cmake --build build --config Debug
+alias c := configure
+configure buildDir = buildDir:
+  cmake -G 'Ninja Multi-Config' -S . -B {{buildDir}}
 
-run:
-	just build
-	./build/Debug/vibe
+alias b := build
+build buildDir = buildDir:
+  cmake --build {{buildDir}} --config Debug --clean-first
+
+run buildDir = buildDir:
+  cmake --build {{buildDir}} --config Debug
+  ./{{buildDir}}/Debug/vibe
