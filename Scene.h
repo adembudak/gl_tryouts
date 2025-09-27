@@ -9,7 +9,6 @@
 #include <tiny_gltf.h>
 
 #include <vector>
-#include <array>
 #include <filesystem>
 
 namespace tn = tinygltf;
@@ -26,7 +25,7 @@ struct buffer_t {
   } element;
 };
 
-struct Model {
+struct Scene {
   tn::Model model;
   std::vector<buffer_t> buffers;
 
@@ -37,7 +36,7 @@ struct Model {
 
   float rotate_ = 0;
 
-  void load(const std::filesystem::path& modelFile);
+  void load(const std::filesystem::path& modelglTFfile);
   void unload();
 
   void setProgramID(GLuint programID);
@@ -55,6 +54,7 @@ struct Model {
 private:
   void visitNode(const tn::Node& node);
   void visitMesh(const tn::Mesh& mesh);
+  void visitCamera(const tn::Camera& camera);
   void visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
 
   void loadModelPositionData(buffer_t& buffer, int accessorIndex);

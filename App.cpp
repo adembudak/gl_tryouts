@@ -22,9 +22,9 @@ void App::startup() {
                   .link()
                   .getProgramID();
 
-  my_model.setProgramID(programID);
-  my_model.transformMatrixLocation = glGetUniformLocation(programID, "transform");
-  my_model.load("models/Models/Triangle/glTF/Triangle.gltf");
+  my_scene.setProgramID(programID);
+  my_scene.transformMatrixLocation = glGetUniformLocation(programID, "transform");
+  my_scene.load("models/Models/Triangle/glTF/Triangle.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
@@ -47,11 +47,11 @@ void App::render(double currentTime) {
   glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
-  glUniformMatrix4fv(my_model.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_model.transform));
+  glUniformMatrix4fv(my_scene.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_scene.transform));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
-  const std::vector<buffer_t>& buffers = my_model.getBuffers();
+  const std::vector<buffer_t>& buffers = my_scene.getBuffers();
   for(const buffer_t& buffer : buffers) {
     glBindVertexArray(buffer.vertexArrayID);
     glDrawElements(buffer.element.mode, buffer.element.count, buffer.element.componentType, nullptr);
@@ -60,7 +60,7 @@ void App::render(double currentTime) {
 
 void App::shutdown() {
   shaderLoader.unload();
-  my_model.unload();
+  my_scene.unload();
 
   glfwDestroyWindow(window);
   glfwTerminate();
@@ -74,29 +74,29 @@ void App::onKey(int key, int action, int mods) {
       AppBase::running = false;
       break;
       // Translate model
-    case GLFW_KEY_K: my_model.translate({0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_L: my_model.translate({0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_J: my_model.translate({0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_H: my_model.translate({-0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_K: my_scene.translate({0.0, 0.1, 0.0}); break;
+    case GLFW_KEY_L: my_scene.translate({0.1, 0.0, 0.0}); break;
+    case GLFW_KEY_J: my_scene.translate({0.0, -0.1, 0.0}); break;
+    case GLFW_KEY_H: my_scene.translate({-0.1, 0.0, 0.0}); break;
 
     case GLFW_KEY_M: // Scale model
       if(mods & GLFW_MOD_SHIFT)
-        my_model.scale(glm::vec3{1.1, 1.1, 1.1});
+        my_scene.scale(glm::vec3{1.1, 1.1, 1.1});
       else
-        my_model.scale(glm::vec3{0.9, 0.9, 0.9});
+        my_scene.scale(glm::vec3{0.9, 0.9, 0.9});
       break;
 
     case GLFW_KEY_X: // Rotate model
       if(mods & GLFW_MOD_SHIFT)
-        my_model.rotate(-rotateAmount, {0.1, 0.0, 0.0});
+        my_scene.rotate(-rotateAmount, {0.1, 0.0, 0.0});
       else
-        my_model.rotate(rotateAmount, {0.1, 0.0, 0.0});
+        my_scene.rotate(rotateAmount, {0.1, 0.0, 0.0});
       break;
 
-    case GLFW_KEY_Y:     my_model.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z:     my_model.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
+    case GLFW_KEY_Y:     my_scene.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
+    case GLFW_KEY_Z:     my_scene.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
-    case GLFW_KEY_SPACE: my_model.switchMeshMode(); break;
+    case GLFW_KEY_SPACE: my_scene.switchMeshMode(); break;
 
     default:             break;
     }

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "AppBase.h"
-#include "Model.h"
+#include "Scene.h"
 #include "ShaderLoader.h"
 #include "Camera.h"
+
 struct App : public Application::AppBase {
   virtual void setConfigDefaults() override;
   virtual void startup() override;
@@ -22,7 +23,7 @@ private:
 
   util::ShaderLoader shaderLoader;
 
-  Model my_model;
+  Scene my_scene;
   Camera camera;
 
   double lastTime = 0;

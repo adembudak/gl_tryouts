@@ -1,4 +1,4 @@
-#include "Model.h"
+#include "Scene.h"
 
 #include <tiny_gltf.h>
 
@@ -7,12 +7,13 @@
 
 #include <filesystem>
 
-void Model::setProgramID(GLuint programID) {
+void Scene::setProgramID(GLuint programID) {
   this->programID = programID;
 }
 
-void Model::load(const std::filesystem::path& modelFile) {
-  tn::TinyGLTF{}.LoadASCIIFromFile(&model, nullptr, nullptr, modelFile);
+void Scene::load(const std::filesystem::path& modelglTFFile) {
+  assert(std::filesystem::exists(modelglTFFile));
+  tn::TinyGLTF{}.LoadASCIIFromFile(&model, nullptr, nullptr, modelglTFFile);
 
   for(const tn::Scene& scene : model.scenes) {
     for(int nodeIndex : scene.nodes) {
@@ -27,7 +28,7 @@ void Model::load(const std::filesystem::path& modelFile) {
   }
 }
 
-void Model::unload() {
+void Scene::unload() {
   for(const buffer_t& buffer : buffers) {
     glDeleteVertexArrays(1, &buffer.vertexArrayID);
     glDeleteBuffers(buffer.arrayBufferIDs.size(), buffer.arrayBufferIDs.data());
@@ -35,20 +36,20 @@ void Model::unload() {
   }
 }
 
-void Model::scale(const glm::vec3& v) {
+void Scene::scale(const glm::vec3& v) {
   transform = glm::scale(transform, v);
 }
 
-void Model::rotate(const float amount, const glm::vec3& around) {
+void Scene::rotate(const float amount, const glm::vec3& around) {
   rotate_ -= amount;
   transform = glm::rotate(transform, rotate_, around);
 }
 
-void Model::translate(const glm::vec3& v) {
+void Scene::translate(const glm::vec3& v) {
   transform = glm::translate(transform, v);
 }
 
-void Model::switchMeshMode() {
+void Scene::switchMeshMode() {
   switch(mode) {
   case primitive_mode_t::point: mode = line; break;
   case primitive_mode_t::line:  mode = fill; break;
@@ -58,18 +59,23 @@ void Model::switchMeshMode() {
   glPolygonMode(GL_FRONT_AND_BACK, mode);
 }
 
-void Model::visitNode(const tn::Node& node) {
-  int meshIndex = node.mesh;
-  // Node MAY contain a mesh:
-  //  https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#geometry-overview
-  if(meshIndex == -1)
-    return;
+void Scene::visitNode(const tn::Node& node) {
+  if(int meshIndex = node.mesh; meshIndex != -1) {
+    const tn::Mesh& mesh = model.meshes[meshIndex];
+    visitMesh(mesh);
+  }
 
-  const tn::Mesh& mesh = model.meshes[meshIndex];
-  visitMesh(mesh);
+  else if(int cameraIndex = node.camera; cameraIndex != -1) {
+    const tn::Camera& camera = model.cameras[cameraIndex];
+    visitCamera(camera);
+  }
+
+  else {
+    return;
+  }
 }
 
-void Model::visitMesh(const tn::Mesh& mesh) {
+void Scene::visitMesh(const tn::Mesh& mesh) {
   buffer_t buffer;
   GLuint vertexArrayID = createVertexArrayBuffer();
   buffer.vertexArrayID = vertexArrayID;
@@ -80,7 +86,21 @@ void Model::visitMesh(const tn::Mesh& mesh) {
   buffers.push_back(buffer);
 }
 
-void Model::visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive) {
+void Scene::visitCamera(const tn::Camera& camera) {
+  if(camera.type == "perspective") {
+    const tn::PerspectiveCamera& perspective = camera.perspective;
+  }
+
+  else if(camera.type == "orthographic") {
+    const tn::OrthographicCamera& ortho = camera.orthographic;
+  }
+
+  else {
+    return;
+  }
+}
+
+void Scene::visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive) {
   for(const auto& [attribute, accessorIndex] : primitive.attributes)
     if(attribute == "POSITION")
       loadModelPositionData(buffer, accessorIndex);
@@ -91,7 +111,7 @@ void Model::visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive) {
   }
 }
 
-void Model::loadModelPositionData(buffer_t& buffer, int accessorIndex) {
+void Scene::loadModelPositionData(buffer_t& buffer, int accessorIndex) {
   GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
 
   const tn::Accessor& accessor = model.accessors[accessorIndex];
@@ -109,7 +129,7 @@ void Model::loadModelPositionData(buffer_t& buffer, int accessorIndex) {
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 }
 
-void Model::loadModelDrawIndices(buffer_t& buffer, int accessorIndex) {
+void Scene::loadModelDrawIndices(buffer_t& buffer, int accessorIndex) {
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
   const tn::Buffer& buf = model.buffers[bv.buffer];
@@ -122,14 +142,14 @@ void Model::loadModelDrawIndices(buffer_t& buffer, int accessorIndex) {
   buffer.element.count = accessor.count;
 }
 
-GLuint Model::createArrayBuffer(int target) const {
+GLuint Scene::createArrayBuffer(int target) const {
   GLuint id;
   glCreateBuffers(1, &id);
   glBindBuffer(target, id);
   return id;
 }
 
-bool Model::deleteArrayBuffer(GLuint id) const {
+bool Scene::deleteArrayBuffer(GLuint id) const {
   if(!glIsBuffer(id))
     return false;
 
@@ -137,14 +157,14 @@ bool Model::deleteArrayBuffer(GLuint id) const {
   return true;
 }
 
-GLuint Model::createVertexArrayBuffer() const {
+GLuint Scene::createVertexArrayBuffer() const {
   GLuint id;
   glGenVertexArrays(1, &id);
   glBindVertexArray(id);
   return id;
 }
 
-bool Model::deleteVertexArrayBuffer(GLuint id) const {
+bool Scene::deleteVertexArrayBuffer(GLuint id) const {
   if(!glIsVertexArray(id))
     return false;
 
