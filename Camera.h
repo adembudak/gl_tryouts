@@ -7,14 +7,14 @@
 
 inline constexpr auto pi = glm::pi<float>();
 
+inline constexpr float fieldOfView = pi / 2.0f;
+inline constexpr float aspectRatio = 1.333f;
+inline constexpr float zNear = 0.1f;
+inline constexpr float zFar = 1000.0f;
+inline constexpr glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
+                                                //
 struct Camera {
   glm::vec3 eye{0.0, 0.0, 5.0};
-  const glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
-
-  float fieldOfView = pi / 2.0f;
-  float aspectRatio = 1.333f;
-  float zNear = 0.1f;
-  float zFar = 1000.0f;
 
   enum class direction { left, right, front, back } dir;
 
