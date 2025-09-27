@@ -47,7 +47,7 @@ void App::render(double currentTime) {
   glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
-  glUniformMatrix4fv(my_scene.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_scene.transform));
+  glUniformMatrix4fv(my_scene.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_scene.transformMatrix));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
