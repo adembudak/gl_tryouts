@@ -29,7 +29,7 @@ struct Scene {
   tn::Model model;
   std::vector<buffer_t> buffers;
 
-  glm::mat4x4 transform = glm::mat4(1.0);
+  glm::mat4x4 transformMatrix = glm::mat4(1.0);
   GLuint transformMatrixLocation;
 
   GLuint programID;

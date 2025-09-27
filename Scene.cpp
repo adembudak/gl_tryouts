@@ -37,16 +37,16 @@ void Scene::unload() {
 }
 
 void Scene::scale(const glm::vec3& v) {
-  transform = glm::scale(transform, v);
+  transformMatrix = glm::scale(transformMatrix, v);
 }
 
 void Scene::rotate(const float amount, const glm::vec3& around) {
   rotate_ -= amount;
-  transform = glm::rotate(transform, rotate_, around);
+  transformMatrix = glm::rotate(transformMatrix, rotate_, around);
 }
 
 void Scene::translate(const glm::vec3& v) {
-  transform = glm::translate(transform, v);
+  transformMatrix = glm::translate(transformMatrix, v);
 }
 
 void Scene::switchMeshMode() {
