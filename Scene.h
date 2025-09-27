@@ -53,12 +53,12 @@ struct Scene {
 
 private:
   void visitNode(const tn::Node& node);
-  void visitMesh(const tn::Mesh& mesh);
-  void visitCamera(const tn::Camera& camera);
-  void visitPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
+  void visitNodeMesh(const tn::Mesh& mesh);
+  void visitNodeCamera(const tn::Camera& camera);
+  void visitMeshPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
 
-  void loadModelPositionData(buffer_t& buffer, int accessorIndex);
-  void loadModelDrawIndices(buffer_t& buffer, int accessorIndex);
+  void loadMeshPositionData(buffer_t& buffer, int accessorIndex);
+  void loadMeshDrawIndices(buffer_t& buffer, int accessorIndex);
 
   GLuint createArrayBuffer(int target) const;
   bool deleteArrayBuffer(GLuint id) const;
