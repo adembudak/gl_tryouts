@@ -13,7 +13,7 @@
 
 namespace tn = tinygltf;
 
-struct buffer_t {
+struct mesh_buffer_t {
   GLuint vertexArrayID;
   std::vector<GLuint> arrayBufferIDs;
 
@@ -27,7 +27,7 @@ struct buffer_t {
 
 struct Scene {
   tn::Model model;
-  std::vector<buffer_t> buffers;
+  std::vector<mesh_buffer_t> buffers;
 
   GLuint programID;
 
@@ -36,7 +36,7 @@ struct Scene {
 
   void setProgramID(GLuint programID);
 
-  const std::vector<buffer_t>& getBuffers() const {
+  const std::vector<mesh_buffer_t>& getBuffers() const {
     return buffers;
   }
 
@@ -44,10 +44,10 @@ private:
   void visitNode(const tn::Node& node);
   void visitNodeMesh(const tn::Mesh& mesh);
   void visitNodeCamera(const tn::Camera& camera);
-  void visitMeshPrimitive(buffer_t& buffer, const tn::Primitive& primitive);
+  void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
 
-  void loadMeshPositionData(buffer_t& buffer, int accessorIndex);
-  void loadMeshDrawIndices(buffer_t& buffer, int accessorIndex);
+  void loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex);
+  void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
 
   GLuint createArrayBuffer(int target) const;
   bool deleteArrayBuffer(GLuint id) const;

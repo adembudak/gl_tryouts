@@ -47,8 +47,8 @@ void App::render(double currentTime) {
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
-  const std::vector<buffer_t>& buffers = my_scene.getBuffers();
-  for(const buffer_t& buffer : buffers) {
+  const std::vector<mesh_buffer_t>& buffers = my_scene.getBuffers();
+  for(const mesh_buffer_t& buffer : buffers) {
     glBindVertexArray(buffer.vertexArrayID);
     glDrawElements(buffer.element.mode, buffer.element.count, buffer.element.componentType, nullptr);
   }

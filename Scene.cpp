@@ -29,7 +29,7 @@ void Scene::load(const std::filesystem::path& modelglTFFile) {
 }
 
 void Scene::unload() {
-  for(const buffer_t& buffer : buffers) {
+  for(const mesh_buffer_t& buffer : buffers) {
     glDeleteVertexArrays(1, &buffer.vertexArrayID);
     glDeleteBuffers(buffer.arrayBufferIDs.size(), buffer.arrayBufferIDs.data());
     glDeleteBuffers(1, &buffer.element.elementBufferID);
@@ -53,9 +53,8 @@ void Scene::visitNode(const tn::Node& node) {
 }
 
 void Scene::visitNodeMesh(const tn::Mesh& mesh) {
-  buffer_t buffer;
-  GLuint vertexArrayID = createVertexArrayBuffer();
-  buffer.vertexArrayID = vertexArrayID;
+  mesh_buffer_t buffer;
+  buffer.vertexArrayID = createVertexArrayBuffer();
 
   for(const tn::Primitive& primitive : mesh.primitives)
     visitMeshPrimitive(buffer, primitive);
@@ -64,7 +63,6 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh) {
 }
 
 void Scene::visitNodeCamera(const tn::Camera& camera) {
-  // Implement this
   if(camera.type == "perspective") {
     const tn::PerspectiveCamera& perspective = camera.perspective;
   }
@@ -78,7 +76,7 @@ void Scene::visitNodeCamera(const tn::Camera& camera) {
   }
 }
 
-void Scene::visitMeshPrimitive(buffer_t& buffer, const tn::Primitive& primitive) {
+void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive) {
   for(const auto& [attribute, accessorIndex] : primitive.attributes)
     if(attribute == "POSITION")
       loadMeshPositionData(buffer, accessorIndex);
@@ -89,7 +87,7 @@ void Scene::visitMeshPrimitive(buffer_t& buffer, const tn::Primitive& primitive)
   }
 }
 
-void Scene::loadMeshPositionData(buffer_t& buffer, int accessorIndex) {
+void Scene::loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex) {
   GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
 
   const tn::Accessor& accessor = model.accessors[accessorIndex];
@@ -107,7 +105,7 @@ void Scene::loadMeshPositionData(buffer_t& buffer, int accessorIndex) {
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 }
 
-void Scene::loadMeshDrawIndices(buffer_t& buffer, int accessorIndex) {
+void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
   const tn::Buffer& buf = model.buffers[bv.buffer];
