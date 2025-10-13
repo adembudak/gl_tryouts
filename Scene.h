@@ -49,8 +49,6 @@ struct Scene {
   void rotate(const float amount, const glm::vec3& around);
   void translate(const glm::vec3& v);
 
-  void switchMeshMode();
-
 private:
   void visitNode(const tn::Node& node);
   void visitNodeMesh(const tn::Mesh& mesh);
@@ -65,7 +63,4 @@ private:
 
   GLuint createVertexArrayBuffer() const;
   bool deleteVertexArrayBuffer(GLuint id) const;
-
-  enum primitive_mode_t : GLenum { point = GL_POINT, line = GL_LINE, fill = GL_FILL };
-  primitive_mode_t mode = primitive_mode_t::fill;
 };

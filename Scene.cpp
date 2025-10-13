@@ -49,16 +49,6 @@ void Scene::translate(const glm::vec3& v) {
   transformMatrix = glm::translate(transformMatrix, v);
 }
 
-void Scene::switchMeshMode() {
-  switch(mode) {
-  case primitive_mode_t::point: mode = line; break;
-  case primitive_mode_t::line:  mode = fill; break;
-  case primitive_mode_t::fill:  mode = point; break;
-  }
-
-  glPolygonMode(GL_FRONT_AND_BACK, mode);
-}
-
 void Scene::visitNode(const tn::Node& node) {
   if(int meshIndex = node.mesh; meshIndex != -1) {
     const tn::Mesh& mesh = model.meshes[meshIndex];

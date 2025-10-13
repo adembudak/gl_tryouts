@@ -96,8 +96,6 @@ void App::onKey(int key, int action, int mods) {
     case GLFW_KEY_Y:     my_scene.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
     case GLFW_KEY_Z:     my_scene.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
-    case GLFW_KEY_SPACE: my_scene.switchMeshMode(); break;
-
     default:             break;
     }
 
