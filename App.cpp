@@ -6,8 +6,6 @@
 #include <vector>
 #include <utility>
 
-constexpr float rotateAmount = pi / 180.0;
-
 void App::setConfigDefaults() {
   info.title = "something something";
   AppBase::setConfigDefaults();
@@ -23,7 +21,6 @@ void App::startup() {
                   .getProgramID();
 
   my_scene.setProgramID(programID);
-  my_scene.transformMatrixLocation = glGetUniformLocation(programID, "transform");
   my_scene.load("models/Models/Triangle/glTF/Triangle.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
@@ -47,7 +44,6 @@ void App::render(double currentTime) {
   glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
-  glUniformMatrix4fv(my_scene.transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(my_scene.transformMatrix));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
@@ -73,28 +69,6 @@ void App::onKey(int key, int action, int mods) {
     case GLFW_KEY_ESCAPE:
       AppBase::running = false;
       break;
-      // Translate model
-    case GLFW_KEY_K: my_scene.translate({0.0, 0.1, 0.0}); break;
-    case GLFW_KEY_L: my_scene.translate({0.1, 0.0, 0.0}); break;
-    case GLFW_KEY_J: my_scene.translate({0.0, -0.1, 0.0}); break;
-    case GLFW_KEY_H: my_scene.translate({-0.1, 0.0, 0.0}); break;
-
-    case GLFW_KEY_M: // Scale model
-      if(mods & GLFW_MOD_SHIFT)
-        my_scene.scale(glm::vec3{1.1, 1.1, 1.1});
-      else
-        my_scene.scale(glm::vec3{0.9, 0.9, 0.9});
-      break;
-
-    case GLFW_KEY_X: // Rotate model
-      if(mods & GLFW_MOD_SHIFT)
-        my_scene.rotate(-rotateAmount, {0.1, 0.0, 0.0});
-      else
-        my_scene.rotate(rotateAmount, {0.1, 0.0, 0.0});
-      break;
-
-    case GLFW_KEY_Y:     my_scene.rotate(rotateAmount, {0.0, 1.0, 0.0}); break;
-    case GLFW_KEY_Z:     my_scene.rotate(rotateAmount, {0.0, 0.0, 1.0}); break;
 
     default:             break;
     }

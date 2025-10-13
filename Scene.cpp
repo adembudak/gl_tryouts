@@ -36,19 +36,6 @@ void Scene::unload() {
   }
 }
 
-void Scene::scale(const glm::vec3& v) {
-  transformMatrix = glm::scale(transformMatrix, v);
-}
-
-void Scene::rotate(const float amount, const glm::vec3& around) {
-  rotate_ -= amount;
-  transformMatrix = glm::rotate(transformMatrix, rotate_, around);
-}
-
-void Scene::translate(const glm::vec3& v) {
-  transformMatrix = glm::translate(transformMatrix, v);
-}
-
 void Scene::visitNode(const tn::Node& node) {
   if(int meshIndex = node.mesh; meshIndex != -1) {
     const tn::Mesh& mesh = model.meshes[meshIndex];

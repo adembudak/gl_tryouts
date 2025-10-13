@@ -29,12 +29,7 @@ struct Scene {
   tn::Model model;
   std::vector<buffer_t> buffers;
 
-  glm::mat4x4 transformMatrix = glm::mat4(1.0);
-  GLuint transformMatrixLocation;
-
   GLuint programID;
-
-  float rotate_ = 0;
 
   void load(const std::filesystem::path& modelglTFfile);
   void unload();
@@ -44,10 +39,6 @@ struct Scene {
   const std::vector<buffer_t>& getBuffers() const {
     return buffers;
   }
-
-  void scale(const glm::vec3& v);
-  void rotate(const float amount, const glm::vec3& around);
-  void translate(const glm::vec3& v);
 
 private:
   void visitNode(const tn::Node& node);
