@@ -1,9 +1,14 @@
 #include "Scene.h"
 
-#include <tiny_gltf.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#define GLM_GTX_quaternion
 
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <tiny_gltf.h>
 
 #include <filesystem>
 
@@ -29,17 +34,24 @@ void Scene::load(const std::filesystem::path& modelglTFFile) {
 }
 
 void Scene::unload() {
-  for(const mesh_buffer_t& buffer : buffers) {
-    glDeleteVertexArrays(1, &buffer.vertexArrayID);
-    glDeleteBuffers(buffer.arrayBufferIDs.size(), buffer.arrayBufferIDs.data());
-    glDeleteBuffers(1, &buffer.element.elementBufferID);
+  for(const node_t& buffer : buffers) {
+    glDeleteVertexArrays(1, &buffer.mesh_buffer.vertexArrayID);
+    glDeleteBuffers(buffer.mesh_buffer.arrayBufferIDs.size(), buffer.mesh_buffer.arrayBufferIDs.data());
+    glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
   }
 }
 
 void Scene::visitNode(const tn::Node& node) {
+  node_t buffer;
+
+  if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale))
+    loadNodeTransformData(node, buffer);
+
   if(int meshIndex = node.mesh; meshIndex != -1) {
     const tn::Mesh& mesh = model.meshes[meshIndex];
-    visitNodeMesh(mesh);
+    visitNodeMesh(mesh, buffer.mesh_buffer);
+
+    buffers.push_back(buffer);
   }
 
   else if(int cameraIndex = node.camera; cameraIndex != -1) {
@@ -52,14 +64,11 @@ void Scene::visitNode(const tn::Node& node) {
   }
 }
 
-void Scene::visitNodeMesh(const tn::Mesh& mesh) {
-  mesh_buffer_t buffer;
-  buffer.vertexArrayID = createVertexArrayBuffer();
+void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
+  mesh_buffer.vertexArrayID = createVertexArrayBuffer();
 
   for(const tn::Primitive& primitive : mesh.primitives)
-    visitMeshPrimitive(buffer, primitive);
-
-  buffers.push_back(buffer);
+    visitMeshPrimitive(mesh_buffer, primitive);
 }
 
 void Scene::visitNodeCamera(const tn::Camera& camera) {
@@ -85,6 +94,26 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
     buffer.element.mode = primitive.mode;
     loadMeshDrawIndices(buffer, primitive.indices);
   }
+}
+
+void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
+  if(!std::empty(node.matrix))
+    buffer.transformMatrix = glm::make_mat4x4(std::data(node.matrix));
+
+  glm::mat4x4 T = glm::mat4x4(1.0);
+  glm::mat4x4 R = glm::mat4x4(1.0);
+  glm::mat4x4 S = glm::mat4x4(1.0);
+
+  if(!std::empty(node.translation))
+    T = glm::translate(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.translation))));
+
+  if(!std::empty(node.rotation))
+    R = glm::toMat4(glm::make_quat(std::data(node.rotation)));
+
+  if(!std::empty(node.scale))
+    S = glm::scale(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.scale))));
+
+  buffer.transformMatrix = T * R * S;
 }
 
 void Scene::loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex) {

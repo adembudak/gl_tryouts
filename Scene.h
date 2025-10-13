@@ -25,9 +25,14 @@ struct mesh_buffer_t {
   } element;
 };
 
+struct node_t {
+  mesh_buffer_t mesh_buffer;
+  glm::mat4x4 transformMatrix = glm::mat4x4(1.0f);
+};
+
 struct Scene {
   tn::Model model;
-  std::vector<mesh_buffer_t> buffers;
+  std::vector<node_t> buffers;
 
   GLuint programID;
 
@@ -36,16 +41,17 @@ struct Scene {
 
   void setProgramID(GLuint programID);
 
-  const std::vector<mesh_buffer_t>& getBuffers() const {
+  const std::vector<node_t>& getBuffers() const {
     return buffers;
   }
 
 private:
   void visitNode(const tn::Node& node);
-  void visitNodeMesh(const tn::Mesh& mesh);
+  void visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer);
   void visitNodeCamera(const tn::Camera& camera);
   void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
 
+  void loadNodeTransformData(const tn::Node& node, node_t& buffer);
   void loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
 

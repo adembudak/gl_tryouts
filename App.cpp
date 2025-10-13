@@ -47,10 +47,10 @@ void App::render(double currentTime) {
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
-  const std::vector<mesh_buffer_t>& buffers = my_scene.getBuffers();
-  for(const mesh_buffer_t& buffer : buffers) {
-    glBindVertexArray(buffer.vertexArrayID);
-    glDrawElements(buffer.element.mode, buffer.element.count, buffer.element.componentType, nullptr);
+  const std::vector<node_t>& buffers = my_scene.getBuffers();
+  for(const node_t& buffer : buffers) {
+    glBindVertexArray(buffer.mesh_buffer.vertexArrayID);
+    glDrawElements(buffer.mesh_buffer.element.mode, buffer.mesh_buffer.element.count, buffer.mesh_buffer.element.componentType, nullptr);
   }
 }
 
@@ -66,11 +66,9 @@ void App::onKey(int key, int action, int mods) {
   switch(action) {
   case GLFW_PRESS:
     switch(key) {
-    case GLFW_KEY_ESCAPE:
-      AppBase::running = false;
-      break;
+    case GLFW_KEY_ESCAPE: AppBase::running = false; break;
 
-    default:             break;
+    default:              break;
     }
 
     break;
