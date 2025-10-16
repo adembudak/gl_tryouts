@@ -19,8 +19,8 @@ struct mesh_buffer_t {
 
   struct element_t {
     GLuint elementBufferID;
-    int mode;
-    int componentType;
+    int mode;  // triangle, triangle Strip etc.
+    int componentType; // float, unsigned short ...
     size_t count;
   } element;
 };
@@ -55,9 +55,6 @@ private:
   void loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
 
-  GLuint createArrayBuffer(int target) const;
   bool deleteArrayBuffer(GLuint id) const;
-
-  GLuint createVertexArrayBuffer() const;
   bool deleteVertexArrayBuffer(GLuint id) const;
 };

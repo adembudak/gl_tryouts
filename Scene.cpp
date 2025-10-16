@@ -65,7 +65,8 @@ void Scene::visitNode(const tn::Node& node) {
 }
 
 void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
-  mesh_buffer.vertexArrayID = createVertexArrayBuffer();
+  glGenVertexArrays(1, &mesh_buffer.vertexArrayID);
+  glBindVertexArray(mesh_buffer.vertexArrayID);
 
   for(const tn::Primitive& primitive : mesh.primitives)
     visitMeshPrimitive(mesh_buffer, primitive);
@@ -123,7 +124,10 @@ void Scene::loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex) {
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
   const tn::Buffer& buf = model.buffers[bv.buffer];
 
-  GLuint arrayBufferID = createArrayBuffer(bv.target);
+  GLuint arrayBufferID;
+  glCreateBuffers(1, &arrayBufferID);
+  glBindBuffer(bv.target, arrayBufferID);
+
   buffer.arrayBufferIDs.push_back(arrayBufferID);
 
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
@@ -139,19 +143,14 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
   const tn::Buffer& buf = model.buffers[bv.buffer];
 
-  GLuint elementBufferID = createArrayBuffer(bv.target);
+  GLuint elementBufferID;
+  glCreateBuffers(1, &elementBufferID);
+  glBindBuffer(bv.target, elementBufferID);
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
 
   buffer.element.elementBufferID = elementBufferID;
   buffer.element.componentType = accessor.componentType;
   buffer.element.count = accessor.count;
-}
-
-GLuint Scene::createArrayBuffer(int target) const {
-  GLuint id;
-  glCreateBuffers(1, &id);
-  glBindBuffer(target, id);
-  return id;
 }
 
 bool Scene::deleteArrayBuffer(GLuint id) const {
@@ -160,13 +159,6 @@ bool Scene::deleteArrayBuffer(GLuint id) const {
 
   glDeleteBuffers(1, &id);
   return true;
-}
-
-GLuint Scene::createVertexArrayBuffer() const {
-  GLuint id;
-  glGenVertexArrays(1, &id);
-  glBindVertexArray(id);
-  return id;
 }
 
 bool Scene::deleteVertexArrayBuffer(GLuint id) const {
