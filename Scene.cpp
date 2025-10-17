@@ -98,23 +98,24 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
 }
 
 void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
-  if(!std::empty(node.matrix))
+  if(!std::empty(node.matrix)) {
     buffer.transformMatrix = glm::make_mat4x4(std::data(node.matrix));
+  } else {
+    glm::mat4x4 T = glm::mat4x4(1.0);
+    glm::mat4x4 R = glm::mat4x4(1.0);
+    glm::mat4x4 S = glm::mat4x4(1.0);
 
-  glm::mat4x4 T = glm::mat4x4(1.0);
-  glm::mat4x4 R = glm::mat4x4(1.0);
-  glm::mat4x4 S = glm::mat4x4(1.0);
+    if(!std::empty(node.translation))
+      T = glm::translate(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.translation))));
 
-  if(!std::empty(node.translation))
-    T = glm::translate(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.translation))));
+    if(!std::empty(node.rotation))
+      R = glm::toMat4(glm::make_quat(std::data(node.rotation)));
 
-  if(!std::empty(node.rotation))
-    R = glm::toMat4(glm::make_quat(std::data(node.rotation)));
+    if(!std::empty(node.scale))
+      S = glm::scale(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.scale))));
 
-  if(!std::empty(node.scale))
-    S = glm::scale(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.scale))));
-
-  buffer.transformMatrix = T * R * S;
+    buffer.transformMatrix = T * R * S;
+  }
 }
 
 void Scene::loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex) {
