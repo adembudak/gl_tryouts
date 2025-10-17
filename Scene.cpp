@@ -130,12 +130,33 @@ void Scene::loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex) {
 
   buffer.arrayBufferIDs.push_back(arrayBufferID);
 
-  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
-
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
   glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, arrayBufferID, accessor.byteOffset, accessor.ByteStride(bv));
-  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type),
-                            accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
+
+  if(accessor.sparse.isSparse) {
+    const tn::Accessor::Sparse& sparse = accessor.sparse;
+
+    const tn::BufferView& indicesBufferView = model.bufferViews[sparse.indices.bufferView];
+    const tn::Buffer& indicesBuffer = model.buffers[indicesBufferView.buffer];
+
+    const auto indices_begin = reinterpret_cast<unsigned short*>(const_cast<unsigned char*>(std::data(indicesBuffer.data)) + indicesBufferView.byteOffset + sparse.indices.byteOffset);
+    const auto indices_end = indices_begin + sparse.count;
+    const std::vector<unsigned short> indices(indices_begin, indices_end);
+
+    const tn::BufferView& valuesBufferView = model.bufferViews[sparse.values.bufferView];
+    const tn::Buffer& valuesBuffer = model.buffers[valuesBufferView.buffer];
+
+    const auto values_begin = reinterpret_cast<glm::vec3*>(const_cast<unsigned char*>(std::data(valuesBuffer.data)) + valuesBufferView.byteOffset + sparse.values.byteOffset);
+    const auto values_end = values_begin + sparse.count;
+    const std::vector<glm::vec3> values(values_begin, values_end);
+
+    glm::vec3* const ptr = reinterpret_cast<glm::vec3*>(glMapNamedBuffer(arrayBufferID, GL_READ_WRITE));
+    for(int i = 0; i < sparse.count; ++i)
+      *(ptr + indices[i]) = values[i];
+    glUnmapNamedBuffer(arrayBufferID);
+  }
 }
 
 void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
