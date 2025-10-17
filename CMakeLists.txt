@@ -45,7 +45,7 @@ target_link_libraries(vibe PRIVATE App)
 cmake_path(SET shaders_path "${PROJECT_SOURCE_DIR}/shaders")
 
 add_custom_command(TARGET vibe
-  POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${shaders_path} "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
+  POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory_if_newer ${shaders_path} "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,shaders>")
 
 if(VERIFY_SHADERS)
   file(GLOB shader_files
