@@ -25,6 +25,7 @@ void App::startup() {
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
+  transformMatrixLocation = glGetUniformLocation(programID, "transform");
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
@@ -47,10 +48,11 @@ void App::render(double currentTime) {
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
-  const std::vector<node_t>& buffers = my_scene.getBuffers();
-  for(const node_t& buffer : buffers) {
-    glBindVertexArray(buffer.mesh_buffer.vertexArrayID);
-    glDrawElements(buffer.mesh_buffer.element.mode, buffer.mesh_buffer.element.count, buffer.mesh_buffer.element.componentType, nullptr);
+  const std::vector<node_t>& node_buffers = my_scene.getBuffers();
+  for(const node_t& node_buffer : node_buffers) {
+    glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix));
+    glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
+    glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
   }
 }
 

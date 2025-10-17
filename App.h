@@ -20,6 +20,7 @@ private:
 
   GLuint viewMatrixLocation;
   GLuint projectionMatrixLocation;
+  GLuint transformMatrixLocation;
 
   util::ShaderLoader shaderLoader;
 
