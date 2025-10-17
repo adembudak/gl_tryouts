@@ -97,9 +97,3 @@ void App::onMouseWheel(int pos) {
   default: break;
   }
 }
-
-void App::onMouseMove(int x, int y) {
-  float x_ = float(x) - (info.windowWidth / 2.0f);
-  float y_ = float(y) - (info.windowHeight / 2.0f);
-  camera.lookAround(glm::radians(x_), glm::radians(y_), 0.0f);
-}

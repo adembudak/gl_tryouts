@@ -28,7 +28,3 @@ void Camera::moveAround(direction dir) {
   case back:  eye += (-speed * glm::vec3(0.0, 0.0, -5.0)); break;
   }
 }
-
-void Camera::lookAround(float angleX, float angleY, float angleZ) {
-  yawPitchRoll = glm::yawPitchRoll(angleX, angleY, 0.0f);
-}

@@ -13,7 +13,6 @@ struct App : public Application::AppBase {
 
   virtual void onKey(int key, int action, int mods) override;
   virtual void onMouseWheel(int pos) override;
-  virtual void onMouseMove(int x, int y) override;
 
 private:
   GLuint programID;

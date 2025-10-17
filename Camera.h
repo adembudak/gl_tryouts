@@ -23,7 +23,6 @@ struct Camera {
   glm::mat4x4 yawPitchRoll = glm::mat4x4(1);
   glm::mat4x4 projection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 
-  void lookAround(float angleX, float angleY, float angleZ);
   void moveAround(direction dir);
 
   void update(double dT);
