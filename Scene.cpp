@@ -118,8 +118,8 @@ void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
   }
 }
 
-  GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
 void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex) {
+  GLuint attribIndex = glGetAttribLocation(programID, "vertexPosition");
 
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
