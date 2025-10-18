@@ -131,7 +131,9 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
 
   buffer.arrayBufferIDs.push_back(arrayBufferID);
 
-  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+  const GLsizeiptr size = accessor.count * tn::GetComponentSizeInBytes(accessor.componentType) * tn::GetNumComponentsInType(accessor.type);
+  glBufferStorage(bv.target, size, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+
   glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, arrayBufferID, accessor.byteOffset, accessor.ByteStride(bv));
   glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
