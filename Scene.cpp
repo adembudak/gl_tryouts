@@ -87,9 +87,13 @@ void Scene::visitNodeCamera(const tn::Camera& camera) {
 }
 
 void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive) {
-  for(const auto& [attribute, accessorIndex] : primitive.attributes)
+  for(const auto& [attribute, accessorIndex] : primitive.attributes) {
     if(attribute == "POSITION")
       loadMeshVertexPositionData(buffer, accessorIndex);
+
+    if(attribute == "NORMAL")
+      loadMeshVertexNormalData(buffer, accessorIndex);
+  }
 
   if(primitive.indices != -1) {
     buffer.element.mode = primitive.mode;
@@ -162,6 +166,25 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
   }
 }
 
+void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
+  GLuint attribIndex = glGetAttribLocation(programID, "normalPosition");
+
+  const tn::Accessor accessor = model.accessors[accessorIndex];
+  const tn::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bufferView.buffer];
+
+  GLuint vertexNormalsBufferID;
+  glCreateBuffers(1, &vertexNormalsBufferID);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexNormalsBufferID);
+
+  const GLsizeiptr size = accessor.count * tn::GetComponentSizeInBytes(accessor.componentType) * tn::GetNumComponentsInType(accessor.type);
+  glBufferStorage(GL_ARRAY_BUFFER, size, std::data(buf.data) + bufferView.byteOffset, GL_MAP_READ_BIT);
+
+  glVertexArrayVertexBuffer(vertexNormalsBufferID, attribIndex, vertexNormalsBufferID, accessor.byteOffset, accessor.ByteStride(bufferView));
+  glVertexArrayAttribFormat(vertexNormalsBufferID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
+}
+
 void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
@@ -170,7 +193,9 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   GLuint elementBufferID;
   glCreateBuffers(1, &elementBufferID);
   glBindBuffer(bv.target, elementBufferID);
-  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+
+  const GLsizeiptr size = accessor.count * tn::GetComponentSizeInBytes(accessor.componentType) * tn::GetNumComponentsInType(accessor.type);
+  glBufferStorage(bv.target, size, std::data(buf.data) + bv.byteOffset + accessor.byteOffset, GL_MAP_READ_BIT);
 
   buffer.element.elementBufferID = elementBufferID;
   buffer.element.componentType = accessor.componentType;
