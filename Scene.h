@@ -19,7 +19,7 @@ struct mesh_buffer_t {
 
   struct element_t {
     GLuint elementBufferID;
-    int mode;  // triangle, triangle Strip etc.
+    int mode;          // triangle, triangle Strip etc.
     int componentType; // float, unsigned short ...
     size_t count;
   } element;
@@ -51,8 +51,10 @@ private:
   void visitNodeCamera(const tn::Camera& camera);
   void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
 
+
   void loadNodeTransformData(const tn::Node& node, node_t& buffer);
   void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);
+  void loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
 
   bool deleteArrayBuffer(GLuint id) const;
