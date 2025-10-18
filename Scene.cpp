@@ -89,7 +89,7 @@ void Scene::visitNodeCamera(const tn::Camera& camera) {
 void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive) {
   for(const auto& [attribute, accessorIndex] : primitive.attributes)
     if(attribute == "POSITION")
-      loadMeshPositionData(buffer, accessorIndex);
+      loadMeshVertexPositionData(buffer, accessorIndex);
 
   if(primitive.indices != -1) {
     buffer.element.mode = primitive.mode;
@@ -118,8 +118,8 @@ void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
   }
 }
 
-void Scene::loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex) {
   GLuint attribIndex = glGetAttribLocation(programID, "vPosition");
+void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex) {
 
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];

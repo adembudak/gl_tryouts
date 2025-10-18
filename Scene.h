@@ -52,7 +52,7 @@ private:
   void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
 
   void loadNodeTransformData(const tn::Node& node, node_t& buffer);
-  void loadMeshPositionData(mesh_buffer_t& buffer, int accessorIndex);
+  void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
 
   bool deleteArrayBuffer(GLuint id) const;
