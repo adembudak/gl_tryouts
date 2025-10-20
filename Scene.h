@@ -61,7 +61,4 @@ private:
   void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
-
-  bool deleteArrayBuffer(GLuint id) const;
-  bool deleteVertexArrayBuffer(GLuint id) const;
 };

@@ -35,7 +35,8 @@ void Scene::load(const std::filesystem::path& modelglTFFile) {
 
 void Scene::unload() {
   for(const node_t& buffer : buffers) {
-    glDeleteVertexArrays(1, &buffer.mesh_buffer.vertexArrayID);
+    if(glIsBuffer(buffer.mesh_buffer.vertexArrayID))
+      glDeleteVertexArrays(1, &buffer.mesh_buffer.vertexArrayID);
 
     if(glIsBuffer(buffer.mesh_buffer.vertexBufferID.positionBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.vertexBufferID.positionBufferID);
@@ -43,7 +44,8 @@ void Scene::unload() {
     if(glIsBuffer(buffer.mesh_buffer.vertexBufferID.normalBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.vertexBufferID.normalBufferID);
 
-    glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
+    if(glIsBuffer(buffer.mesh_buffer.element.elementBufferID))
+      glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
   }
 }
 
@@ -189,7 +191,8 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
   glBufferStorage(GL_ARRAY_BUFFER, size, std::data(buf.data) + bufferView.byteOffset, GL_MAP_READ_BIT);
 
   glVertexArrayVertexBuffer(buffer.vertexBufferID.normalBufferID, attribIndex, buffer.vertexBufferID.normalBufferID, accessor.byteOffset, accessor.ByteStride(bufferView));
-  glVertexArrayAttribFormat(buffer.vertexBufferID.normalBufferID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glVertexArrayAttribFormat(buffer.vertexBufferID.normalBufferID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized,
+                            accessor.byteOffset);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 }
 
@@ -211,18 +214,3 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   buffer.element.count = accessor.count;
 }
 
-bool Scene::deleteArrayBuffer(GLuint id) const {
-  if(!glIsBuffer(id))
-    return false;
-
-  glDeleteBuffers(1, &id);
-  return true;
-}
-
-bool Scene::deleteVertexArrayBuffer(GLuint id) const {
-  if(!glIsVertexArray(id))
-    return false;
-
-  glDeleteVertexArrays(1, &id);
-  return true;
-}
