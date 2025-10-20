@@ -15,11 +15,17 @@ namespace tn = tinygltf;
 
 struct mesh_buffer_t {
   GLuint vertexArrayID;
-  std::vector<GLuint> arrayBufferIDs;
+
+  struct vertexAttributeBuffer_t {
+    GLuint positionBufferID = -1;
+    GLuint normalBufferID = -1;
+  };
+
+  vertexAttributeBuffer_t vertexBufferID;
 
   struct element_t {
     GLuint elementBufferID;
-    int mode;          // triangle, triangle Strip etc.
+    int mode;          // triangle, triangle strip etc.
     int componentType; // float, unsigned short ...
     size_t count;
   } element;
@@ -50,7 +56,6 @@ private:
   void visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer);
   void visitNodeCamera(const tn::Camera& camera);
   void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
-
 
   void loadNodeTransformData(const tn::Node& node, node_t& buffer);
   void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);
