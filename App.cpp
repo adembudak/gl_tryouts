@@ -40,16 +40,13 @@ void App::render(double currentTime) {
 
   camera.update(delta);
 
-  constexpr GLfloat backgroundColor[] = {0.43, 0.109, 0.203, 1.0}; // Claret violet
   constexpr GLfloat clearDepth = 1.0;
-  glClearBufferfv(GL_COLOR, 0, &backgroundColor[0]);
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
 
-  const std::vector<node_t>& node_buffers = my_scene.getBuffers();
-  for(const node_t& node_buffer : node_buffers) {
+  for(const node_t& node_buffer : my_scene.getBuffers()) {
     glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix));
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
     glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
