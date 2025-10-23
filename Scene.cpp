@@ -1,4 +1,3 @@
-#include "Scene.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_GTX_quaternion
@@ -11,6 +10,9 @@
 #include <tiny_gltf.h>
 
 #include <filesystem>
+#include <print>
+
+#include "Scene.h"
 
 void Scene::setProgramID(GLuint programID) {
   this->programID = programID;
@@ -18,7 +20,14 @@ void Scene::setProgramID(GLuint programID) {
 
 void Scene::load(const std::filesystem::path& modelglTFFile) {
   assert(std::filesystem::exists(modelglTFFile));
-  tn::TinyGLTF{}.LoadASCIIFromFile(&model, nullptr, nullptr, modelglTFFile);
+  std::string error, warning;
+  tn::TinyGLTF{}.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
+
+  if(!std::empty(error))
+    std::println("Error [TinyGLTF] {}", error);
+
+  if(!std::empty(warning))
+    std::println("Warning [TinyGLTF] {}", warning);
 
   for(const tn::Scene& scene : model.scenes) {
     for(int nodeIndex : scene.nodes) {
