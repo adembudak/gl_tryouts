@@ -1,4 +1,3 @@
-
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_GTX_quaternion
 
@@ -116,6 +115,10 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
     buffer.element.mode = primitive.mode;
     loadMeshDrawIndices(buffer, primitive.indices);
   }
+
+  if(primitive.material != -1) {
+    loadMeshMaterial(buffer, primitive.material);
+  }
 }
 
 void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
@@ -223,3 +226,23 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   buffer.element.count = accessor.count;
 }
 
+void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
+  const tn::Material& material = model.materials[materialIndex];
+  const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
+
+  // pbr.baseColorFactor;
+  // pbr.metallicFactor;
+  // pbr.roughnessFactor;
+  GLuint id;
+  glCreateBuffers(1, &id);
+  glBindBuffer(GL_UNIFORM_BUFFER, id);
+
+  int b = glGetUniformLocation(programID, "baseColorFactor");
+  int m = glGetUniformLocation(programID, "metallicFactor");
+  int r = glGetUniformLocation(programID, "roughnessFactor");
+
+  std::print("{} {} {}\n", b, m , r);
+
+  // glBufferStorage(GL_UNIFORM_BUFFER, sizeof(m_material), &m_material, GL_MAP_READ_BIT);
+  glBindBufferBase(GL_UNIFORM_BUFFER, 0, id);
+}

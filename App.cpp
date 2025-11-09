@@ -21,7 +21,7 @@ void App::startup() {
                   .getProgramID();
 
   my_scene.setProgramID(programID);
-  my_scene.load("models/Models/SimpleSparseAccessor/glTF/SimpleSparseAccessor.gltf");
+  my_scene.load("models/Models/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");

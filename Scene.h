@@ -19,9 +19,7 @@ struct mesh_buffer_t {
   struct vertexAttributeBuffer_t {
     GLuint positionBufferID = -1;
     GLuint normalBufferID = -1;
-  };
-
-  vertexAttributeBuffer_t vertexBufferID;
+  } vertexBufferID;
 
   struct element_t {
     GLuint elementBufferID;
@@ -61,4 +59,6 @@ private:
   void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
+
+  void loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex);
 };
