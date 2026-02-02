@@ -15,8 +15,18 @@ out vec3 normal;
 out vec3 fragmentPosition;
 
 void main() {
-  fragmentPosition = vec3(model * vec4(vertexPosition, 1.0);
-  normal = mat3(transpose(inverse(model))) * vertexNormal;
+  fragmentPosition = vec3(transform * vec4(vertexPosition, 1.0));
+  const mat3 normalMatrix = mat3(transpose(inverse(transform)));
+  normal = normalMatrix * vertexNormal;
+
   gl_Position = projection * view * transform * vec4(vertexPosition, 1.0);
+  //                                            i_______________________i
+  //                                                  object space
+  //                                i___________________________________i
+  //                                        world space
+  //                         i__________________________________________i
+  //                                      camera space
+  //            i_______________________________________________________i
+  //                             clip space
 }
 
