@@ -23,7 +23,7 @@ namespace Application {
  *     gflwPollEvents();
  *   }
  *
- *  this->shutdown();
+ *   this->shutdown();
  * }
  */
 
