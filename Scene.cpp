@@ -28,17 +28,8 @@ void Scene::load(const std::filesystem::path& modelglTFFile) {
   if(!std::empty(warning))
     std::println("Warning [TinyGLTF] {}", warning);
 
-  for(const tn::Scene& scene : model.scenes) {
-    for(int nodeIndex : scene.nodes) {
-      const tn::Node& node = model.nodes[nodeIndex];
-      if(!node.children.empty()) {
-        for(int nodeIndex : node.children)
-          visitNode(model.nodes[nodeIndex]);
-      } else {
-        visitNode(node);
-      }
-    }
-  }
+  for(const tn::Scene& scene : model.scenes)
+    visitScene(scene);
 }
 
 void Scene::unload() {
@@ -54,6 +45,18 @@ void Scene::unload() {
 
     if(glIsBuffer(buffer.mesh_buffer.element.elementBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
+  }
+}
+
+void Scene::visitScene(const tn::Scene& scene) {
+  for(int nodeIndex : scene.nodes) {
+    const tn::Node& node = model.nodes[nodeIndex];
+    if(!std::empty(node.children)) {
+      for(int nodeIndex : node.children)
+        visitNode(model.nodes[nodeIndex]);
+    } else {
+      visitNode(node);
+    }
   }
 }
 

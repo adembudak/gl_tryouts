@@ -50,6 +50,7 @@ struct Scene {
   }
 
 private:
+  void visitScene(const tn::Scene& scene);
   void visitNode(const tn::Node& node);
   void visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer);
   void visitNodeCamera(const tn::Camera& camera);
