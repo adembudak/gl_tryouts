@@ -51,12 +51,11 @@ void Scene::unload() {
 void Scene::visitScene(const tn::Scene& scene) {
   for(int nodeIndex : scene.nodes) {
     const tn::Node& node = model.nodes[nodeIndex];
-    if(!std::empty(node.children)) {
+    if(!std::empty(node.children))
       for(int nodeIndex : node.children)
         visitNode(model.nodes[nodeIndex]);
-    } else {
+    else
       visitNode(node);
-    }
   }
 }
 
@@ -244,8 +243,5 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   int m = glGetUniformLocation(programID, "metallicFactor");
   int r = glGetUniformLocation(programID, "roughnessFactor");
 
-  std::print("{} {} {}\n", b, m , r);
-
-  // glBufferStorage(GL_UNIFORM_BUFFER, sizeof(m_material), &m_material, GL_MAP_READ_BIT);
-  glBindBufferBase(GL_UNIFORM_BUFFER, 0, id);
+  std::print("{} {} {}\n", b, m, r);
 }
