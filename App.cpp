@@ -21,7 +21,8 @@ void App::startup() {
                   .getProgramID();
 
   my_scene.setProgramID(programID);
-  my_scene.load("models/Models/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf");
+  my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf");
+  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/ABeautifulGame/glTF/ABeautifulGame.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
@@ -43,11 +44,11 @@ void App::render(double currentTime) {
   constexpr GLfloat clearDepth = 1.0;
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.viewMatrix()));
-  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(camera.projectionMatrix()));
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, camera.viewMatrix());
+  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, camera.projectionMatrix());
 
   for(const node_t& node_buffer : my_scene.getBuffers()) {
-    glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix));
+    glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, node_buffer.transformMatrix());
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
     glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
   }

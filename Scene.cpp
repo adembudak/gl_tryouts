@@ -70,6 +70,9 @@ void Scene::visitNode(const tn::Node& node) {
     visitNodeMesh(mesh, buffer.mesh_buffer);
 
     buffers.push_back(buffer);
+
+    for(int nodeIndex : node.children)
+      visitNode(model.nodes[nodeIndex], buffer.transformMatrix_);
   }
 
   else if(int cameraIndex = node.camera; cameraIndex != -1) {
@@ -126,6 +129,7 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
 void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
   if(!std::empty(node.matrix)) {
     buffer.transformMatrix = glm::make_mat4x4(std::data(node.matrix));
+    buffer.transformMatrix_ = glm::mat4x4(glm::make_mat4x4(std::data(node.matrix)));
   } else {
     glm::mat4x4 T = glm::mat4x4(1.0);
     glm::mat4x4 R = glm::mat4x4(1.0);
@@ -141,6 +145,7 @@ void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
       S = glm::scale(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.scale))));
 
     buffer.transformMatrix = T * R * S;
+    buffer.transformMatrix_ = T * R * S;
   }
 }
 
