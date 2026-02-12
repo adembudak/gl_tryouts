@@ -6,13 +6,12 @@
 struct Camera {
   Camera();
 
-  glm::vec3 eye{0.0, 0.0, 5.0};
-
   enum class direction { left, right, front, back } dir;
 
   float delta = 0.0;
 
-  glm::mat4x4 yawPitchRoll;
+  glm::vec3 eye;
+  glm::mat4x4 view;
   glm::mat4x4 projection;
 
   void update(double dT);
