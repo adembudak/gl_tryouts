@@ -24,7 +24,7 @@ target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
 
 add_library(Scene)
 target_sources(Scene PRIVATE Scene.cpp)
-target_link_libraries(Scene PUBLIC OpenGL::GL GLEW::GLEW glm::glm tinygltf::tinygltf)
+target_link_libraries(Scene PUBLIC OpenGL::GL $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew> glm::glm tinygltf::tinygltf)
 
 add_library(ShaderLoader)
 target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
