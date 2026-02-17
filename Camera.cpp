@@ -20,8 +20,11 @@ constexpr float zFar = 1000.0f;
 constexpr glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
 constexpr glm::vec3 center{0.0, 0.0, 0.0};
 
+constexpr glm::vec3 defaultCameraPosition{0.0, 0.0, 5.0};
+
 Camera::Camera() {
-  eye = glm::vec3{0.0, 0.0, 5.0};
+  eye = defaultCameraPosition;
+
   view = glm::lookAt(eye, center, Y_up);
   projection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 }
@@ -34,10 +37,10 @@ void Camera::moveAround(direction dir) {
   float speed = delta * 2.0;
   switch(dir) {
     using enum direction;
-  case left:  eye += speed * glm::normalize(cross({0.0, 0.0, -5.0}, Y_up)); break;
-  case right: eye += speed * glm::normalize(cross(Y_up, {0.0, 0.0, -5.0})); break;
-  case front: eye += (speed * glm::vec3(0.0, 0.0, -5.0)); break;
-  case back:  eye += (-speed * glm::vec3(0.0, 0.0, -5.0)); break;
+  case left:  eye += speed * glm::normalize(cross(-defaultCameraPosition, Y_up)); break;
+  case right: eye += speed * glm::normalize(cross(Y_up, -defaultCameraPosition)); break;
+  case front: eye += (speed * -defaultCameraPosition); break;
+  case back:  eye += (-speed * -defaultCameraPosition); break;
   }
 
 #if !defined(NDEBUG)

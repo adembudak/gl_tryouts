@@ -93,8 +93,8 @@ void App::onKey(int key, int action, int mods) {
 
 void App::onMouseWheel(int pos) {
   switch(pos) {
-  case 1:  camera.eye.z -= 1.0; break;
-  case -1: camera.eye.z += 1.0; break;
+  case 1:  camera.moveAround(Camera::direction::front); break;
+  case -1: camera.moveAround(Camera::direction::back); break;
   default: break;
   }
 }
