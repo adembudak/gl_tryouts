@@ -44,6 +44,9 @@ void App::render(double currentTime) {
   constexpr GLfloat clearDepth = 1.0;
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
 
+  constexpr GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
+  glClearBufferfv(GL_COLOR, 0, black);
+
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, camera.viewMatrix());
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, camera.projectionMatrix());
 
