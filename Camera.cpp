@@ -18,10 +18,11 @@ constexpr float zNear = 0.1f;
 constexpr float zFar = 1000.0f;
 
 constexpr glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
+constexpr glm::vec3 center{0.0, 0.0, 0.0};
 
 Camera::Camera() {
   eye = glm::vec3{0.0, 0.0, 5.0};
-  view = glm::lookAt(eye, glm::vec3(xy(eye), eye.z - 5.0f), Y_up);
+  view = glm::lookAt(eye, center, Y_up);
   projection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 }
 
@@ -42,10 +43,10 @@ void Camera::moveAround(direction dir) {
 #if !defined(NDEBUG)
   std::cout << glm::to_string(eye) << '\n';
 #endif
+  view = glm::lookAt(eye, glm::vec3(xy(eye), eye.z - 5.0f), Y_up);
 }
 
-const float* Camera::viewMatrix() {
-  view = glm::lookAt(eye, glm::vec3(xy(eye), eye.z - 5.0f), Y_up);
+const float* Camera::viewMatrix() const {
   return glm::value_ptr(view);
 }
 

@@ -17,6 +17,6 @@ struct Camera {
   void update(double dT);
   void moveAround(direction dir);
 
-  const float* viewMatrix();
+  const float* viewMatrix() const;
   const float* projectionMatrix() const;
 };
