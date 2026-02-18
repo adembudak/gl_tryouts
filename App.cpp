@@ -47,11 +47,12 @@ void App::render(double currentTime) {
   constexpr GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
   glClearBufferfv(GL_COLOR, 0, black);
 
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, camera.viewMatrix());
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, camera.projectionMatrix());
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, camera.viewMatrix());
 
   for(const node_t& node_buffer : my_scene.getBuffers()) {
     glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, node_buffer.transformMatrix());
+
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
     glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
   }
@@ -80,9 +81,9 @@ void App::onKey(int key, int action, int mods) {
 
   case GLFW_REPEAT:
     switch(key) {
-    case GLFW_KEY_W: camera.moveAround(Camera::direction::front); break;
+    case GLFW_KEY_W: camera.moveAround(Camera::direction::up); break;
     case GLFW_KEY_D: camera.moveAround(Camera::direction::right); break;
-    case GLFW_KEY_S: camera.moveAround(Camera::direction::back); break;
+    case GLFW_KEY_S: camera.moveAround(Camera::direction::down); break;
     case GLFW_KEY_A: camera.moveAround(Camera::direction::left); break;
     }
     break;

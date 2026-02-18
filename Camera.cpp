@@ -37,8 +37,11 @@ void Camera::moveAround(direction dir) {
   float speed = delta * 2.0;
   switch(dir) {
     using enum direction;
-  case left:  eye += speed * glm::normalize(cross(-defaultCameraPosition, Y_up)); break;
+
+  case up:    eye += speed * Y_up; break;
   case right: eye += speed * glm::normalize(cross(Y_up, -defaultCameraPosition)); break;
+  case down:  eye += speed * -Y_up; break;
+  case left:  eye += speed * glm::normalize(cross(-defaultCameraPosition, Y_up)); break;
   case front: eye += (speed * -defaultCameraPosition); break;
   case back:  eye += (-speed * -defaultCameraPosition); break;
   }
@@ -49,10 +52,10 @@ void Camera::moveAround(direction dir) {
   view = glm::lookAt(eye, glm::vec3(xy(eye), eye.z - 5.0f), Y_up);
 }
 
-const float* Camera::viewMatrix() const {
-  return glm::value_ptr(view);
-}
-
 const float* Camera::projectionMatrix() const {
   return glm::value_ptr(projection);
+}
+
+const float* Camera::viewMatrix() const {
+  return glm::value_ptr(view);
 }

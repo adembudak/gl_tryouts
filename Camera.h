@@ -6,17 +6,18 @@
 struct Camera {
   Camera();
 
-  enum class direction { left, right, front, back } dir;
+  enum class direction { up, right, down, left, front, back } dir;
 
   float delta = 0.0;
 
   glm::vec3 eye;
+
   glm::mat4x4 view;
   glm::mat4x4 projection;
 
   void update(double dT);
   void moveAround(direction dir);
 
-  const float* viewMatrix() const;
   const float* projectionMatrix() const;
+  const float* viewMatrix() const;
 };
