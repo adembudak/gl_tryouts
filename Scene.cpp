@@ -51,19 +51,16 @@ void Scene::unload() {
 void Scene::visitScene(const tn::Scene& scene) {
   for(int nodeIndex : scene.nodes) {
     const tn::Node& node = model.nodes[nodeIndex];
-    if(!std::empty(node.children))
-      for(int nodeIndex : node.children)
-        visitNode(model.nodes[nodeIndex]);
-    else
-      visitNode(node);
+    glm::mat4x4 defaultTransform = glm::mat4x4();
+    visitNode(node, defaultTransform);
   }
 }
 
-void Scene::visitNode(const tn::Node& node) {
+void Scene::visitNode(const tn::Node& node, const glm::mat4x4& parentNodeTransform) {
   node_t buffer;
 
   if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale))
-    loadNodeTransformData(node, buffer);
+    loadNodeTransformData(node, buffer, parentNodeTransform);
 
   if(int meshIndex = node.mesh; meshIndex != -1) {
     const tn::Mesh& mesh = model.meshes[meshIndex];
@@ -77,7 +74,7 @@ void Scene::visitNode(const tn::Node& node) {
 
   else if(int cameraIndex = node.camera; cameraIndex != -1) {
     const tn::Camera& camera = model.cameras[cameraIndex];
-    visitNodeCamera(camera);
+    visitNodeCamera(camera, parentNodeTransform);
   }
 
   else {
@@ -93,13 +90,15 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
     visitMeshPrimitive(mesh_buffer, primitive);
 }
 
-void Scene::visitNodeCamera(const tn::Camera& camera) {
+void Scene::visitNodeCamera(const tn::Camera& camera, const glm::mat4x4& parentNodeTransform) {
   if(camera.type == "perspective") {
-    const tn::PerspectiveCamera& perspective = camera.perspective;
+    const tn::PerspectiveCamera& c = camera.perspective;
+    const glm::mat4x4 perspective = glm::perspective(c.yfov, c.aspectRatio, c.znear, c.zfar);
   }
 
   else if(camera.type == "orthographic") {
-    const tn::OrthographicCamera& ortho = camera.orthographic;
+    const tn::OrthographicCamera& c = camera.orthographic;
+    const glm::mat4x4 orthogonal = glm::ortho(-c.xmag, c.xmag, -c.ymag, c.ymag, c.znear, c.zfar);
   }
 
   else {
@@ -126,10 +125,9 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
   }
 }
 
-void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
+void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer, const glm::mat4x4& parentNodeTransform) {
   if(!std::empty(node.matrix)) {
-    buffer.transformMatrix = glm::make_mat4x4(std::data(node.matrix));
-    buffer.transformMatrix_ = glm::mat4x4(glm::make_mat4x4(std::data(node.matrix)));
+    buffer.transformMatrix_ = parentNodeTransform * glm::mat4x4(glm::make_mat4x4(std::data(node.matrix)));
   } else {
     glm::mat4x4 T = glm::mat4x4(1.0);
     glm::mat4x4 R = glm::mat4x4(1.0);
@@ -144,8 +142,7 @@ void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer) {
     if(!std::empty(node.scale))
       S = glm::scale(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.scale))));
 
-    buffer.transformMatrix = T * R * S;
-    buffer.transformMatrix_ = T * R * S;
+    buffer.transformMatrix_ = parentNodeTransform * T * R * S;
   }
 }
 
