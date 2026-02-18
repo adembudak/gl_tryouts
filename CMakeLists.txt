@@ -33,6 +33,7 @@ target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW range-v3::range
 add_library(Camera)
 target_sources(Camera PRIVATE Camera.cpp)
 target_link_libraries(Camera PRIVATE glm::glm)
+target_compile_definitions(Camera PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
 
 add_library(App)
 target_sources(App PRIVATE App.cpp)

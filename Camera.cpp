@@ -1,11 +1,13 @@
 #include "Camera.h"
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+#define GLM_FORCE_XYZW_ONLY
+
+#include <glm/glm.hpp>
+
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/vec_swizzle.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #if !defined(NDEBUG)
   #include <glm/gtx/string_cast.hpp>
@@ -39,9 +41,9 @@ void Camera::moveAround(direction dir) {
     using enum direction;
 
   case up:    eye += speed * Y_up; break;
-  case right: eye += speed * glm::normalize(cross(Y_up, -defaultCameraPosition)); break;
+  case right: eye += speed * glm::normalize(cross(-defaultCameraPosition, Y_up)); break;
   case down:  eye += speed * -Y_up; break;
-  case left:  eye += speed * glm::normalize(cross(-defaultCameraPosition, Y_up)); break;
+  case left:  eye += speed * glm::normalize(cross(Y_up, -defaultCameraPosition)); break;
   case front: eye += (speed * -defaultCameraPosition); break;
   case back:  eye += (-speed * -defaultCameraPosition); break;
   }
