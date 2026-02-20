@@ -22,18 +22,20 @@ add_library(AppBase)
 target_sources(AppBase PRIVATE AppBase.cpp)
 target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
 
+add_library(Camera)
+target_sources(Camera PRIVATE Camera.cpp)
+target_link_libraries(Camera PRIVATE glm::glm tinygltf::tinygltf)
+target_compile_definitions(Camera PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
+
 add_library(Scene)
 target_sources(Scene PRIVATE Scene.cpp)
-target_link_libraries(Scene PUBLIC OpenGL::GL $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew> glm::glm tinygltf::tinygltf)
+target_link_libraries(Scene
+  PUBLIC OpenGL::GL $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew> glm::glm tinygltf::tinygltf
+  PRIVATE Camera)
 
 add_library(ShaderLoader)
 target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
 target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW range-v3::range-v3 mpark_patterns)
-
-add_library(Camera)
-target_sources(Camera PRIVATE Camera.cpp)
-target_link_libraries(Camera PRIVATE glm::glm)
-target_compile_definitions(Camera PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
 
 add_library(App)
 target_sources(App PRIVATE App.cpp)

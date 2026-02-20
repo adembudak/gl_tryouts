@@ -13,6 +13,8 @@
 #include <vector>
 #include <filesystem>
 
+#include "Camera.h"
+
 namespace tn = tinygltf;
 
 struct mesh_buffer_t {
@@ -31,26 +33,10 @@ struct mesh_buffer_t {
   } element;
 };
 
-struct camera_t {
-  enum class camera_type { perspective, orthographic } type;
-
-  camera_t(const tn::PerspectiveCamera& p) {
-    type = camera_type::perspective;
-
-    projection_matrix = glm::perspective(p.yfov, p.aspectRatio, p.znear, p.zfar);
-  }
-
-  camera_t(const tn::OrthographicCamera& o) {
-    type = camera_type::orthographic;
-
-    projection_matrix = glm::ortho(-o.xmag, o.xmag, -o.ymag, o.ymag, o.znear, o.zfar);
-  }
-
-  glm::mat4x4 projection_matrix;
-};
-
 struct node_t {
   mesh_buffer_t mesh_buffer;
+
+  std::optional<Camera> camera;
 
   const float* transformMatrix() const {
     return glm::value_ptr(transformMatrix_);
@@ -78,7 +64,7 @@ private:
   void visitScene(const tn::Scene& scene);
   void visitNode(const tn::Node& node, const glm::mat4x4& parentNodeTransform);
   void visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer);
-  void visitNodeCamera(const tn::Camera& camera, const glm::mat4x4& parentNodeTransform);
+  void visitNodeCamera(const tn::Camera& camera, node_t& buffer, const glm::mat4x4& parentNodeTransform);
   void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
 
   void loadNodeTransformData(const tn::Node& node, node_t& buffer, const glm::mat4x4& parentNodeTransform);

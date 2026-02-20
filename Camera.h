@@ -3,21 +3,29 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
-struct Camera {
-  Camera();
+namespace tinygltf {
+struct PerspectiveCamera;
+struct OrthographicCamera;
+}
 
+namespace tn = tinygltf;
+
+struct Camera {
   enum class direction { up, right, down, left, front, back } dir;
 
-  float delta = 0.0;
+  Camera() = default;
 
-  glm::vec3 eye;
-
-  glm::mat4x4 view;
-  glm::mat4x4 projection;
-
-  void update(double dT);
-  void moveAround(direction dir);
+  Camera(const tn::PerspectiveCamera& p);
+  Camera(const tn::OrthographicCamera& o);
 
   const float* projectionMatrix() const;
-  const float* viewMatrix() const;
+
+  static const float* defaultPerspectiveCamera();
+  static const float* defaultCameraPosition();
+
+
+  glm::mat4x4 projection{};
 };
+
+void update(const Camera& c, double dT);
+const float* moveAround(const Camera& c, Camera::direction dir);

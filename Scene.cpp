@@ -59,26 +59,25 @@ void Scene::visitScene(const tn::Scene& scene) {
 void Scene::visitNode(const tn::Node& node, const glm::mat4x4& parentNodeTransform) {
   node_t buffer;
 
-  if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale))
+  if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale)) {
     loadNodeTransformData(node, buffer, parentNodeTransform);
+  }
 
   if(int meshIndex = node.mesh; meshIndex != -1) {
     const tn::Mesh& mesh = model.meshes[meshIndex];
     visitNodeMesh(mesh, buffer.mesh_buffer);
+  }
 
-    buffers.push_back(buffer);
+  if(int cameraIndex = node.camera; cameraIndex != -1) {
+    const tn::Camera& camera = model.cameras[cameraIndex];
+    visitNodeCamera(camera, buffer, parentNodeTransform);
+  }
 
+  buffers.push_back(std::move(buffer));
+
+  if(!empty(node.children)) {
     for(int nodeIndex : node.children)
       visitNode(model.nodes[nodeIndex], buffer.transformMatrix_);
-  }
-
-  else if(int cameraIndex = node.camera; cameraIndex != -1) {
-    const tn::Camera& camera = model.cameras[cameraIndex];
-    visitNodeCamera(camera, parentNodeTransform);
-  }
-
-  else {
-    return;
   }
 }
 
@@ -90,19 +89,17 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
     visitMeshPrimitive(mesh_buffer, primitive);
 }
 
-void Scene::visitNodeCamera(const tn::Camera& camera, const glm::mat4x4& parentNodeTransform) {
+void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer, const glm::mat4x4& parentNodeTransform) {
   if(camera.type == "perspective") {
-    const tn::PerspectiveCamera& c = camera.perspective;
-    const glm::mat4x4 perspective = glm::perspective(c.yfov, c.aspectRatio, c.znear, c.zfar);
+    buffer.camera = camera.perspective;
   }
 
   else if(camera.type == "orthographic") {
-    const tn::OrthographicCamera& c = camera.orthographic;
-    const glm::mat4x4 orthogonal = glm::ortho(-c.xmag, c.xmag, -c.ymag, c.ymag, c.znear, c.zfar);
+    buffer.camera = camera.orthographic;
   }
 
   else {
-    return;
+    assert(false);
   }
 }
 
@@ -164,6 +161,7 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
 
   glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, buffer.vertexBufferID.positionBufferID, accessor.byteOffset, accessor.ByteStride(bv));
   glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glVertexArrayAttribBinding(buffer.vertexBufferID.positionBufferID, attribIndex, attribIndex);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 
   if(accessor.sparse.isSparse) {
@@ -188,6 +186,8 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
       *(ptr + indices[i]) = values[i];
     glUnmapNamedBuffer(id);
   }
+
+  assert(glGetError() == GL_NO_ERROR);
 }
 
 void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
@@ -210,6 +210,8 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
   glVertexArrayAttribFormat(buffer.vertexBufferID.normalBufferID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized,
                             accessor.byteOffset);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
+
+  assert(glGetError() == GL_NO_ERROR);
 }
 
 void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
@@ -217,17 +219,21 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
   const tn::Buffer& buf = model.buffers[bv.buffer];
 
+  glBindVertexArray(buffer.vertexArrayID);
+
   GLuint id;
   glCreateBuffers(1, &id);
-  glBindBuffer(bv.target, id);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
 
   buffer.element.elementBufferID = id;
 
   const GLsizeiptr size = accessor.count * tn::GetComponentSizeInBytes(accessor.componentType) * tn::GetNumComponentsInType(accessor.type);
-  glBufferStorage(bv.target, size, std::data(buf.data) + bv.byteOffset + accessor.byteOffset, GL_MAP_READ_BIT);
+  glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, size, std::data(buf.data) + bv.byteOffset + accessor.byteOffset, GL_MAP_READ_BIT);
 
   buffer.element.componentType = accessor.componentType;
   buffer.element.count = accessor.count;
+
+  assert(glGetError() == GL_NO_ERROR);
 }
 
 void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {

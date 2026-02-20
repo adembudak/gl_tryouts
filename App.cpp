@@ -22,6 +22,7 @@ void App::startup() {
 
   my_scene.setProgramID(programID);
   my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf");
+  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Cameras/glTF/Cameras.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/ABeautifulGame/glTF/ABeautifulGame.gltf");
 
   viewMatrixLocation = glGetUniformLocation(programID, "view");
@@ -39,7 +40,7 @@ void App::render(double currentTime) {
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
 
-  camera.update(delta);
+  ////////////////  camera.update(delta);
 
   constexpr GLfloat clearDepth = 1.0;
   glClearBufferfv(GL_DEPTH, 0, &clearDepth);
@@ -47,8 +48,8 @@ void App::render(double currentTime) {
   constexpr GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
   glClearBufferfv(GL_COLOR, 0, black);
 
-  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, camera.projectionMatrix());
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, camera.viewMatrix());
+  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, Camera::defaultPerspectiveCamera());
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, Camera::defaultCameraPosition());
 
   for(const node_t& node_buffer : my_scene.getBuffers()) {
     glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, node_buffer.transformMatrix());
@@ -80,12 +81,14 @@ void App::onKey(int key, int action, int mods) {
   case GLFW_RELEASE: break;
 
   case GLFW_REPEAT:
-    switch(key) {
-    case GLFW_KEY_W: camera.moveAround(Camera::direction::up); break;
-    case GLFW_KEY_D: camera.moveAround(Camera::direction::right); break;
-    case GLFW_KEY_S: camera.moveAround(Camera::direction::down); break;
-    case GLFW_KEY_A: camera.moveAround(Camera::direction::left); break;
-    }
+    /*
+switch(key) {
+case GLFW_KEY_W: camera.moveAround(Camera::direction::up); break;
+case GLFW_KEY_D: camera.moveAround(Camera::direction::right); break;
+case GLFW_KEY_S: camera.moveAround(Camera::direction::down); break;
+case GLFW_KEY_A: camera.moveAround(Camera::direction::left); break;
+}
+*/
     break;
 
   default: break;
@@ -93,9 +96,11 @@ void App::onKey(int key, int action, int mods) {
 }
 
 void App::onMouseWheel(int pos) {
-  switch(pos) {
-  case 1:  camera.moveAround(Camera::direction::front); break;
-  case -1: camera.moveAround(Camera::direction::back); break;
-  default: break;
-  }
+  /*
+switch(pos) {
+case 1:  camera.moveAround(Camera::direction::front); break;
+case -1: camera.moveAround(Camera::direction::back); break;
+default: break;
+}
+*/
 }
