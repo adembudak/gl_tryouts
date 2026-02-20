@@ -31,6 +31,23 @@ struct mesh_buffer_t {
   } element;
 };
 
+struct camera_t {
+  enum class camera_type { perspective, orthographic } type;
+
+  camera_t(const tn::PerspectiveCamera& p) {
+    type = camera_type::perspective;
+
+    projection_matrix = glm::perspective(p.yfov, p.aspectRatio, p.znear, p.zfar);
+  }
+
+  camera_t(const tn::OrthographicCamera& o) {
+    type = camera_type::orthographic;
+
+    projection_matrix = glm::ortho(-o.xmag, o.xmag, -o.ymag, o.ymag, o.znear, o.zfar);
+  }
+
+  glm::mat4x4 projection_matrix;
+};
 
 struct node_t {
   mesh_buffer_t mesh_buffer;
