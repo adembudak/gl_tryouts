@@ -11,3 +11,7 @@ build buildDir = buildDir:
 run buildDir = buildDir:
   cmake --build {{buildDir}} --config Debug
   ./{{buildDir}}/Debug/vibe
+
+debug buildDir = buildDir:
+  cmake --build {{buildDir}} --config Debug
+  gdb ./{{buildDir}}/Debug/vibe
