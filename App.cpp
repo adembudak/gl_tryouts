@@ -81,14 +81,12 @@ void App::onKey(int key, int action, int mods) {
   case GLFW_RELEASE: break;
 
   case GLFW_REPEAT:
-    /*
-switch(key) {
-case GLFW_KEY_W: camera.moveAround(Camera::direction::up); break;
-case GLFW_KEY_D: camera.moveAround(Camera::direction::right); break;
-case GLFW_KEY_S: camera.moveAround(Camera::direction::down); break;
-case GLFW_KEY_A: camera.moveAround(Camera::direction::left); break;
-}
-*/
+    switch(key) {
+    case GLFW_KEY_W: break;
+    case GLFW_KEY_D: break;
+    case GLFW_KEY_S: break;
+    case GLFW_KEY_A: break;
+    }
     break;
 
   default: break;
@@ -96,11 +94,9 @@ case GLFW_KEY_A: camera.moveAround(Camera::direction::left); break;
 }
 
 void App::onMouseWheel(int pos) {
-  /*
-switch(pos) {
-case 1:  camera.moveAround(Camera::direction::front); break;
-case -1: camera.moveAround(Camera::direction::back); break;
-default: break;
-}
-*/
+  switch(pos) {
+  case 1:  break;
+  case -1: break;
+  default: break;
+  }
 }
