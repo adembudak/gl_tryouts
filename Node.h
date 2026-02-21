@@ -1,0 +1,40 @@
+#pragma once
+#include "Camera.h"
+
+#include <GL/glew.h>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtc/type_ptr.hpp>
+
+#include <optional>
+
+struct mesh_buffer_t {
+  GLuint vertexArrayID = -1;
+
+  struct vertexAttributeBuffer_t {
+    GLuint positionBufferID = -1;
+    GLuint normalBufferID = -1;
+  } vertexBufferID;
+
+  size_t count;
+
+  struct element_t {
+    GLuint elementBufferID = -1;
+    int mode;          // triangle, triangle strip etc.
+    int componentType; // float, unsigned short ...
+    size_t count;
+  } element;
+};
+
+struct node_t {
+  mesh_buffer_t mesh_buffer;
+
+  std::optional<Camera> camera;
+
+  const float* transformMatrix() const {
+    return glm::value_ptr(transformMatrix_);
+  }
+
+  glm::mat4x4 transformMatrix_ = glm::mat4x4(1.0f);
+};
+
