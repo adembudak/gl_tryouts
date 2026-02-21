@@ -25,8 +25,10 @@ struct mesh_buffer_t {
     GLuint normalBufferID = -1;
   } vertexBufferID;
 
+  size_t count;
+
   struct element_t {
-    GLuint elementBufferID;
+    GLuint elementBufferID = -1;
     int mode;          // triangle, triangle strip etc.
     int componentType; // float, unsigned short ...
     size_t count;

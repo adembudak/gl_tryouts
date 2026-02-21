@@ -55,7 +55,11 @@ void App::render(double currentTime) {
     glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, node_buffer.transformMatrix());
 
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
-    glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
+
+    if(node_buffer.mesh_buffer.element.elementBufferID != -1)
+      glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
+    else
+      glDrawArrays(GL_TRIANGLES, 0, node_buffer.mesh_buffer.count);
   }
 }
 
