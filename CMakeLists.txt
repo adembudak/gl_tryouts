@@ -18,32 +18,34 @@ find_package(TinyGLTF QUIET REQUIRED CONFIG)
 find_package(range-v3 QUIET REQUIRED CONFIG)
 find_package(mpark_patterns QUIET REQUIRED CONFIG)
 
-add_library(AppBase)
-target_sources(AppBase PRIVATE AppBase.cpp)
-target_link_libraries(AppBase PUBLIC glfw OpenGL::GL GLEW::GLEW)
-
-add_library(Camera)
-target_sources(Camera PRIVATE Camera.cpp)
-target_link_libraries(Camera PRIVATE glm::glm tinygltf::tinygltf)
-target_compile_definitions(Camera PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
-
-add_library(Scene)
-target_sources(Scene PRIVATE Scene.cpp)
-target_link_libraries(Scene
-  PUBLIC OpenGL::GL $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew> glm::glm tinygltf::tinygltf
-  PRIVATE Camera)
-
-add_library(ShaderLoader)
-target_sources(ShaderLoader PRIVATE ShaderLoader.cpp)
-target_link_libraries(ShaderLoader PRIVATE OpenGL::GL GLEW::GLEW range-v3::range-v3 mpark_patterns)
-
-add_library(App)
-target_sources(App PRIVATE App.cpp)
-target_link_libraries(App PUBLIC AppBase Scene ShaderLoader Camera)
-
 add_executable(vibe)
-target_sources(vibe PRIVATE main.cpp)
-target_link_libraries(vibe PRIVATE App)
+target_sources(vibe
+  PRIVATE
+    main.cpp
+    Camera.cpp
+    Scene.cpp
+    ShaderLoader.cpp
+    AppBase.cpp
+    App.cpp
+  PRIVATE FILE_SET HEADERS FILES
+    Camera.h
+    Scene.h
+    Node.h
+    ShaderLoader.h
+    AppBase.h
+    App.h)
+
+target_link_libraries(vibe
+  PRIVATE
+   $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew>
+   OpenGL::GL
+   glfw
+   glm::glm
+   tinygltf::tinygltf
+   range-v3::range-v3
+   mpark_patterns)
+
+target_compile_definitions(vibe PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
 
 cmake_path(SET shaders_path "${PROJECT_SOURCE_DIR}/shaders")
 
