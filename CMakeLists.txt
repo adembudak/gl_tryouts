@@ -2,21 +2,16 @@ cmake_minimum_required(VERSION 3.30)
 
 project(GL_tryouts CXX)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED 1)
-set(CMAKE_CXX_EXTENSIONS 0)
-set(CMAKE_CXX_SCAN_FOR_MODULES 0)
-
 option(VERIFY_SHADERS "Run Glslang on shader files" 0)
 option(VISUALIZE_TARGETS "Run Graphviz on targets to see linkage graph" 0)
 
-find_package(glew NAMES glew GLEW QUIET CONFIG REQUIRED)
+find_package(glew QUIET REQUIRED CONFIG NAMES glew GLEW)
 find_package(glfw3 QUIET REQUIRED CONFIG)
-find_package(OpenGL QUIET REQUIRED)
 find_package(glm QUIET REQUIRED CONFIG)
-find_package(TinyGLTF QUIET REQUIRED CONFIG)
-find_package(range-v3 QUIET REQUIRED CONFIG)
 find_package(mpark_patterns QUIET REQUIRED CONFIG)
+find_package(OpenGL QUIET REQUIRED)
+find_package(range-v3 QUIET REQUIRED CONFIG)
+find_package(TinyGLTF QUIET REQUIRED CONFIG)
 
 add_executable(vibe)
 target_sources(vibe
@@ -38,14 +33,18 @@ target_sources(vibe
 target_link_libraries(vibe
   PRIVATE
    $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew>
-   OpenGL::GL
    glfw
    glm::glm
-   tinygltf::tinygltf
+   mpark_patterns
+   OpenGL::GL
    range-v3::range-v3
-   mpark_patterns)
+   tinygltf::tinygltf)
+target_compile_features(vibe PRIVATE cxx_std_23)
 
 target_compile_definitions(vibe PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
+
+install(TARGETS vibe)
+install(DIRECTORY shaders TYPE BIN)
 
 cmake_path(SET shaders_path "${PROJECT_SOURCE_DIR}/shaders")
 
