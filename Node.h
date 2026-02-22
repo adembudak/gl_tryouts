@@ -13,7 +13,7 @@ struct mesh_buffer_t {
   struct vertexAttributeBuffer_t {
     GLuint positionBufferID = -1;
     GLuint normalBufferID = -1;
-  } vertexBufferID;
+  } vertexAttribute;
 
   size_t count;
 
