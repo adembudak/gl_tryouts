@@ -4,7 +4,6 @@
 
 #include <glm/glm.hpp>
 
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/vec_swizzle.hpp>
 #include <glm/gtc/type_ptr.hpp>

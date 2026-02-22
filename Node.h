@@ -3,7 +3,6 @@
 
 #include <GL/glew.h>
 
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/type_ptr.hpp>
 
 #include <optional>

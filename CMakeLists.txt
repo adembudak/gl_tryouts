@@ -41,7 +41,7 @@ target_link_libraries(vibe
    tinygltf::tinygltf)
 target_compile_features(vibe PRIVATE cxx_std_23)
 
-target_compile_definitions(vibe PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20)
+target_compile_definitions(vibe PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20 GLM_ENABLE_EXPERIMENTAL)
 
 install(TARGETS vibe)
 install(DIRECTORY shaders TYPE BIN)

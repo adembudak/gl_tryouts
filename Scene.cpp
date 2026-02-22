@@ -1,4 +1,3 @@
-#define GLM_ENABLE_EXPERIMENTAL
 #define GLM_GTX_quaternion
 
 #include <glm/ext/matrix_transform.hpp>
