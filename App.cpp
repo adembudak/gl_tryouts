@@ -1,5 +1,6 @@
 #include "App.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -48,11 +49,11 @@ void App::render(double currentTime) {
   constexpr GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
   glClearBufferfv(GL_COLOR, 0, black);
 
-  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, Camera::defaultPerspectiveCamera());
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, Camera::defaultCameraPosition());
+  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultPerspectiveCamera()));
+  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultCameraPosition()));
 
   for(const node_t& node_buffer : my_scene.getBuffers()) {
-    glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, node_buffer.transformMatrix());
+    glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
 
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
 

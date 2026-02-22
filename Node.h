@@ -30,10 +30,9 @@ struct node_t {
 
   std::optional<Camera> camera;
 
-  const float* transformMatrix() const {
-    return glm::value_ptr(transformMatrix_);
+  glm::mat4x4 transformMatrix() const {
+    return transformMatrix_;
   }
 
   glm::mat4x4 transformMatrix_ = glm::mat4x4(1.0f);
 };
-

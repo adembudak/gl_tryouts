@@ -18,14 +18,13 @@ struct Camera {
   Camera(const tn::PerspectiveCamera& p);
   Camera(const tn::OrthographicCamera& o);
 
-  const float* projectionMatrix() const;
+  glm::mat4x4 projectionMatrix() const;
 
-  static const float* defaultPerspectiveCamera();
-  static const float* defaultCameraPosition();
-
+  static glm::mat4x4 defaultPerspectiveCamera();
+  static glm::mat4x4 defaultCameraPosition();
 
   glm::mat4x4 projection{};
 };
 
 void update(const Camera& c, double dT);
-const float* moveAround(const Camera& c, Camera::direction dir);
+glm::mat4x4 moveAround(const Camera& c, Camera::direction dir);
