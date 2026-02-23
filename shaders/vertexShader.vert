@@ -12,13 +12,9 @@ layout (location = 4) uniform mat4x4 view;
 layout (location = 5) uniform mat4x4 projection;
 
 out vec3 normal;
-out vec3 fragmentPosition;
 
 void main() {
-  fragmentPosition = vec3(transform * vec4(vertexPosition, 1.0));
-  const mat3 normalMatrix = mat3(transpose(inverse(transform)));
-  normal = normalMatrix * vertexNormal;
-
+  normal = vertexNormal;
   gl_Position = projection * view * transform * vec4(vertexPosition, 1.0);
   //                                            i_______________________i
   //                                                  object space
