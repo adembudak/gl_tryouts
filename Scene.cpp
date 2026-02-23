@@ -50,7 +50,7 @@ void Scene::unload() {
 void Scene::visitScene(const tn::Scene& scene) {
   for(int nodeIndex : scene.nodes) {
     const tn::Node& node = model.nodes[nodeIndex];
-    glm::mat4x4 defaultTransform = glm::mat4x4();
+    glm::mat4x4 defaultTransform = glm::mat4x4(1.0);
     visitNode(node, defaultTransform);
   }
 }
