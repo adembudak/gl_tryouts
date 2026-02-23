@@ -156,14 +156,7 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
   buffer.vertexAttribute.positionBufferID = id;
 
   buffer.count = accessor.count;
-
-  {
-    const GLsizeiptr size = accessor.count * tn::GetComponentSizeInBytes(accessor.componentType) * tn::GetNumComponentsInType(accessor.type);
-    assert(size == bv.byteLength);
-  }
-
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
-
   glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, buffer.vertexAttribute.positionBufferID, accessor.byteOffset, accessor.ByteStride(bv));
   glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
   glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
@@ -199,8 +192,8 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
   GLuint attribIndex = glGetAttribLocation(programID, "vertexNormal");
 
   const tn::Accessor accessor = model.accessors[accessorIndex];
-  const tn::BufferView& bufferView = model.bufferViews[accessor.bufferView];
-  const tn::Buffer& buf = model.buffers[bufferView.buffer];
+  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bv.buffer];
 
   GLuint id;
   glCreateBuffers(1, &id);
@@ -208,11 +201,10 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
 
   buffer.vertexAttribute.normalBufferID = id;
 
-  glBufferStorage(GL_ARRAY_BUFFER, bufferView.byteLength, std::data(buf.data) + bufferView.byteOffset, GL_MAP_READ_BIT);
-
-  glVertexArrayVertexBuffer(buffer.vertexAttribute.normalBufferID, attribIndex, buffer.vertexAttribute.normalBufferID, accessor.byteOffset, accessor.ByteStride(bufferView));
-  glVertexArrayAttribFormat(buffer.vertexAttribute.normalBufferID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized,
-                            accessor.byteOffset);
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, buffer.vertexAttribute.normalBufferID, accessor.byteOffset, accessor.ByteStride(bv));
+  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 
   assert(glGetError() == GL_NO_ERROR);
