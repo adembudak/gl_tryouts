@@ -19,8 +19,8 @@ struct mesh_buffer_t {
 
   struct element_t {
     GLuint elementBufferID = -1;
-    int mode;          // triangle, triangle strip etc.
-    int componentType; // float, unsigned short ...
+    int mode = GL_TRIANGLES; // default
+    int componentType;       // float, unsigned short ...
     size_t count;
   } element;
 };

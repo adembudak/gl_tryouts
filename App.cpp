@@ -60,7 +60,7 @@ void App::render(double currentTime) {
     if(node_buffer.mesh_buffer.element.elementBufferID != -1)
       glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
     else
-      glDrawArrays(GL_TRIANGLES, 0, node_buffer.mesh_buffer.count);
+      glDrawArrays(node_buffer.mesh_buffer.element.mode, 0, node_buffer.mesh_buffer.count);
   }
 }
 
