@@ -197,7 +197,7 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
 
   GLuint id;
   glCreateBuffers(1, &id);
-  glBindBuffer(GL_ARRAY_BUFFER, id);
+  glBindBuffer(bv.target, id);
 
   buffer.vertexAttribute.normalBufferID = id;
 
@@ -219,7 +219,7 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
 
   GLuint id;
   glCreateBuffers(1, &id);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+  glBindBuffer(bv.target, id);
 
   buffer.element.elementBufferID = id;
 
