@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    "glew",
+    {
+      "name": "glfw3",
+      "features": [
+        "wayland"
+      ]
+    },
+    "glm",
+    "mpark-patterns",
+    "opengl",
+    "range-v3",
+    "tinygltf"
+  ]
+}
