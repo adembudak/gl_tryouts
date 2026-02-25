@@ -2,16 +2,16 @@ buildDir := 'build'
 
 alias c := configure
 configure buildDir = buildDir:
-  cmake -G 'Ninja Multi-Config' -S . -B {{buildDir}}
+  cmake -DVCPKG_MANIFEST_MODE=ON -S . -B {{buildDir}} --toolchain $VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
 
 alias b := build
 build buildDir = buildDir:
-  cmake --build {{buildDir}} --config Debug --clean-first
+  cmake --build {{buildDir}} --clean-first
 
 run buildDir = buildDir:
-  cmake --build {{buildDir}} --config Debug
-  ./{{buildDir}}/Debug/vibe
+  cmake --build {{buildDir}}
+  ./{{buildDir}}/vibe
 
 debug buildDir = buildDir:
-  cmake --build {{buildDir}} --config Debug
-  gdb ./{{buildDir}}/Debug/vibe
+  cmake --build {{buildDir}}
+  gdb ./{{buildDir}}/vibe
