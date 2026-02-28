@@ -233,18 +233,22 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
 
 void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   const tn::Material& material = model.materials[materialIndex];
+
+  const tn::NormalTextureInfo& normalTexture = material.normalTexture;
+  if(normalTexture.index != -1) {
+  }
+
+  const tn::OcclusionTextureInfo& occlusionTexture = material.occlusionTexture;
+  if(occlusionTexture.index != -1) {
+  }
+
+  const tn::TextureInfo& emissiveTexture = material.emissiveTexture;
+  if(emissiveTexture.index != -1) {
+  }
+
   const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
-  // pbr.baseColorFactor;
-  // pbr.metallicFactor;
-  // pbr.roughnessFactor;
-  GLuint id;
-  glCreateBuffers(1, &id);
-  glBindBuffer(GL_UNIFORM_BUFFER, id);
-
-  int b = glGetUniformLocation(programID, "baseColorFactor");
-  int m = glGetUniformLocation(programID, "metallicFactor");
-  int r = glGetUniformLocation(programID, "roughnessFactor");
-
-  std::print("{} {} {}\n", b, m, r);
+  glUniform1d(glGetUniformLocation(programID, "roughness"), pbr.roughnessFactor);
+  glUniform4dv(glGetUniformLocation(programID, "baseColor"), 1, std::data(pbr.baseColorFactor));
+  glUniform1d(glGetUniformLocation(programID, "metallic"), pbr.metallicFactor);
 }

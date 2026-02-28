@@ -4,9 +4,9 @@
 #pragma optimize(off)
 #pragma debug(on)
 
-layout (location = 6) uniform vec4 baseColorFactor;
-layout (location = 7) uniform double metallicFactor;
-layout (location = 8) uniform double roughnessFactor;
+layout (location = 6) uniform dvec4 baseColor;
+layout (location = 7) uniform double metallic;
+layout (location = 8) uniform double roughness;
 
 in vec3 normal;
 out vec4 fragmentColor;
