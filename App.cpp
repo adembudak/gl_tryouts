@@ -23,6 +23,7 @@ void App::startup() {
 
   my_scene.setProgramID(programID);
   my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf");
+  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Triangle/glTF/Triangle.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Cameras/glTF/Cameras.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/ABeautifulGame/glTF/ABeautifulGame.gltf");
 
@@ -56,6 +57,10 @@ void App::render(double currentTime) {
     glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
 
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
+
+    glUniform1d(glGetUniformLocation(programID, "roughness"), node_buffer.mesh_buffer.material.roughnessFactor);
+    glUniform4dv(glGetUniformLocation(programID, "baseColor"), 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
+    glUniform1d(glGetUniformLocation(programID, "metallic"), node_buffer.mesh_buffer.material.metallicFactor);
 
     if(node_buffer.mesh_buffer.element.elementBufferID != -1)
       glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
