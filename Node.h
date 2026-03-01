@@ -23,6 +23,18 @@ struct mesh_buffer_t {
     int componentType;       // float, unsigned short ...
     size_t count;
   } element;
+
+  struct material_properties_t {
+    enum class alphaMode_t { opaque, mask, blend };
+
+    alphaMode_t alphaMode = alphaMode_t::opaque; // default
+    double alphaCutoff = 0.5;                    // default
+    bool doubleSided = false;                    // default
+
+    std::array<double, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
+    double roughnessFactor = 1.0;                                 // default
+    double metallicFactor = 1.0;                                  // default
+  } material;
 };
 
 struct node_t {

@@ -5,6 +5,8 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <range/v3/algorithm/copy.hpp>
+
 #include <tiny_gltf.h>
 
 #include <filesystem>
@@ -248,7 +250,7 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
 
   const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
-  glUniform1d(glGetUniformLocation(programID, "roughness"), pbr.roughnessFactor);
-  glUniform4dv(glGetUniformLocation(programID, "baseColor"), 1, std::data(pbr.baseColorFactor));
-  glUniform1d(glGetUniformLocation(programID, "metallic"), pbr.metallicFactor);
+  buffer.material.roughnessFactor = pbr.roughnessFactor;
+  ranges::copy(pbr.baseColorFactor, std::begin(buffer.material.baseColorFactor));
+  buffer.material.metallicFactor = pbr.metallicFactor;
 }
