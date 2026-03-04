@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Camera.h"
 
 #include <GL/glew.h>
@@ -34,6 +35,13 @@ struct mesh_buffer_t {
     std::array<double, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
     double roughnessFactor = 1.0;                                 // default
     double metallicFactor = 1.0;                                  // default
+
+    GLuint normalTextureID = -1;
+    GLuint occlusionTextureID = -1;
+    GLuint emissionTextureID = -1;
+    GLuint baseColorTextureID = -1;
+    GLuint metallicRoughnessTextureID = -1;
+
   } material;
 };
 
