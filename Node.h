@@ -3,10 +3,10 @@
 #include "Camera.h"
 
 #include <GL/glew.h>
-
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
 
 #include <optional>
+#include <array>
 
 struct mesh_buffer_t {
   GLuint vertexArrayID = -1;
@@ -14,6 +14,7 @@ struct mesh_buffer_t {
   struct vertexAttributeBuffer_t {
     GLuint positionBufferID = -1;
     GLuint normalBufferID = -1;
+    GLuint textureCoordID = -1;
   } vertexAttribute;
 
   size_t count;

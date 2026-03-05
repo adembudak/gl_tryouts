@@ -1,5 +1,7 @@
 #define GLM_GTX_quaternion
 
+#include "Scene.h"
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
@@ -11,8 +13,6 @@
 
 #include <filesystem>
 #include <print>
-
-#include "Scene.h"
 
 void Scene::setProgramID(GLuint programID) {
   this->programID = programID;
@@ -44,8 +44,26 @@ void Scene::unload() {
     if(glIsBuffer(buffer.mesh_buffer.vertexAttribute.normalBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.vertexAttribute.normalBufferID);
 
+    if(glIsBuffer(buffer.mesh_buffer.vertexAttribute.textureCoordID))
+      glDeleteBuffers(1, &buffer.mesh_buffer.vertexAttribute.textureCoordID);
+
     if(glIsBuffer(buffer.mesh_buffer.element.elementBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
+
+    if(glIsTexture(buffer.mesh_buffer.material.normalTextureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.normalTextureID);
+
+    if(glIsTexture(buffer.mesh_buffer.material.occlusionTextureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.occlusionTextureID);
+
+    if(glIsTexture(buffer.mesh_buffer.material.emissionTextureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.emissionTextureID);
+
+    if(glIsTexture(buffer.mesh_buffer.material.baseColorTextureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.baseColorTextureID);
+
+    if(glIsTexture(buffer.mesh_buffer.material.metallicRoughnessTextureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.metallicRoughnessTextureID);
   }
 }
 
@@ -111,6 +129,10 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
 
     if(attribute == "NORMAL")
       loadMeshVertexNormalData(buffer, accessorIndex);
+
+    if(attribute.starts_with("TEXCOORD")) {
+      loadMeshTextureCoordinateData(buffer, accessorIndex);
+    }
   }
 
   if(primitive.indices != -1) {
@@ -212,6 +234,30 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
   assert(glGetError() == GL_NO_ERROR);
 }
 
+void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex) {
+  GLuint attribIndex = glGetAttribLocation(programID, "textureCoordinate_0");
+
+  const tn::Accessor accessor = model.accessors[accessorIndex];
+  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bv.buffer];
+
+  glBindVertexArray(buffer.vertexArrayID);
+
+  GLuint id;
+  glCreateBuffers(1, &id);
+  glBindBuffer(bv.target, id);
+
+  buffer.vertexAttribute.textureCoordID = id;
+
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, id, accessor.byteOffset, accessor.ByteStride(bv));
+  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
+  glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
+
+  assert(glGetError() == GL_NO_ERROR);
+}
+
 void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   const tn::Accessor& accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
@@ -253,4 +299,58 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   buffer.material.roughnessFactor = pbr.roughnessFactor;
   ranges::copy(pbr.baseColorFactor, std::begin(buffer.material.baseColorFactor));
   buffer.material.metallicFactor = pbr.metallicFactor;
+
+  const tn::TextureInfo& baseColorTexture = pbr.baseColorTexture;
+  if(baseColorTexture.index != -1) {
+    loadTexture(buffer, baseColorTexture.index);
+  }
+
+  const tn::TextureInfo& metallicRoughnessTexture = pbr.metallicRoughnessTexture;
+  if(metallicRoughnessTexture.index != -1) {
+  }
 }
+
+void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex) {
+  const tn::Texture& texture = model.textures[textureIndex];
+  const tn::Sampler& sampler = model.samplers[texture.sampler];
+  const tn::Image& im = model.images[texture.source];
+
+  GLuint id;
+  glCreateTextures(GL_TEXTURE_2D, 1, &id);
+  glBindTexture(GL_TEXTURE_2D, id);
+  assert(glIsTexture(id));
+
+  glActiveTexture(GL_TEXTURE0);
+
+  buffer.material.baseColorTextureID = id;
+
+  glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
+  glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
+  glTextureParameteri(id, GL_TEXTURE_WRAP_S, sampler.wrapS);
+  glTextureParameteri(id, GL_TEXTURE_WRAP_T, sampler.wrapT);
+
+  const unsigned char* pixels_data = nullptr;
+  if(im.bufferView != -1) {
+    const tn::BufferView& bv = model.bufferViews[im.bufferView];
+    const tn::Buffer& buf = model.buffers[bv.buffer];
+    pixels_data = std::data(buf.data) + bv.byteOffset;
+  } else {
+    pixels_data = std::data(im.image);
+  }
+
+  GLenum format = 0;
+  switch(im.component) {
+  case 1:  format = GL_RED; break;
+  case 2:  format = GL_RG; break;
+  case 3:  format = GL_RGB; break;
+  case 4:  format = GL_RGBA; break;
+  default: assert(false); break;
+  }
+
+  std::print("im.component: {}\nim.bits: {}\nim.width: {}\nim.height: {}\nim.mimeType: {}\n", im.component, im.bits, im.width, im.height, im.mimeType);
+
+  glTextureStorage2D(buffer.material.baseColorTextureID, 1, GL_SRGB8_ALPHA8, im.width, im.height);
+  glTextureSubImage2D(buffer.material.baseColorTextureID, 0, 0, 0, im.width, im.height, format, im.pixel_type, pixels_data);
+
+  assert(glGetError() == GL_NO_ERROR);
+};

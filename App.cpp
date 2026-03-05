@@ -22,7 +22,7 @@ void App::startup() {
                   .getProgramID();
 
   my_scene.setProgramID(programID);
-  my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf");
+  my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleTexture/glTF/SimpleTexture.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Triangle/glTF/Triangle.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Cameras/glTF/Cameras.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/ABeautifulGame/glTF/ABeautifulGame.gltf");
@@ -58,8 +58,21 @@ void App::render(double currentTime) {
 
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
 
-    glUniform1d(glGetUniformLocation(programID, "roughness"), node_buffer.mesh_buffer.material.roughnessFactor);
+    if(node_buffer.mesh_buffer.material.doubleSided) {
+      glDisable(GL_CULL_FACE);
+    } else {
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_BACK);
+    }
+
+    if(node_buffer.mesh_buffer.material.baseColorTextureID != -1) {
+      glActiveTexture(GL_TEXTURE0);
+      glUniform1i(glGetUniformLocation(programID, "baseColorTextureSampler"), 0);
+      glBindTexture(GL_TEXTURE_2D, node_buffer.mesh_buffer.material.baseColorTextureID);
+    }
     glUniform4dv(glGetUniformLocation(programID, "baseColor"), 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
+
+    glUniform1d(glGetUniformLocation(programID, "roughness"), node_buffer.mesh_buffer.material.roughnessFactor);
     glUniform1d(glGetUniformLocation(programID, "metallic"), node_buffer.mesh_buffer.material.metallicFactor);
 
     if(node_buffer.mesh_buffer.element.elementBufferID != -1)

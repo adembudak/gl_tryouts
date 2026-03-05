@@ -39,7 +39,10 @@ private:
   void loadNodeTransformData(const tn::Node& node, node_t& buffer, const glm::mat4x4& parentNodeTransform);
   void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex);
+  void loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
 
   void loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex);
+
+  void loadTexture(mesh_buffer_t& buffer, int textureIndex);
 };
