@@ -3,7 +3,6 @@
 #include "AppBase.h"
 #include "Scene.h"
 #include "ShaderLoader.h"
-#include "Camera.h"
 
 struct App : public Application::AppBase {
   virtual void setConfigDefaults() override;
@@ -24,7 +23,6 @@ private:
   util::ShaderLoader shaderLoader;
 
   Scene my_scene;
-  Camera camera;
 
   double lastTime = 0;
 };
