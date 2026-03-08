@@ -24,7 +24,6 @@ private:
   util::ShaderLoader shaderLoader;
 
   Scene my_scene;
-  Camera camera;
 
   double lastTime = 0;
 };
