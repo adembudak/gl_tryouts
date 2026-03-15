@@ -8,6 +8,7 @@ uniform dvec4 baseColor;
 uniform double metallic;
 uniform double roughness;
 
+layout(binding = 0)
 uniform sampler2D baseColorTextureSampler;
 
 in vec3 normal;

@@ -320,8 +320,6 @@ void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex) {
   glBindTexture(GL_TEXTURE_2D, id);
   assert(glIsTexture(id));
 
-  glActiveTexture(GL_TEXTURE0);
-
   buffer.material.baseColorTextureID = id;
 
   glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, sampler.minFilter);

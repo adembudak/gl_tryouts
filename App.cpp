@@ -65,11 +65,9 @@ void App::render(double currentTime) {
       glCullFace(GL_BACK);
     }
 
-    if(node_buffer.mesh_buffer.material.baseColorTextureID != -1) {
-      glActiveTexture(GL_TEXTURE0);
-      glUniform1i(glGetUniformLocation(programID, "baseColorTextureSampler"), 0);
-      glBindTexture(GL_TEXTURE_2D, node_buffer.mesh_buffer.material.baseColorTextureID);
-    }
+    if(node_buffer.mesh_buffer.material.baseColorTextureID != -1)
+      glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
+
     glUniform4dv(glGetUniformLocation(programID, "baseColor"), 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
 
     glUniform1d(glGetUniformLocation(programID, "roughness"), node_buffer.mesh_buffer.material.roughnessFactor);
