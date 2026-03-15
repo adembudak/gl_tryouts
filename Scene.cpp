@@ -302,7 +302,7 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
 
   const tn::TextureInfo& baseColorTexture = pbr.baseColorTexture;
   if(baseColorTexture.index != -1) {
-    loadTexture(buffer, baseColorTexture.index);
+    loadTexture(buffer, baseColorTexture.index, mesh_buffer_t::material_properties_t::textureKind::baseColorTexture);
   }
 
   const tn::TextureInfo& metallicRoughnessTexture = pbr.metallicRoughnessTexture;
@@ -310,7 +310,7 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   }
 }
 
-void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex) {
+void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex, mesh_buffer_t::material_properties_t::textureKind kind) {
   const tn::Texture& texture = model.textures[textureIndex];
   const tn::Sampler& sampler = model.samplers[texture.sampler];
   const tn::Image& im = model.images[texture.source];
@@ -319,8 +319,6 @@ void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex) {
   glCreateTextures(GL_TEXTURE_2D, 1, &id);
   glBindTexture(GL_TEXTURE_2D, id);
   assert(glIsTexture(id));
-
-  buffer.material.baseColorTextureID = id;
 
   glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, sampler.minFilter);
   glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, sampler.magFilter);
@@ -338,17 +336,47 @@ void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex) {
 
   GLenum format = 0;
   switch(im.component) {
-  case 1:  format = GL_RED; break;
-  case 2:  format = GL_RG; break;
-  case 3:  format = GL_RGB; break;
-  case 4:  format = GL_RGBA; break;
-  default: assert(false); break;
+  case 1: format = GL_RED; break;
+  case 2: format = GL_RG; break;
+  case 3: format = GL_RGB; break;
+  case 4: format = GL_RGBA; break;
   }
+  assert(format != 0);
+
+  GLenum internalFormat = 0;
+  switch(kind) {
+    using enum mesh_buffer_t::material_properties_t::textureKind;
+  case normalTexture:
+    internalFormat = im.component == 4 ? GL_RGBA8 : GL_RGB8;
+    buffer.material.normalTextureID = id;
+    break;
+
+  case occlusionTexture:
+    internalFormat = im.component == 4 ? GL_RGBA8 : im.component == 3 ? GL_RGB8 : im.component == 2 ? GL_RG8 : GL_R8;
+    buffer.material.occlusionTextureID = id;
+    break;
+
+  case emissionTexture:
+    internalFormat = im.component == 4 ? GL_RGBA8 : GL_RGB8;
+    buffer.material.emissionTextureID = id;
+    break;
+
+  case baseColorTexture:
+    internalFormat = im.component == 4 ? GL_SRGB8_ALPHA8 : GL_SRGB8;
+    buffer.material.baseColorTextureID = id;
+    break;
+
+  case metallicRoughnessTexture:
+    internalFormat = im.component == 4 ? GL_RGBA8 : GL_RGB8;
+    buffer.material.metallicRoughnessTextureID = id;
+    break;
+  };
+  assert(internalFormat != 0);
 
   std::print("im.component: {}\nim.bits: {}\nim.width: {}\nim.height: {}\nim.mimeType: {}\n", im.component, im.bits, im.width, im.height, im.mimeType);
 
-  glTextureStorage2D(buffer.material.baseColorTextureID, 1, GL_SRGB8_ALPHA8, im.width, im.height);
-  glTextureSubImage2D(buffer.material.baseColorTextureID, 0, 0, 0, im.width, im.height, format, im.pixel_type, pixels_data);
+  glTextureStorage2D(id, 1, internalFormat, im.width, im.height);
+  glTextureSubImage2D(id, 0, 0, 0, im.width, im.height, format, im.pixel_type, pixels_data);
 
   assert(glGetError() == GL_NO_ERROR);
 };

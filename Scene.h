@@ -44,5 +44,5 @@ private:
 
   void loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex);
 
-  void loadTexture(mesh_buffer_t& buffer, int textureIndex);
+  void loadTexture(mesh_buffer_t& buffer, int textureIndexu, mesh_buffer_t::material_properties_t::textureKind kind);
 };

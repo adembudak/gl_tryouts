@@ -29,6 +29,8 @@ struct mesh_buffer_t {
   struct material_properties_t {
     enum class alphaMode_t { opaque, mask, blend };
 
+    enum class textureKind { normalTexture, occlusionTexture, emissionTexture, baseColorTexture, metallicRoughnessTexture };
+
     alphaMode_t alphaMode = alphaMode_t::opaque; // default
     double alphaCutoff = 0.5;                    // default
     bool doubleSided = false;                    // default
