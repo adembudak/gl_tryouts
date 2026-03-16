@@ -17,9 +17,7 @@ in vec2 textureCoordinate;
 out vec4 fragmentColor;
 
 void main() {
-  vec4 baseColor = vec4(baseColor.r, baseColor.g, baseColor.b, baseColor.a);
-
   vec4 textureColor = texture(baseColorTextureSampler, textureCoordinate);
 
-  fragmentColor = textureColor * baseColor;
+  fragmentColor = textureColor * vec4(baseColor);
 }

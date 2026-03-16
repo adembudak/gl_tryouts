@@ -1,6 +1,6 @@
-#include <memory>
-
 #include "App.h"
+
+#include <memory>
 
 int main() {
   auto an_app = std::make_unique<App>();

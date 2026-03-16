@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.30)
 project(GL_tryouts CXX)
 
 option(VERIFY_SHADERS "Run Glslang on shader files" 0)
+option(RUN_APITRACE "Run apitrace on final executable" 0)
 option(VISUALIZE_TARGETS "Run Graphviz on targets to see linkage graph" 0)
 
 find_package(glew QUIET REQUIRED CONFIG NAMES glew GLEW)
@@ -59,6 +60,11 @@ if(VERIFY_SHADERS)
   find_program(GLSLANG_COMMAND glslang glslangValidator REQUIRED)
   add_custom_command(TARGET vibe
     POST_BUILD COMMAND ${GLSLANG_COMMAND} ARGS --error-column ${shader_files})
+endif()
+
+if(RUN_APITRACE)
+  find_program(APITRACE_COMMAND apitrace REQUIRED)
+  add_custom_target(trace COMMAND ${APITRACE_COMMAND} trace --api gl --verbose "$<PATH:APPEND,$<TARGET_FILE_DIR:vibe>,vibe>" VERBATIM)
 endif()
 
 if(VISUALIZE_TARGETS)

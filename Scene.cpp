@@ -44,9 +44,6 @@ void Scene::unload() {
     if(glIsBuffer(buffer.mesh_buffer.vertexAttribute.normalBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.vertexAttribute.normalBufferID);
 
-    if(glIsBuffer(buffer.mesh_buffer.vertexAttribute.textureCoordID))
-      glDeleteBuffers(1, &buffer.mesh_buffer.vertexAttribute.textureCoordID);
-
     if(glIsBuffer(buffer.mesh_buffer.element.elementBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
 
@@ -130,8 +127,8 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
     if(attribute == "NORMAL")
       loadMeshVertexNormalData(buffer, accessorIndex);
 
-    if(attribute.starts_with("TEXCOORD")) {
-      loadMeshTextureCoordinateData(buffer, accessorIndex);
+    if(attribute.starts_with("TEXCOORD_")) {
+      loadMeshTextureCoordinateData(buffer, accessorIndex, attribute);
     }
   }
 
@@ -181,8 +178,10 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
 
   buffer.count = accessor.count;
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+
   glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, buffer.vertexAttribute.positionBufferID, accessor.byteOffset, accessor.ByteStride(bv));
   glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+
   glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 
@@ -226,15 +225,17 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
   buffer.vertexAttribute.normalBufferID = id;
 
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+
   glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, buffer.vertexAttribute.normalBufferID, accessor.byteOffset, accessor.ByteStride(bv));
   glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+
   glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 
   assert(glGetError() == GL_NO_ERROR);
 }
 
-void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex) {
+void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex, const std::string& TEXCOORD_n) {
   GLuint attribIndex = glGetAttribLocation(programID, "textureCoordinate_0");
 
   const tn::Accessor accessor = model.accessors[accessorIndex];
@@ -247,11 +248,13 @@ void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorInd
   glCreateBuffers(1, &id);
   glBindBuffer(bv.target, id);
 
-  buffer.vertexAttribute.textureCoordID = id;
+  buffer.material.textureUV[TEXCOORD_n] = id;
 
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
-  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, id, accessor.byteOffset, accessor.ByteStride(bv));
+
+  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, id, bv.byteOffset, accessor.ByteStride(bv));
   glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+
   glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 
@@ -270,8 +273,11 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
   glBindBuffer(bv.target, id);
 
   buffer.element.elementBufferID = id;
+  glVertexArrayElementBuffer(buffer.vertexArrayID, id);
 
-  glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, bv.byteLength, std::data(buf.data) + bv.byteOffset + accessor.byteOffset, GL_MAP_READ_BIT);
+  buffer.element.offset = accessor.byteOffset;
+
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
 
   buffer.element.componentType = accessor.componentType;
   buffer.element.count = accessor.count;
@@ -282,16 +288,13 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
 void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   const tn::Material& material = model.materials[materialIndex];
 
-  const tn::NormalTextureInfo& normalTexture = material.normalTexture;
-  if(normalTexture.index != -1) {
+  if(const tn::NormalTextureInfo& normalTexture = material.normalTexture; normalTexture.index != -1) {
   }
 
-  const tn::OcclusionTextureInfo& occlusionTexture = material.occlusionTexture;
-  if(occlusionTexture.index != -1) {
+  if(const tn::OcclusionTextureInfo& occlusionTexture = material.occlusionTexture; occlusionTexture.index != -1) {
   }
 
-  const tn::TextureInfo& emissiveTexture = material.emissiveTexture;
-  if(emissiveTexture.index != -1) {
+  if(const tn::TextureInfo& emissiveTexture = material.emissiveTexture; emissiveTexture.index != -1) {
   }
 
   const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
@@ -300,17 +303,15 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   ranges::copy(pbr.baseColorFactor, std::begin(buffer.material.baseColorFactor));
   buffer.material.metallicFactor = pbr.metallicFactor;
 
-  const tn::TextureInfo& baseColorTexture = pbr.baseColorTexture;
-  if(baseColorTexture.index != -1) {
-    loadTexture(buffer, baseColorTexture.index, mesh_buffer_t::material_properties_t::textureKind::baseColorTexture);
+  if(const tn::TextureInfo& baseColorTexture = pbr.baseColorTexture; baseColorTexture.index != -1) {
+    loadTexture(buffer, baseColorTexture.index, baseColorTexture.texCoord, mesh_buffer_t::material_properties_t::textureKind::baseColorTexture);
   }
 
-  const tn::TextureInfo& metallicRoughnessTexture = pbr.metallicRoughnessTexture;
-  if(metallicRoughnessTexture.index != -1) {
+  if(const tn::TextureInfo& metallicRoughnessTexture = pbr.metallicRoughnessTexture; metallicRoughnessTexture.index != -1) {
   }
 }
 
-void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex, mesh_buffer_t::material_properties_t::textureKind kind) {
+void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex, int texCoord_n, mesh_buffer_t::material_properties_t::textureKind kind) {
   const tn::Texture& texture = model.textures[textureIndex];
   const tn::Sampler& sampler = model.samplers[texture.sampler];
   const tn::Image& im = model.images[texture.source];
