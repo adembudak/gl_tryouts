@@ -252,8 +252,8 @@ void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorInd
 
   glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
 
-  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, id, bv.byteOffset, accessor.ByteStride(bv));
-  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+  glVertexArrayVertexBuffer(buffer.vertexArrayID, attribIndex, id, accessor.byteOffset, accessor.ByteStride(bv));
+  glVertexArrayAttribFormat(buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, 0);
 
   glVertexArrayAttribBinding(buffer.vertexArrayID, attribIndex, attribIndex);
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
