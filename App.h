@@ -20,6 +20,10 @@ private:
   GLuint projectionMatrixLocation;
   GLuint transformMatrixLocation;
 
+  GLuint baseColorLocation;
+  GLuint roughnessLocation;
+  GLuint metallicLocation;
+
   util::ShaderLoader shaderLoader;
 
   Scene my_scene;

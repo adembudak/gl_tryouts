@@ -31,6 +31,10 @@ void App::startup() {
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
   transformMatrixLocation = glGetUniformLocation(programID, "transform");
 
+  baseColorLocation = glGetUniformLocation(programID, "baseColor");
+  roughnessLocation = glGetUniformLocation(programID, "roughness");
+  metallicLocation = glGetUniformLocation(programID, "metallic");
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -68,10 +72,9 @@ void App::render(double currentTime) {
     if(node_buffer.mesh_buffer.material.baseColorTextureID != -1)
       glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
 
-    glUniform4dv(glGetUniformLocation(programID, "baseColor"), 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
-
-    glUniform1d(glGetUniformLocation(programID, "roughness"), node_buffer.mesh_buffer.material.roughnessFactor);
-    glUniform1d(glGetUniformLocation(programID, "metallic"), node_buffer.mesh_buffer.material.metallicFactor);
+    glUniform4dv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
+    glUniform1d(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
+    glUniform1d(metallicLocation, node_buffer.mesh_buffer.material.metallicFactor);
 
     if(node_buffer.mesh_buffer.element.elementBufferID != -1)
       glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
