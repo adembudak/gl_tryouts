@@ -72,9 +72,9 @@ void App::render(double currentTime) {
     if(node_buffer.mesh_buffer.material.baseColorTextureID != -1)
       glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
 
-    glUniform4dv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
-    glUniform1d(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
-    glUniform1d(metallicLocation, node_buffer.mesh_buffer.material.metallicFactor);
+    glUniform4fv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
+    glUniform1f(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
+    glUniform1f(metallicLocation, node_buffer.mesh_buffer.material.metallicFactor);
 
     if(node_buffer.mesh_buffer.element.elementBufferID != -1)
       glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);

@@ -4,9 +4,9 @@
 #pragma optimize(off)
 #pragma debug(on)
 
-uniform dvec4 baseColor;
-uniform double metallic;
-uniform double roughness;
+uniform vec4 baseColor;
+uniform float metallic;
+uniform float roughness;
 
 layout(binding = 0)
 uniform sampler2D baseColorTextureSampler;
@@ -19,5 +19,5 @@ out vec4 fragmentColor;
 void main() {
   vec4 textureColor = texture(baseColorTextureSampler, textureCoordinate);
 
-  fragmentColor = textureColor * vec4(baseColor);
+  fragmentColor = textureColor * baseColor;
 }

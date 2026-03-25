@@ -36,9 +36,9 @@ struct mesh_buffer_t {
     double alphaCutoff = 0.5;                    // default
     bool doubleSided = false;                    // default
 
-    std::array<double, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
-    double roughnessFactor = 1.0;                                 // default
-    double metallicFactor = 1.0;                                  // default
+    std::array<float, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
+    float roughnessFactor = 1.0;                                 // default
+    float metallicFactor = 1.0;                                  // default
 
     GLuint normalTextureID = -1;
     GLuint occlusionTextureID = -1;
