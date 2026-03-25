@@ -6,7 +6,8 @@
 
 in vec3 vertexPosition;
 in vec3 vertexNormal;
-in vec2 textureCoordinate_0;
+
+in vec2 TEXCOORD_0;
 
 uniform mat4x4 transform;
 uniform mat4x4 view;
@@ -17,7 +18,7 @@ out vec2 textureCoordinate;
 
 void main() {
   normal = vertexNormal;
-  textureCoordinate = textureCoordinate_0;
+  textureCoordinate = TEXCOORD_0;
 
   gl_Position = projection * view * transform * vec4(vertexPosition, 1.0);
 }

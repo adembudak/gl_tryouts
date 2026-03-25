@@ -236,7 +236,7 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
 }
 
 void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex, const std::string& TEXCOORD_n) {
-  GLuint attribIndex = glGetAttribLocation(programID, "textureCoordinate_0");
+  GLuint attribIndex = glGetAttribLocation(programID, TEXCOORD_n.c_str());
 
   const tn::Accessor accessor = model.accessors[accessorIndex];
   const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
