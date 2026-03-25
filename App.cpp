@@ -35,6 +35,9 @@ void App::startup() {
   roughnessLocation = glGetUniformLocation(programID, "roughness");
   metallicLocation = glGetUniformLocation(programID, "metallic");
 
+  baseColorTextureLocation.hasValue = glGetUniformLocation(programID, "baseColorTexture.hasValue");
+  baseColorTextureLocation.sampler = glGetUniformLocation(programID, "baseColorTexture.sampler");
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -69,8 +72,11 @@ void App::render(double currentTime) {
       glCullFace(GL_BACK);
     }
 
-    if(node_buffer.mesh_buffer.material.baseColorTextureID != -1)
+    glUniform1i(baseColorTextureLocation.hasValue, false);
+    if(node_buffer.mesh_buffer.material.baseColorTextureID != -1) {
+      glUniform1i(baseColorTextureLocation.hasValue, true);
       glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
+    }
 
     glUniform4fv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
     glUniform1f(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
