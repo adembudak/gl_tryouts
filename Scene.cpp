@@ -7,12 +7,17 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include <range/v3/algorithm/copy.hpp>
 
 #include <tiny_gltf.h>
 
 #include <filesystem>
+#include <span>
+#include <vector>
 #include <print>
+#include <algorithm>
 
 void Scene::setProgramID(GLuint programID) {
   this->programID = programID;
@@ -34,7 +39,7 @@ void Scene::load(const std::filesystem::path& modelglTFFile) {
 }
 
 void Scene::unload() {
-  for(const node_t& buffer : buffers) {
+  for(const auto& [_, buffer] : buffers) {
     if(glIsBuffer(buffer.mesh_buffer.vertexArrayID))
       glDeleteVertexArrays(1, &buffer.mesh_buffer.vertexArrayID);
 
@@ -66,13 +71,14 @@ void Scene::unload() {
 
 void Scene::visitScene(const tn::Scene& scene) {
   for(int nodeIndex : scene.nodes) {
-    const tn::Node& node = model.nodes[nodeIndex];
     glm::mat4x4 defaultTransform = glm::mat4x4(1.0);
-    visitNode(node, defaultTransform);
+    visitNode(nodeIndex, defaultTransform);
   }
 }
 
-void Scene::visitNode(const tn::Node& node, const glm::mat4x4& parentNodeTransform) {
+void Scene::visitNode(const int nodeIndex, const glm::mat4x4& parentNodeTransform) {
+  const tn::Node& node = model.nodes[nodeIndex];
+
   node_t buffer;
 
   if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale)) {
@@ -89,11 +95,11 @@ void Scene::visitNode(const tn::Node& node, const glm::mat4x4& parentNodeTransfo
     visitNodeCamera(camera, buffer, parentNodeTransform);
   }
 
-  buffers.push_back(std::move(buffer));
+  buffers[nodeIndex] = std::move(buffer);
 
   if(!empty(node.children)) {
     for(int nodeIndex : node.children)
-      visitNode(model.nodes[nodeIndex], buffer.transformMatrix_);
+      visitNode(nodeIndex, buffer.transformMatrix_);
   }
 }
 
@@ -139,6 +145,145 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primi
 
   if(primitive.material != -1) {
     loadMeshMaterial(buffer, primitive.material);
+  }
+}
+
+void Scene::animate(float currentTime) {
+
+  for(tn::Animation animation : model.animations) {
+
+    const std::vector<tn::AnimationChannel>& channels = animation.channels;
+
+    glm::mat4x4 TRS(1.0f);
+    for(const tn::AnimationChannel& c : channels) {
+      const tn::AnimationSampler& animationSampler = animation.samplers[c.sampler];
+
+      const tn::Accessor& inputAccessor = model.accessors[animationSampler.input];
+      const tn::BufferView& inputBufferView = model.bufferViews[inputAccessor.bufferView];
+      const tn::Buffer& inputBuffer = model.buffers[inputBufferView.buffer];
+
+      const auto input_begin = reinterpret_cast<float*>(const_cast<unsigned char*>(std::data(inputBuffer.data)) + inputBufferView.byteOffset + inputAccessor.byteOffset);
+      const auto input_end = input_begin + inputAccessor.count;
+
+      const std::span<float> input(input_begin, input_end); //  keyframe timestamps
+
+      const float currentTime_ = std::fmod(currentTime, input.back()); // time normalized
+
+      auto prev_pos = std::lower_bound(input.begin(), input.end(), currentTime_);
+      auto next_pos = std::upper_bound(input.begin(), input.end(), currentTime_);
+
+      prev_pos = (prev_pos == input.begin()) ? prev_pos : std::prev(prev_pos);
+      next_pos = (next_pos == input.end()) ? std::prev(next_pos) : next_pos;
+
+      const std::size_t prev_pos_index = std::distance(input.begin(), prev_pos);
+      const std::size_t next_pos_index = std::distance(input.begin(), next_pos);
+
+      const float previousTime = input[prev_pos_index];
+      const float nextTime = input[next_pos_index];
+
+      const float interpolant = (currentTime_ - previousTime) / (nextTime - previousTime);
+
+      const tn::Accessor& outputAccessor = model.accessors[animationSampler.output];
+      const tn::BufferView& outputBufferView = model.bufferViews[outputAccessor.bufferView];
+      const tn::Buffer& outputBuffer = model.buffers[outputBufferView.buffer];
+
+      const tn::Node& target_node = model.nodes[c.target_node];
+
+      if(c.target_path == "translation") {
+        const auto output_begin = reinterpret_cast<glm::vec3*>(const_cast<unsigned char*>(std::data(outputBuffer.data)) + outputBufferView.byteOffset + outputAccessor.byteOffset);
+        const auto output_end = output_begin + outputAccessor.count;
+
+        const std::span<glm::vec3> output(output_begin, output_end);
+
+        const glm::vec3 previousTranslation = output[prev_pos_index];
+        const glm::vec3 nextTranslation = output[next_pos_index];
+
+        glm::vec3 currentTranslation;
+        if(animationSampler.interpolation == "STEP") {
+          currentTranslation = previousTranslation;
+        }
+
+        else if(animationSampler.interpolation == "LINEAR") {
+          currentTranslation = glm::mix(previousTranslation, nextTranslation, interpolant); // previousTranslation + interpolant * (nextTranslation - previousTranslation); // (lerp)
+        }
+
+        else if(animationSampler.interpolation == "CUBICSPLINE") {
+        }
+
+        else {
+          assert(false);
+        }
+
+        TRS *= glm::translate(glm::mat4x4(1.0), currentTranslation);
+      }
+
+      else if(c.target_path == "rotation") {
+        const auto output_begin = reinterpret_cast<glm::vec4*>(const_cast<unsigned char*>(std::data(outputBuffer.data)) + outputBufferView.byteOffset + outputAccessor.byteOffset);
+        const auto output_end = output_begin + outputAccessor.count;
+
+        const std::span<glm::vec4> output(output_begin, output_end);
+
+        const glm::quat previousRotation = glm::make_quat(glm::value_ptr(output[prev_pos_index]));
+        const glm::quat nextRotation = glm::make_quat(glm::value_ptr(output[next_pos_index]));
+
+        glm::quat currentRotation;
+        if(animationSampler.interpolation == "STEP") {
+          currentRotation = previousRotation;
+        }
+
+        else if(animationSampler.interpolation == "LINEAR") {
+          currentRotation = glm::slerp(previousRotation, nextRotation, interpolant);
+        }
+
+        else if(animationSampler.interpolation == "CUBICSPLINE") {
+
+        }
+
+        else {
+          assert(false);
+        }
+
+        // std::println("{} {}", currentTime_, glm::to_string(currentRotation));
+        TRS *= glm::mat4_cast(currentRotation);
+      }
+
+      else if(c.target_path == "scale") {
+        const auto output_begin = reinterpret_cast<glm::vec3*>(const_cast<unsigned char*>(std::data(outputBuffer.data)) + outputBufferView.byteOffset + outputAccessor.byteOffset);
+        const auto output_end = output_begin + outputAccessor.count;
+
+        const std::span<glm::vec3> output(output_begin, output_end);
+        const glm::vec3 previousScale = output[prev_pos_index];
+        const glm::vec3 nextScale = output[next_pos_index];
+
+        glm::vec3 currentScale;
+        if(animationSampler.interpolation == "STEP") {
+          currentScale = previousScale;
+        }
+
+        else if(animationSampler.interpolation == "LINEAR") {
+          currentScale = glm::mix(previousScale, nextScale, interpolant);
+        }
+
+        else if(animationSampler.interpolation == "CUBICSPLINE") {
+
+        }
+
+        else {
+          assert(false);
+        }
+
+        TRS *= glm::scale(glm::mat4x4(1.0f), currentScale);
+      }
+
+      else if(c.target_path == "weights") {
+      }
+
+      else {
+        assert(false);
+      }
+
+      buffers[c.target_node].transformMatrix_ = TRS;
+    }
   }
 }
 
@@ -193,14 +338,14 @@ void Scene::loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex)
 
     const auto indices_begin = reinterpret_cast<unsigned short*>(const_cast<unsigned char*>(std::data(indicesBuffer.data)) + indicesBufferView.byteOffset + sparse.indices.byteOffset);
     const auto indices_end = indices_begin + sparse.count;
-    const std::vector<unsigned short> indices(indices_begin, indices_end);
+    const std::span<unsigned short> indices(indices_begin, indices_end);
 
     const tn::BufferView& valuesBufferView = model.bufferViews[sparse.values.bufferView];
     const tn::Buffer& valuesBuffer = model.buffers[valuesBufferView.buffer];
 
     const auto values_begin = reinterpret_cast<glm::vec3*>(const_cast<unsigned char*>(std::data(valuesBuffer.data)) + valuesBufferView.byteOffset + sparse.values.byteOffset);
     const auto values_end = values_begin + sparse.count;
-    const std::vector<glm::vec3> values(values_begin, values_end);
+    const std::span<glm::vec3> values(values_begin, values_end);
 
     glm::vec3* const ptr = reinterpret_cast<glm::vec3*>(glMapNamedBuffer(id, GL_READ_WRITE));
     for(int i = 0; i < sparse.count; ++i)
@@ -308,6 +453,7 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   }
 
   if(const tn::TextureInfo& metallicRoughnessTexture = pbr.metallicRoughnessTexture; metallicRoughnessTexture.index != -1) {
+    loadTexture(buffer, metallicRoughnessTexture.index, metallicRoughnessTexture.texCoord, mesh_buffer_t::material_properties_t::textureKind::metallicRoughnessTexture);
   }
 }
 
@@ -318,7 +464,6 @@ void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex, int texCoord_n,
 
   GLuint id;
   glCreateTextures(GL_TEXTURE_2D, 1, &id);
-  glBindTexture(GL_TEXTURE_2D, id);
   assert(glIsTexture(id));
 
   glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, sampler.minFilter);

@@ -22,7 +22,9 @@ void App::startup() {
                   .getProgramID();
 
   my_scene.setProgramID(programID);
-  my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleTexture/glTF/SimpleTexture.gltf");
+
+  my_scene.load("/home/adem/Github/gl_tryouts/models/Models/AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf");
+  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleTexture/glTF/SimpleTexture.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Triangle/glTF/Triangle.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Cameras/glTF/Cameras.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/ABeautifulGame/glTF/ABeautifulGame.gltf");
@@ -60,7 +62,7 @@ void App::render(double currentTime) {
   glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultPerspectiveCamera()));
   glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultCameraPosition()));
 
-  for(const node_t& node_buffer : my_scene.getBuffers()) {
+  for(const auto& [_, node_buffer] : my_scene.getBuffers()) {
     glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
 
     glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
@@ -87,6 +89,8 @@ void App::render(double currentTime) {
     else
       glDrawArrays(node_buffer.mesh_buffer.element.mode, 0, node_buffer.mesh_buffer.count);
   }
+
+  my_scene.animate(currentTime);
 }
 
 void App::shutdown() {

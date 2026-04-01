@@ -16,7 +16,7 @@ namespace tn = tinygltf;
 
 struct Scene {
   tn::Model model;
-  std::vector<node_t> buffers;
+  std::unordered_map<int, node_t> buffers;
 
   GLuint programID;
 
@@ -25,13 +25,19 @@ struct Scene {
 
   void setProgramID(GLuint programID);
 
-  const std::vector<node_t>& getBuffers() const {
+  tn::Model& getModel() {
+    return model;
+  }
+
+  const std::unordered_map<int, node_t>& getBuffers() const {
     return buffers;
   }
 
+  void animate(float currentTime);
+
 private:
   void visitScene(const tn::Scene& scene);
-  void visitNode(const tn::Node& node, const glm::mat4x4& parentNodeTransform);
+  void visitNode(const int nodeIndex, const glm::mat4x4& parentNodeTransform);
   void visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer);
   void visitNodeCamera(const tn::Camera& camera, node_t& buffer, const glm::mat4x4& parentNodeTransform);
   void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);

@@ -24,7 +24,7 @@ private:
   GLuint roughnessLocation;
   GLuint metallicLocation;
 
-  struct { GLuint hasValue, sampler; } baseColorTextureLocation;
+  struct { GLboolean hasValue; GLuint sampler; } baseColorTextureLocation;
 
   util::ShaderLoader shaderLoader;
 
