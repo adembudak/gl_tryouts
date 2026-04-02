@@ -167,10 +167,10 @@ void Scene::animate(float currentTime) {
 
       const std::span<float> input(input_begin, input_end); //  keyframe timestamps
 
-      const float currentTime_ = std::fmod(currentTime, input.back()); // time normalized
+      currentTime = std::fmod(currentTime, input.back()); // time normalized
 
-      auto prev_pos = std::lower_bound(input.begin(), input.end(), currentTime_);
-      auto next_pos = std::upper_bound(input.begin(), input.end(), currentTime_);
+      auto prev_pos = std::lower_bound(input.begin(), input.end(), currentTime);
+      auto next_pos = std::upper_bound(input.begin(), input.end(), currentTime);
 
       prev_pos = (prev_pos == input.begin()) ? prev_pos : std::prev(prev_pos);
       next_pos = (next_pos == input.end()) ? std::prev(next_pos) : next_pos;
@@ -181,7 +181,7 @@ void Scene::animate(float currentTime) {
       const float previousTime = input[prev_pos_index];
       const float nextTime = input[next_pos_index];
 
-      const float interpolant = (currentTime_ - previousTime) / (nextTime - previousTime);
+      const float interpolant = (currentTime - previousTime) / (nextTime - previousTime);
 
       const tn::Accessor& outputAccessor = model.accessors[animationSampler.output];
       const tn::BufferView& outputBufferView = model.bufferViews[outputAccessor.bufferView];
