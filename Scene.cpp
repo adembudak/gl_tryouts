@@ -195,8 +195,8 @@ void Scene::animate(float currentTime) {
 
         const std::span<glm::vec3> output(output_begin, output_end);
 
-        const glm::vec3 previousTranslation = output[prev_pos_index];
-        const glm::vec3 nextTranslation = output[next_pos_index];
+        const glm::vec3& previousTranslation = output[prev_pos_index];
+        const glm::vec3& nextTranslation = output[next_pos_index];
 
         glm::vec3 currentTranslation;
         if(animationSampler.interpolation == "STEP") {
@@ -248,8 +248,8 @@ void Scene::animate(float currentTime) {
 
         const std::span<glm::quat> output(output_begin, output_end);
 
-        const glm::quat previousRotation = output[prev_pos_index];
-        const glm::quat nextRotation = output[next_pos_index];
+        const glm::quat& previousRotation = output[prev_pos_index];
+        const glm::quat& nextRotation = output[next_pos_index];
 
         glm::quat currentRotation;
         if(animationSampler.interpolation == "STEP") {
@@ -291,8 +291,8 @@ void Scene::animate(float currentTime) {
         const auto output_end = output_begin + outputAccessor.count;
 
         const std::span<glm::vec3> output(output_begin, output_end);
-        const glm::vec3 previousScale = output[prev_pos_index];
-        const glm::vec3 nextScale = output[next_pos_index];
+        const glm::vec3& previousScale = output[prev_pos_index];
+        const glm::vec3& nextScale = output[next_pos_index];
 
         glm::vec3 currentScale;
         if(animationSampler.interpolation == "STEP") {
