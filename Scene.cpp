@@ -218,13 +218,13 @@ void Scene::animate(float currentTime) {
       }
 
       else if(c.target_path == "rotation") {
-        const auto output_begin = reinterpret_cast<glm::vec4*>(const_cast<unsigned char*>(std::data(outputBuffer.data)) + outputBufferView.byteOffset + outputAccessor.byteOffset);
+        const auto output_begin = reinterpret_cast<glm::quat*>(const_cast<unsigned char*>(std::data(outputBuffer.data)) + outputBufferView.byteOffset + outputAccessor.byteOffset);
         const auto output_end = output_begin + outputAccessor.count;
 
-        const std::span<glm::vec4> output(output_begin, output_end);
+        const std::span<glm::quat> output(output_begin, output_end);
 
-        const glm::quat previousRotation = glm::make_quat(glm::value_ptr(output[prev_pos_index]));
-        const glm::quat nextRotation = glm::make_quat(glm::value_ptr(output[next_pos_index]));
+        const glm::quat previousRotation = output[prev_pos_index];
+        const glm::quat nextRotation = output[next_pos_index];
 
         glm::quat currentRotation;
         if(animationSampler.interpolation == "STEP") {
