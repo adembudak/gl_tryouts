@@ -11,8 +11,6 @@ struct OrthographicCamera;
 namespace tn = tinygltf;
 
 struct Camera {
-  enum class direction { up, right, down, left, front, back } dir;
-
   Camera() = default;
 
   Camera(const tn::PerspectiveCamera& p);
@@ -25,6 +23,3 @@ struct Camera {
 
   glm::mat4x4 projection{};
 };
-
-void update(const Camera& c, double dT);
-glm::mat4x4 moveAround(const Camera& c, Camera::direction dir);
