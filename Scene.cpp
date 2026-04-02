@@ -15,6 +15,7 @@
 
 #include <filesystem>
 #include <span>
+#include <cmath>
 #include <vector>
 #include <print>
 #include <algorithm>
@@ -154,8 +155,7 @@ void Scene::animate(float currentTime) {
 
     const std::vector<tn::AnimationChannel>& channels = animation.channels;
 
-    glm::mat4x4 TRS(1.0f);
-    for(const tn::AnimationChannel& c : channels) {
+    for(glm::mat4x4 TRS(1.0f); const tn::AnimationChannel& c : channels) {
       const tn::AnimationSampler& animationSampler = animation.samplers[c.sampler];
 
       const tn::Accessor& inputAccessor = model.accessors[animationSampler.input];
@@ -208,6 +208,31 @@ void Scene::animate(float currentTime) {
         }
 
         else if(animationSampler.interpolation == "CUBICSPLINE") {
+          // const glm::vec3& a_prev = output[prev_pos_index * 3 + 0];
+          const glm::vec3& v_prev = output[prev_pos_index * 3 + 1];
+          const glm::vec3& b_prev = output[prev_pos_index * 3 + 2];
+
+          const glm::vec3& a_next = output[next_pos_index * 3 + 0];
+          const glm::vec3& v_next = output[next_pos_index * 3 + 1];
+          // const glm::vec3& b_next = output[next_pos_index * 3 + 2];
+
+          const float t = interpolant;
+          const float td = nextTime - previousTime;
+
+          const float t2 = std::pow(t, 2);
+          const float t3 = std::pow(t, 3);
+
+          // clang-format off
+          // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#interpolation-cubic
+          currentTranslation =
+            (2.0f*t3 - 3.0f*t2 + 1.0f) * v_prev
+            +
+            td * (t3 - 2.0f*t2 + t) * b_prev
+            +
+            (-2.0f*t3 + 3.0f*t2) * v_next
+            +
+            td * (t3 -t2) * a_next;
+          // clang-format on
         }
 
         else {
@@ -236,7 +261,21 @@ void Scene::animate(float currentTime) {
         }
 
         else if(animationSampler.interpolation == "CUBICSPLINE") {
+          const glm::quat& v_prev = output[prev_pos_index * 3 + 1];
+          const glm::quat& b_prev = output[prev_pos_index * 3 + 2];
 
+          const glm::quat& a_next = output[next_pos_index * 3 + 0];
+          const glm::quat& v_next = output[next_pos_index * 3 + 1];
+
+          const float t = interpolant;
+          const float td = nextTime - previousTime;
+
+          const float t2 = std::pow(t, 2);
+          const float t3 = std::pow(t, 3);
+
+          currentRotation = (2.0f * t3 - 3.0f * t2 + 1.0f) * v_prev + td * (t3 - 2.0f * t2 + t) * b_prev + (-2.0f * t3 + 3.0f * t2) * v_next + td * (t3 - t2) * a_next;
+
+          currentRotation = glm::normalize(currentRotation);
         }
 
         else {
@@ -265,7 +304,19 @@ void Scene::animate(float currentTime) {
         }
 
         else if(animationSampler.interpolation == "CUBICSPLINE") {
+          const glm::vec3& v_prev = output[prev_pos_index * 3 + 1];
+          const glm::vec3& b_prev = output[prev_pos_index * 3 + 2];
 
+          const glm::vec3& a_next = output[next_pos_index * 3 + 0];
+          const glm::vec3& v_next = output[next_pos_index * 3 + 1];
+
+          const float t = interpolant;
+          const float td = nextTime - previousTime;
+
+          const float t2 = std::pow(t, 2);
+          const float t3 = std::pow(t, 3);
+
+          currentScale = (2.0f * t3 - 3.0f * t2 + 1.0f) * v_prev + td * (t3 - 2.0f * t2 + t) * b_prev + (-2.0f * t3 + 3.0f * t2) * v_next + td * (t3 - t2) * a_next;
         }
 
         else {
