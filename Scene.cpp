@@ -92,7 +92,7 @@ void Scene::visitNode(const int nodeIndex, const glm::mat4x4& parentNodeTransfor
 
   if(int cameraIndex = node.camera; cameraIndex != -1) {
     const tn::Camera& camera = model.cameras[cameraIndex];
-    visitNodeCamera(camera, buffer);
+    visitNodeCamera(camera, buffer, nodeIndex);
   }
 
   buffers[nodeIndex] = std::move(buffer);
@@ -111,13 +111,29 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
     visitMeshPrimitive(mesh_buffer, primitive);
 }
 
-void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer) {
+void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer, const int nodeIndex) {
+  std::string name;
+  name.append("Attached to ");
+
+  if(const std::string nodeName = model.nodes[nodeIndex].name; !std::empty(nodeName))
+    name.append(nodeName);
+  name.append(" (Node ").append(std::to_string(nodeIndex)).append(") ");
+
+  if(const std::string cameraName = camera.name; !std::empty(cameraName))
+    name.append("Camera: ").append(cameraName);
+
   if(camera.type == "perspective") {
     buffer.camera = camera.perspective;
+
+    name.append(" (perspective)");
+    buffer.camera->name = name;
   }
 
   else if(camera.type == "orthographic") {
     buffer.camera = camera.orthographic;
+
+    name.append(" (orthographic)");
+    buffer.camera->name = name;
   }
 
   else {
