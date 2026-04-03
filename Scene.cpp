@@ -6,7 +6,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <glm/gtx/string_cast.hpp>
 
 #include <range/v3/algorithm/copy.hpp>
@@ -93,7 +92,7 @@ void Scene::visitNode(const int nodeIndex, const glm::mat4x4& parentNodeTransfor
 
   if(int cameraIndex = node.camera; cameraIndex != -1) {
     const tn::Camera& camera = model.cameras[cameraIndex];
-    visitNodeCamera(camera, buffer, parentNodeTransform);
+    visitNodeCamera(camera, buffer);
   }
 
   buffers[nodeIndex] = std::move(buffer);
@@ -112,7 +111,7 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
     visitMeshPrimitive(mesh_buffer, primitive);
 }
 
-void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer, const glm::mat4x4& parentNodeTransform) {
+void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer) {
   if(camera.type == "perspective") {
     buffer.camera = camera.perspective;
   }
