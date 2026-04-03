@@ -13,6 +13,7 @@ find_package(mpark_patterns QUIET REQUIRED CONFIG)
 find_package(OpenGL QUIET REQUIRED)
 find_package(range-v3 QUIET REQUIRED CONFIG)
 find_package(TinyGLTF QUIET REQUIRED CONFIG)
+find_package(imgui QUIET REQUIRED CONFIG)
 
 add_executable(vibe)
 target_sources(vibe
@@ -36,6 +37,7 @@ target_link_libraries(vibe
     $<IF:$<TARGET_EXISTS:GLEW::GLEW>,GLEW::GLEW,glew::glew>
     glfw
     glm::glm
+    imgui::imgui
     mpark_patterns
     OpenGL::GL
     range-v3::range-v3

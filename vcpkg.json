@@ -8,6 +8,13 @@
       ]
     },
     "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
     "mpark-patterns",
     "opengl",
     "range-v3",
