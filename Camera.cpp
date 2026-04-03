@@ -1,21 +1,8 @@
 #include "Camera.h"
 
-#define GLM_FORCE_XYZW_ONLY
-
-#include <glm/glm.hpp>
-
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/vec_swizzle.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#if !defined(NDEBUG)
-  #include <glm/gtx/string_cast.hpp>
-  #include <iostream>
-#endif
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <tiny_gltf.h>
-
-float delta = 0.0;
 
 Camera::Camera(const tn::PerspectiveCamera& p) {
   projection = glm::perspective(p.yfov, p.aspectRatio, p.znear, p.zfar);
@@ -25,7 +12,7 @@ Camera::Camera(const tn::OrthographicCamera& o) {
   projection = glm::ortho(-o.xmag, o.xmag, -o.ymag, o.ymag, o.znear, o.zfar);
 }
 
-glm::mat4x4 Camera::projectionMatrix() const {
+const glm::mat4x4& Camera::projectionMatrix() const {
   return projection;
 }
 
