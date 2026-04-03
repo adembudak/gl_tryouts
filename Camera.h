@@ -18,8 +18,8 @@ struct Camera {
 
   glm::mat4x4 projectionMatrix() const;
 
-  static glm::mat4x4 defaultPerspectiveCamera();
-  static glm::mat4x4 defaultCameraPosition();
+  static const glm::mat4x4& defaultPerspectiveCamera();
+  static const glm::mat4x4& defaultCameraPosition();
 
   glm::mat4x4 projection{};
 };

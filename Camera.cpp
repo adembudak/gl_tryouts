@@ -35,7 +35,7 @@ constexpr float zNear = 0.1f;
 constexpr float zFar = 1000.0f;
 static const glm::mat4x4 defaultProjection = glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
 
-glm::mat4x4 Camera::defaultPerspectiveCamera() {
+const glm::mat4x4& Camera::defaultPerspectiveCamera() {
   return defaultProjection;
 }
 
@@ -44,6 +44,6 @@ constexpr glm::vec3 center{0.0, 0.0, 0.0};
 constexpr glm::vec3 Y_up{0.0, 1.0, 0.0}; // Camera orientation
 static const glm::mat4x4 defaultView = glm::lookAt(eye, center, Y_up);
 
-glm::mat4x4 Camera::defaultCameraPosition() {
+const glm::mat4x4& Camera::defaultCameraPosition() {
   return defaultView;
 }
