@@ -14,6 +14,9 @@ struct App : public Application::AppBase {
   virtual void onMouseWheel(int pos) override;
 
 private:
+  bool show_demo_window = true;
+  bool show_another_window = false;
+
   GLuint programID;
 
   GLuint viewMatrixLocation;
@@ -24,7 +27,10 @@ private:
   GLuint roughnessLocation;
   GLuint metallicLocation;
 
-  struct { GLboolean hasValue; GLuint sampler; } baseColorTextureLocation;
+  struct {
+    GLboolean hasValue;
+    GLuint sampler;
+  } baseColorTextureLocation;
 
   util::ShaderLoader shaderLoader;
 
