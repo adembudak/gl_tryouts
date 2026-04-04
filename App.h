@@ -15,6 +15,7 @@ struct App : public Application::AppBase {
 
 private:
   bool show_demo_window = true;
+  bool is_scene_loaded = false;
 
   GLuint programID;
 

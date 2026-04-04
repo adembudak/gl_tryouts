@@ -23,19 +23,25 @@ void Scene::setProgramID(GLuint programID) {
   this->programID = programID;
 }
 
-void Scene::load(const std::filesystem::path& modelglTFFile) {
+bool Scene::load(const std::filesystem::path& modelglTFFile) {
   assert(std::filesystem::exists(modelglTFFile));
   std::string error, warning;
   tn::TinyGLTF{}.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
 
-  if(!std::empty(error))
+  if(!std::empty(error)) {
     std::println("Error [TinyGLTF] {}", error);
+
+    return false;
+  }
+
 
   if(!std::empty(warning))
     std::println("Warning [TinyGLTF] {}", warning);
 
   for(const tn::Scene& scene : model.scenes)
     visitScene(scene);
+
+  return true;
 }
 
 void Scene::unload() {

@@ -8,13 +8,18 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <imfilebrowser.h>
+
 #include <vector>
 #include <utility>
+#include <iostream>
 
 void App::setConfigDefaults() {
   info.title = "something something";
   AppBase::setConfigDefaults();
 }
+
+//////////////// ///////////// /////////////
 
 void App::startup() {
 
@@ -27,7 +32,7 @@ void App::startup() {
 
   my_scene.setProgramID(programID);
 
-  my_scene.load("/home/adem/Github/gl_tryouts/models/Models/AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf");
+  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleTexture/glTF/SimpleTexture.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Triangle/glTF/Triangle.gltf");
   // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Cameras/glTF/Cameras.gltf");
@@ -50,23 +55,18 @@ void App::startup() {
 
   assert(glGetError() == GL_NO_ERROR);
 
-  // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
-  (void)io;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 
-  // Setup Dear ImGui style
   ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
 
   // Setup scaling
   ImGuiStyle& style = ImGui::GetStyle();
-  // Setup Platform/Renderer backends
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
 
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 460");
 }
 
@@ -80,6 +80,45 @@ void App::render(double currentTime) {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
+
+  static ImGui::FileBrowser fileDialog;
+
+  if(ImGui::BeginMainMenuBar()) {
+
+    if(ImGui::BeginMenu("File")) {
+      if(ImGui::MenuItem("Open", "Ctrl+O")) {
+        fileDialog.Open();
+      }
+      ImGui::EndMenu();
+    }
+
+    if(ImGui::BeginMenu("Edit")) {
+      if(ImGui::MenuItem("Undo", "Ctrl+Z")) {
+      }
+      if(ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) {
+      } // Disabled item
+        //
+      ImGui::Separator();
+      if(ImGui::MenuItem("Cut", "Ctrl+X")) {
+      }
+
+      if(ImGui::MenuItem("Copy", "Ctrl+C")) {
+      }
+
+      if(ImGui::MenuItem("Paste", "Ctrl+V")) {
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
+
+  fileDialog.Display();
+
+  if(fileDialog.HasSelected()) {
+    is_scene_loaded = my_scene.load(fileDialog.GetSelected());
+    std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
+    fileDialog.ClearSelected();
+  }
 
   ImGui::Begin("Hello, world!");                     // Create a window called "Hello, world!" and append into it.
   ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
@@ -95,39 +134,42 @@ void App::render(double currentTime) {
   constexpr GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
   glClearBufferfv(GL_COLOR, 0, black);
 
-  glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultPerspectiveCamera()));
-  glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultCameraPosition()));
+  if(is_scene_loaded) {
 
-  for(const auto& [_, node_buffer] : my_scene.getBuffers()) {
-    glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultPerspectiveCamera()));
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultCameraPosition()));
 
-    glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
+    for(const auto& [_, node_buffer] : my_scene.getBuffers()) {
+      glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
 
-    if(node_buffer.mesh_buffer.material.doubleSided) {
-      glDisable(GL_CULL_FACE);
-    } else {
-      glEnable(GL_CULL_FACE);
-      glCullFace(GL_BACK);
+      glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
+
+      if(node_buffer.mesh_buffer.material.doubleSided) {
+        glDisable(GL_CULL_FACE);
+      } else {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+      }
+
+      if(node_buffer.mesh_buffer.material.baseColorTextureID != -1) {
+        glUniform1i(baseColorTextureLocation.hasValue, true);
+        glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
+      } else {
+        glUniform1i(baseColorTextureLocation.hasValue, false);
+      }
+
+      glUniform4fv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
+      glUniform1f(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
+      glUniform1f(metallicLocation, node_buffer.mesh_buffer.material.metallicFactor);
+
+      if(node_buffer.mesh_buffer.element.elementBufferID != -1)
+        glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
+      else
+        glDrawArrays(node_buffer.mesh_buffer.element.mode, 0, node_buffer.mesh_buffer.count);
     }
 
-    if(node_buffer.mesh_buffer.material.baseColorTextureID != -1) {
-      glUniform1i(baseColorTextureLocation.hasValue, true);
-      glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
-    } else {
-      glUniform1i(baseColorTextureLocation.hasValue, false);
-    }
-
-    glUniform4fv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
-    glUniform1f(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
-    glUniform1f(metallicLocation, node_buffer.mesh_buffer.material.metallicFactor);
-
-    if(node_buffer.mesh_buffer.element.elementBufferID != -1)
-      glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);
-    else
-      glDrawArrays(node_buffer.mesh_buffer.element.mode, 0, node_buffer.mesh_buffer.count);
+    my_scene.animate(currentTime);
   }
-
-  my_scene.animate(currentTime);
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

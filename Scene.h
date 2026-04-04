@@ -20,7 +20,7 @@ struct Scene {
 
   GLuint programID;
 
-  void load(const std::filesystem::path& modelglTFfile);
+  bool load(const std::filesystem::path& modelglTFfile);
   void unload();
 
   void setProgramID(GLuint programID);
