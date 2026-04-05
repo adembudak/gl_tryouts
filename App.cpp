@@ -94,6 +94,8 @@ void App::render(double currentTime) {
         my_scene.unload();
       }
 
+      ImGui::MenuItem("Dear ImGui demo", nullptr, &show_demo_window);
+
       ImGui::EndMenu();
     }
 
@@ -107,10 +109,6 @@ void App::render(double currentTime) {
     std::cout << "Selected filename" << p_fileDialog->GetSelected().string() << std::endl;
     p_fileDialog->ClearSelected();
   }
-
-  ImGui::Begin("Hello, world!");                     // Create a window called "Hello, world!" and append into it.
-  ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-  ImGui::End();
 
   if(show_demo_window) {
     ImGui::ShowDemoWindow(&show_demo_window);
