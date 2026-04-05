@@ -47,7 +47,7 @@ target_sources(vibe PRIVATE FILE_SET external_libs_set TYPE HEADERS BASE_DIRS ex
 
 target_compile_features(vibe PRIVATE cxx_std_23)
 
-target_compile_definitions(vibe PRIVATE GLM_FORCE_MESSAGES GLM_FORCE_CXX20 GLM_ENABLE_EXPERIMENTAL)
+target_compile_definitions(vibe PRIVATE #[[GLM_FORCE_MESSAGES]] GLM_FORCE_CXX20 GLM_ENABLE_EXPERIMENTAL)
 
 install(TARGETS vibe)
 install(DIRECTORY shaders TYPE BIN)
