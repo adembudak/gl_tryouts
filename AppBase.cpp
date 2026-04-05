@@ -30,52 +30,7 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
   app = std::move(the_app);
   running = true;
 
-  if(!glfwInit())
-    return;
-
-  this->setConfigDefaults();
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, info.majorVersion);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, info.minorVersion);
-
-  if(info.flags.debug) {
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-  }
-
-  if(info.flags.robust)
-    glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_LOSE_CONTEXT_ON_RESET);
-
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-  glfwWindowHint(GLFW_SAMPLES, info.samples);
-  glfwWindowHint(GLFW_STEREO, info.flags.stereo ? GLFW_TRUE : GLFW_FALSE);
-
-  glfwSetErrorCallback(glfw_errorCallback);
-
-  this->window = glfwCreateWindow(info.windowInitialWidth, info.windowInitialHeight, info.title.c_str(),
-                                  info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
-
-  glfwMakeContextCurrent(window);
-  glewInit();
-
-  glfwSetWindowSizeCallback(window, glfw_onResize);
-  glfwSetKeyCallback(window, glfw_onKey);
-  glfwSetMouseButtonCallback(window, glfw_onMouseButton);
-  glfwSetCursorPosCallback(window, glfw_onMouseMove);
-  glfwSetScrollCallback(window, glfw_onMouseWheel);
-
-  if(!info.flags.cursor) {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-  }
-
-  info.flags.stereo = 0;
-
-  if(info.flags.debug) {
-    if(glfwExtensionSupported("GL_ARB_debug_output")) {
-      glDebugMessageCallbackARB(glMessageCallback, this);
-      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-    }
-  }
+  this->createWindow();
 
   this->startup();
 
@@ -104,6 +59,54 @@ void AppBase::onResize(int w, int h) {
 void AppBase::setVsync(bool enable) {
   info.flags.vsync = enable ? 1 : 0;
   glfwSwapInterval(info.flags.vsync);
+}
+
+void AppBase::createWindow() {
+  if(!glfwInit())
+    return;
+
+  this->setConfigDefaults();
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, info.majorVersion);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, info.minorVersion);
+
+  if(info.flags.debug) {
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+  }
+
+  if(info.flags.robust)
+    glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_LOSE_CONTEXT_ON_RESET);
+
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+  glfwWindowHint(GLFW_SAMPLES, info.samples);
+  glfwWindowHint(GLFW_STEREO, info.flags.stereo ? GLFW_TRUE : GLFW_FALSE);
+
+  glfwSetErrorCallback(glfw_errorCallback);
+
+  this->window = glfwCreateWindow(info.windowInitialWidth, info.windowInitialHeight, info.title.c_str(), info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+
+  glfwMakeContextCurrent(window);
+  glewInit();
+
+  glfwSetWindowSizeCallback(window, glfw_onResize);
+  glfwSetKeyCallback(window, glfw_onKey);
+  glfwSetMouseButtonCallback(window, glfw_onMouseButton);
+  glfwSetCursorPosCallback(window, glfw_onMouseMove);
+  glfwSetScrollCallback(window, glfw_onMouseWheel);
+
+  if(!info.flags.cursor) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+  }
+
+  info.flags.stereo = 0;
+
+  if(info.flags.debug) {
+    if(glfwExtensionSupported("GL_ARB_debug_output")) {
+      glDebugMessageCallbackARB(glMessageCallback, this);
+      glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+    }
+  }
 }
 
 void AppBase::glfw_errorCallback(int error, const char* description) {
@@ -148,8 +151,7 @@ void AppBase::glfw_onResize(GLFWwindow* window, int w, int h) {
 }
 
 // private member function
-void GLAPIENTRY AppBase::glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                         const GLchar* message, const void* userParam) {
+void GLAPIENTRY AppBase::glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 
   std::ostringstream sout;
   sout << '\n';

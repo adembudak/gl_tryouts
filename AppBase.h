@@ -12,9 +12,7 @@ namespace Application {
 
 /*
  * void run() {
- *   glfwInit()
- *   this->setConfigDefaults()
- *   glewInit();
+ *   this->createWindow();
  *
  *   this->startup();
  *
@@ -81,9 +79,10 @@ protected:
   static void glfw_onMouseWheel(GLFWwindow* window, double xoffset, double yoffset);
   static void glfw_onResize(GLFWwindow* window, int w, int h);
 
+  static void GLAPIENTRY glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+
 private:
-  static void GLAPIENTRY glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-                                         const GLchar* message, const void* userParam);
+  void createWindow();
 };
 
 }
