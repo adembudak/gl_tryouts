@@ -32,12 +32,6 @@ void App::startup() {
 
   my_scene.setProgramID(programID);
 
-  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf");
-  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/SimpleTexture/glTF/SimpleTexture.gltf");
-  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Triangle/glTF/Triangle.gltf");
-  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/Cameras/glTF/Cameras.gltf");
-  // my_scene.load("/home/adem/Github/gl_tryouts/models/Models/ABeautifulGame/glTF/ABeautifulGame.gltf");
-
   viewMatrixLocation = glGetUniformLocation(programID, "view");
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
   transformMatrixLocation = glGetUniformLocation(programID, "transform");
@@ -70,6 +64,8 @@ void App::startup() {
   ImGui_ImplOpenGL3_Init("#version 460");
 }
 
+static ImGui::FileBrowser fileDialog;
+
 void App::render(double currentTime) {
   const double delta = currentTime - lastTime;
   std::exchange(lastTime, currentTime);
@@ -81,34 +77,25 @@ void App::render(double currentTime) {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  static ImGui::FileBrowser fileDialog;
-
   if(ImGui::BeginMainMenuBar()) {
 
     if(ImGui::BeginMenu("File")) {
-      if(ImGui::MenuItem("Open", "Ctrl+O")) {
+      if(ImGui::MenuItem("Open scene")) {
+        if(is_scene_loaded) {
+          is_scene_loaded = false;
+          my_scene.unload();
+        }
         fileDialog.Open();
       }
+
+      if(ImGui::MenuItem("Close scene")) {
+        is_scene_loaded = false;
+        my_scene.unload();
+      }
+
       ImGui::EndMenu();
     }
 
-    if(ImGui::BeginMenu("Edit")) {
-      if(ImGui::MenuItem("Undo", "Ctrl+Z")) {
-      }
-      if(ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) {
-      } // Disabled item
-        //
-      ImGui::Separator();
-      if(ImGui::MenuItem("Cut", "Ctrl+X")) {
-      }
-
-      if(ImGui::MenuItem("Copy", "Ctrl+C")) {
-      }
-
-      if(ImGui::MenuItem("Paste", "Ctrl+V")) {
-      }
-      ImGui::EndMenu();
-    }
     ImGui::EndMainMenuBar();
   }
 
