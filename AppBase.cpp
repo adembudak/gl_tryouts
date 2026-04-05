@@ -50,7 +50,7 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
   glfwWindowHint(GLFW_SAMPLES, info.samples);
   glfwWindowHint(GLFW_STEREO, info.flags.stereo ? GLFW_TRUE : GLFW_FALSE);
 
-  glfwSetErrorCallback(error_callback);
+  glfwSetErrorCallback(glfw_errorCallback);
 
   this->window = glfwCreateWindow(info.windowInitialWidth, info.windowInitialHeight, info.title.c_str(),
                                   info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
@@ -72,7 +72,7 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
 
   if(info.flags.debug) {
     if(glfwExtensionSupported("GL_ARB_debug_output")) {
-      glDebugMessageCallbackARB(MessageCallback, this);
+      glDebugMessageCallbackARB(glMessageCallback, this);
       glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
     }
   }
@@ -94,6 +94,7 @@ void AppBase::onKey(int key, int action, int mods) {}
 void AppBase::onMouseButton(int button, int action) {}
 void AppBase::onMouseMove(int x, int y) {}
 void AppBase::onMouseWheel(int pos) {}
+
 void AppBase::onResize(int w, int h) {
   info.windowInitialWidth = w;
   info.windowInitialHeight = h;
@@ -105,7 +106,7 @@ void AppBase::setVsync(bool enable) {
   glfwSwapInterval(info.flags.vsync);
 }
 
-void AppBase::error_callback(int error, const char* description) {
+void AppBase::glfw_errorCallback(int error, const char* description) {
   std::ostringstream sout;
 
   switch(error) {
@@ -147,7 +148,7 @@ void AppBase::glfw_onResize(GLFWwindow* window, int w, int h) {
 }
 
 // private member function
-void GLAPIENTRY AppBase::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+void GLAPIENTRY AppBase::glMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                          const GLchar* message, const void* userParam) {
 
   std::ostringstream sout;
