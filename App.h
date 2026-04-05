@@ -4,6 +4,10 @@
 #include "Scene.h"
 #include "ShaderLoader.h"
 
+namespace ImGui {
+class FileBrowser;
+}
+
 struct App : public Application::AppBase {
   virtual void setConfigDefaults() override;
   virtual void startup() override;
@@ -15,7 +19,9 @@ struct App : public Application::AppBase {
 
 private:
   bool show_demo_window = true;
+
   bool is_scene_loaded = false;
+  ImGui::FileBrowser *p_fileDialog;
 
   GLuint programID;
 

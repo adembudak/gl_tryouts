@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <glm/gtc/type_ptr.hpp>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -47,6 +48,8 @@ void App::startup() {
   glDisable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
 
+  p_fileDialog = new ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc | ImGuiFileBrowserFlags_ConfirmOnEnter};
+
   assert(glGetError() == GL_NO_ERROR);
 
   IMGUI_CHECKVERSION();
@@ -63,8 +66,6 @@ void App::startup() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 460");
 }
-
-static ImGui::FileBrowser fileDialog;
 
 void App::render(double currentTime) {
   const double delta = currentTime - lastTime;
@@ -85,7 +86,7 @@ void App::render(double currentTime) {
           is_scene_loaded = false;
           my_scene.unload();
         }
-        fileDialog.Open();
+        p_fileDialog->Open();
       }
 
       if(ImGui::MenuItem("Close scene")) {
@@ -99,12 +100,12 @@ void App::render(double currentTime) {
     ImGui::EndMainMenuBar();
   }
 
-  fileDialog.Display();
+  p_fileDialog->Display();
 
-  if(fileDialog.HasSelected()) {
-    is_scene_loaded = my_scene.load(fileDialog.GetSelected());
-    std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
-    fileDialog.ClearSelected();
+  if(p_fileDialog->HasSelected()) {
+    is_scene_loaded = my_scene.load(p_fileDialog->GetSelected());
+    std::cout << "Selected filename" << p_fileDialog->GetSelected().string() << std::endl;
+    p_fileDialog->ClearSelected();
   }
 
   ImGui::Begin("Hello, world!");                     // Create a window called "Hello, world!" and append into it.
@@ -165,6 +166,8 @@ void App::render(double currentTime) {
 void App::shutdown() {
   shaderLoader.unload();
   my_scene.unload();
+
+  delete p_fileDialog;
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
