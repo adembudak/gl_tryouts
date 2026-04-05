@@ -31,8 +31,8 @@ class AppBase {
 public:
   struct APPINFO {
     std::string title;
-    int windowWidth;
-    int windowHeight;
+    int windowInitialWidth;
+    int windowInitialHeight;
     int majorVersion;
     int minorVersion;
     int samples;

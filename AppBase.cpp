@@ -12,8 +12,8 @@ namespace Application {
 std::unique_ptr<AppBase> AppBase::app = nullptr;
 
 void AppBase::setConfigDefaults() {
-  info.windowWidth = 800;
-  info.windowHeight = 600;
+  info.windowInitialWidth = 800;
+  info.windowInitialHeight = 600;
   info.majorVersion = 4;
   info.minorVersion = 6;
   info.samples = 0;
@@ -52,7 +52,7 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
 
   glfwSetErrorCallback(error_callback);
 
-  this->window = glfwCreateWindow(info.windowWidth, info.windowHeight, info.title.c_str(),
+  this->window = glfwCreateWindow(info.windowInitialWidth, info.windowInitialHeight, info.title.c_str(),
                                   info.flags.fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
@@ -95,8 +95,8 @@ void AppBase::onMouseButton(int button, int action) {}
 void AppBase::onMouseMove(int x, int y) {}
 void AppBase::onMouseWheel(int pos) {}
 void AppBase::onResize(int w, int h) {
-  info.windowWidth = w;
-  info.windowHeight = h;
+  info.windowInitialWidth = w;
+  info.windowInitialHeight = h;
 }
 
 // protected member functions
