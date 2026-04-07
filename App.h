@@ -18,11 +18,13 @@ struct App : public Application::AppBase {
   virtual void onMouseWheel(int pos) override;
 
 private:
-  bool show_demo_window = true;
+  bool show_demo_window = false;
 
   bool is_scene_loaded = false;
-  ImGui::FileBrowser *p_fileDialog;
+  ImGui::FileBrowser* p_fileDialog;
 
+  Camera defaultCamera;
+  glm::mat4x4 defaultView;
   GLuint programID;
 
   GLuint viewMatrixLocation;

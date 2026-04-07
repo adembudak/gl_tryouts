@@ -19,9 +19,6 @@ struct Camera {
 
   const glm::mat4x4& projectionMatrix() const;
 
-  static const glm::mat4x4& defaultPerspectiveCamera();
-  static const glm::mat4x4& defaultCameraPosition();
-
   glm::mat4x4 projection{};
   std::string name;
 };

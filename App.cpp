@@ -50,6 +50,20 @@ void App::startup() {
 
   p_fileDialog = new ImGui::FileBrowser{ImGuiFileBrowserFlags_CloseOnEsc | ImGuiFileBrowserFlags_ConfirmOnEnter};
 
+  tn::PerspectiveCamera p;
+  p.aspectRatio = 1.5;
+  p.yfov = 0.660593;
+  p.zfar = 100.0;
+  p.znear = 0.01;
+  defaultCamera = std::move(p);
+  defaultCamera.name = "Default";
+
+  constexpr glm::vec3 eye{0.0, 0.0, +5.0};      //   +y
+  constexpr glm::vec3 center{0.0, 0.0, 0.0};    //   |
+  constexpr glm::vec3 Y_up{0.0, +1.0, 0.0};     //   o-- +x
+                                                //  /
+  defaultView = glm::lookAt(eye, center, Y_up); // +z
+
   assert(glGetError() == GL_NO_ERROR);
 
   IMGUI_CHECKVERSION();
@@ -121,9 +135,8 @@ void App::render(double currentTime) {
   glClearBufferfv(GL_COLOR, 0, black);
 
   if(is_scene_loaded) {
-
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultPerspectiveCamera()));
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(Camera::defaultCameraPosition()));
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(this->defaultCamera.projectionMatrix()));
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(this->defaultView));
 
     for(const auto& [_, node_buffer] : my_scene.getBuffers()) {
       glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
