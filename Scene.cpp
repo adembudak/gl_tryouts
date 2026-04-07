@@ -25,18 +25,22 @@ void Scene::setProgramID(GLuint programID) {
 
 bool Scene::load(const std::filesystem::path& modelglTFFile) {
   assert(std::filesystem::exists(modelglTFFile));
-  std::string error, warning;
-  tn::TinyGLTF{}.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
 
-  if(!std::empty(error)) {
+  std::string error, warning;
+
+  if(tinygltf::TinyGLTF glTF_Loader; modelglTFFile.extension() == ".gltf")
+    glTF_Loader.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
+  else if(modelglTFFile.extension() == ".glb")
+    glTF_Loader.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
+
+  if(!warning.empty())
+    std::println("Warning [TinyGLTF] {}", warning);
+
+  if(!error.empty()) {
     std::println("Error [TinyGLTF] {}", error);
 
     return false;
   }
-
-
-  if(!std::empty(warning))
-    std::println("Warning [TinyGLTF] {}", warning);
 
   for(const tn::Scene& scene : model.scenes)
     visitScene(scene);
@@ -131,14 +135,14 @@ void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer, const int 
   if(camera.type == "perspective") {
     buffer.camera = camera.perspective;
 
-    name.append(" (perspective)");
+    name.append(" (p)");
     buffer.camera->name = name;
   }
 
   else if(camera.type == "orthographic") {
     buffer.camera = camera.orthographic;
 
-    name.append(" (orthographic)");
+    name.append(" (o)");
     buffer.camera->name = name;
   }
 
