@@ -17,6 +17,7 @@
 #include <cmath>
 #include <vector>
 #include <print>
+#include <utility>
 #include <algorithm>
 
 void Scene::setProgramID(GLuint programID) {
@@ -147,7 +148,7 @@ void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer, const int 
   }
 
   else {
-    assert(false);
+    std::unreachable();
   }
 }
 
@@ -261,7 +262,7 @@ void Scene::animate(float currentTime) {
         }
 
         else {
-          assert(false);
+          std::unreachable();
         }
 
         TRS *= glm::translate(glm::mat4x4(1.0), currentTranslation);
@@ -304,7 +305,7 @@ void Scene::animate(float currentTime) {
         }
 
         else {
-          assert(false);
+          std::unreachable();
         }
 
         // std::println("{} {}", currentTime_, glm::to_string(currentRotation));
@@ -345,7 +346,7 @@ void Scene::animate(float currentTime) {
         }
 
         else {
-          assert(false);
+          std::unreachable();
         }
 
         TRS *= glm::scale(glm::mat4x4(1.0f), currentScale);
@@ -355,7 +356,7 @@ void Scene::animate(float currentTime) {
       }
 
       else {
-        assert(false);
+        std::unreachable();
       }
 
       buffers[c.target_node].transformMatrix_ = TRS;
