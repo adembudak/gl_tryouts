@@ -17,6 +17,14 @@ struct Camera {
   Camera(const tn::PerspectiveCamera& p);
   Camera(const tn::OrthographicCamera& o);
 
+  Camera(const Camera& cam);
+  Camera& operator=(const Camera& cam);
+
+  Camera(Camera&& cam);
+  Camera& operator=(Camera&& cam);
+
+  ~Camera() = default;
+
   const glm::mat4x4& projectionMatrix() const;
 
   glm::mat4x4 projection{};
