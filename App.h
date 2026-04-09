@@ -18,7 +18,7 @@ struct App : public Application::AppBase {
   virtual void onMouseWheel(int pos) override;
 
 private:
-  bool show_demo_window = false;
+  bool imgui_demo_window_visible = false;
 
   bool is_scene_loaded = false;
   ImGui::FileBrowser* p_fileDialog;

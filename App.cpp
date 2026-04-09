@@ -108,7 +108,7 @@ void App::render(double currentTime) {
         my_scene.unload();
       }
 
-      ImGui::MenuItem("Dear ImGui demo", nullptr, &show_demo_window);
+      ImGui::MenuItem("Dear ImGui demo", nullptr, &imgui_demo_window_visible);
 
       ImGui::EndMenu();
     }
@@ -124,8 +124,8 @@ void App::render(double currentTime) {
     p_fileDialog->ClearSelected();
   }
 
-  if(show_demo_window) {
-    ImGui::ShowDemoWindow(&show_demo_window);
+  if(imgui_demo_window_visible) {
+    ImGui::ShowDemoWindow(&imgui_demo_window_visible);
   }
 
   constexpr GLfloat clearDepth = 1.0;
