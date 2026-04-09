@@ -93,34 +93,14 @@ void App::render(double currentTime) {
   ImGui::NewFrame();
 
   if(ImGui::BeginMainMenuBar()) {
-
-    if(ImGui::BeginMenu("File")) {
-      if(ImGui::MenuItem("Open scene")) {
-        if(is_scene_loaded) {
-          is_scene_loaded = false;
-          my_scene.unload();
-        }
-        p_fileDialog->Open();
-      }
-
-      if(ImGui::MenuItem("Close scene")) {
-        is_scene_loaded = false;
-        my_scene.unload();
-      }
-
-      ImGui::MenuItem("Dear ImGui demo", nullptr, &imgui_demo_window_visible);
-
-      ImGui::EndMenu();
-    }
-
-    ImGui::EndMainMenuBar();
+    putMenuBar();
   }
 
   p_fileDialog->Display();
 
   if(p_fileDialog->HasSelected()) {
-    is_scene_loaded = my_scene.load(p_fileDialog->GetSelected());
     std::cout << "Selected filename" << p_fileDialog->GetSelected().string() << std::endl;
+    is_scene_loaded = my_scene.load(p_fileDialog->GetSelected());
     p_fileDialog->ClearSelected();
   }
 
@@ -186,6 +166,29 @@ void App::shutdown() {
 
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void App::putMenuBar() {
+  if(ImGui::BeginMenu("File")) {
+    if(ImGui::MenuItem("Open scene")) {
+      if(is_scene_loaded) { // if it's already open, close first
+        is_scene_loaded = false;
+        my_scene.unload();
+      }
+      p_fileDialog->Open();
+    }
+
+    if(ImGui::MenuItem("Close scene")) {
+      is_scene_loaded = false;
+      my_scene.unload();
+    }
+
+    ImGui::MenuItem("Dear ImGui demo", nullptr, &imgui_demo_window_visible);
+
+    ImGui::EndMenu();
+  }
+
+  ImGui::EndMainMenuBar();
 }
 
 void App::onKey(int key, int action, int mods) {
