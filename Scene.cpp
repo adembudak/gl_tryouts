@@ -32,7 +32,7 @@ bool Scene::load(const std::filesystem::path& modelglTFFile) {
   if(tinygltf::TinyGLTF glTF_Loader; modelglTFFile.extension() == ".gltf")
     glTF_Loader.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
   else if(modelglTFFile.extension() == ".glb")
-    glTF_Loader.LoadASCIIFromFile(&model, &error, &warning, modelglTFFile);
+    glTF_Loader.LoadBinaryFromFile(&model, &error, &warning, modelglTFFile);
 
   if(!warning.empty())
     std::println("Warning [TinyGLTF] {}", warning);
