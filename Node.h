@@ -52,6 +52,9 @@ struct mesh_buffer_t {
 };
 
 struct node_t {
+  enum class type_t { mesh, camera, skin };
+  type_t type;
+
   mesh_buffer_t mesh_buffer;
 
   std::optional<Camera> camera;

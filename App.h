@@ -19,6 +19,17 @@ struct App : public Application::AppBase {
 
 private:
   void putMenuBar();
+
+  void loadSceneCameras();
+  struct T {
+    glm::mat4x4* view;
+    glm::mat4x4 perspective;
+  };
+
+  std::map<std::string, T> cameras;
+  std::vector<std::string> cameraNames;
+  std::string active_camera;
+
 private:
 
   bool imgui_demo_window_visible = false;
@@ -28,6 +39,7 @@ private:
 
   Camera defaultCamera;
   glm::mat4x4 defaultView;
+
   GLuint programID;
 
   GLuint viewMatrixLocation;

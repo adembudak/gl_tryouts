@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,7 +14,8 @@
 
 #include <vector>
 #include <utility>
-#include <iostream>
+#include <ranges>
+#include <print>
 
 void App::setConfigDefaults() {
   info.title = "something something";
@@ -64,6 +66,13 @@ void App::startup() {
                                                 //  /
   defaultView = glm::lookAt(eye, center, Y_up); // +z
 
+  T t;
+  t.view = &defaultView;
+  t.perspective = defaultCamera.projectionMatrix();
+
+  this->active_camera = "Default";
+  cameras[active_camera] = t;
+
   assert(glGetError() == GL_NO_ERROR);
 
   IMGUI_CHECKVERSION();
@@ -96,11 +105,28 @@ void App::render(double currentTime) {
     putMenuBar();
   }
 
+  ImGui::Begin("Scene");
+
+  if(ImGui::BeginCombo("Cameras", active_camera.c_str())) {
+    for(const auto& cam : cameraNames) {
+      bool is_selected = (active_camera == cam);
+      if(ImGui::Selectable(cam.c_str(), is_selected))
+        active_camera = cam;
+
+      if(is_selected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+
+  ImGui::End();
+
   p_fileDialog->Display();
 
   if(p_fileDialog->HasSelected()) {
-    std::cout << "Selected filename" << p_fileDialog->GetSelected().string() << std::endl;
+    std::println("Selected filename {}", p_fileDialog->GetSelected().string());
     is_scene_loaded = my_scene.load(p_fileDialog->GetSelected());
+    this->loadSceneCameras();
     p_fileDialog->ClearSelected();
   }
 
@@ -115,10 +141,13 @@ void App::render(double currentTime) {
   glClearBufferfv(GL_COLOR, 0, black);
 
   if(is_scene_loaded) {
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(this->defaultCamera.projectionMatrix()));
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(this->defaultView));
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(cameras[active_camera].perspective));
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(*cameras[active_camera].view));
 
     for(const auto& [_, node_buffer] : my_scene.getBuffers()) {
+      if(node_buffer.type != node_t::type_t::mesh)
+        continue;
+
       glUniformMatrix4fv(transformMatrixLocation, 1, GL_FALSE, glm::value_ptr(node_buffer.transformMatrix()));
 
       glBindVertexArray(node_buffer.mesh_buffer.vertexArrayID);
@@ -155,8 +184,8 @@ void App::render(double currentTime) {
 }
 
 void App::shutdown() {
-  shaderLoader.unload();
   my_scene.unload();
+  shaderLoader.unload();
 
   delete p_fileDialog;
 
@@ -189,6 +218,20 @@ void App::putMenuBar() {
   }
 
   ImGui::EndMainMenuBar();
+}
+
+void App::loadSceneCameras() {
+  for(auto& [id, node] : my_scene.getBuffers()) {
+    if(node.camera.has_value()) {
+      T t;
+      t.view = &node.transformMatrix_;
+      t.perspective = node.camera->projectionMatrix();
+      cameras[node.camera->name] = std::move(t);
+    }
+  }
+
+  if(!cameras.empty())
+    cameraNames = cameras | std::ranges::views::keys | std::ranges::to<std::vector<std::string>>();
 }
 
 void App::onKey(int key, int action, int mods) {

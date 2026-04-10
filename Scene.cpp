@@ -43,6 +43,26 @@ bool Scene::load(const std::filesystem::path& modelglTFFile) {
     return false;
   }
 
+  for(int i = 0; const tn::Camera& cam : model.cameras) {
+    Camera camera;
+    std::string name = "Cam ";
+    name.append(std::to_string(i));
+    ++i;
+
+    if(cam.type == "perspective") {
+      camera = Camera(cam.perspective);
+      name.append("(p)");
+    } else if(cam.type == "orthographic") {
+      camera = Camera(cam.orthographic);
+      name.append("(o)");
+    } else {
+      std::unreachable();
+    }
+
+    camera.name = std::move(name);
+    cameras.push_back(std::move(camera));
+  }
+
   for(const tn::Scene& scene : model.scenes)
     visitScene(scene);
 
@@ -92,18 +112,19 @@ void Scene::visitNode(const int nodeIndex, const glm::mat4x4& parentNodeTransfor
 
   node_t buffer;
 
-  if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale)) {
-    loadNodeTransformData(node, buffer, parentNodeTransform);
-  }
-
   if(int meshIndex = node.mesh; meshIndex != -1) {
+    buffer.type = node_t::type_t::mesh;
     const tn::Mesh& mesh = model.meshes[meshIndex];
     visitNodeMesh(mesh, buffer.mesh_buffer);
   }
 
   if(int cameraIndex = node.camera; cameraIndex != -1) {
-    const tn::Camera& camera = model.cameras[cameraIndex];
-    visitNodeCamera(camera, buffer, nodeIndex);
+    buffer.type = node_t::type_t::camera;
+    buffer.camera = cameras[cameraIndex];
+  }
+
+  if(!std::empty(node.matrix) || !std::empty(node.translation) || !std::empty(node.rotation) || !std::empty(node.scale)) {
+    loadNodeTransformData(node, buffer, parentNodeTransform);
   }
 
   buffers[nodeIndex] = std::move(buffer);
@@ -120,36 +141,6 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
 
   for(const tn::Primitive& primitive : mesh.primitives)
     visitMeshPrimitive(mesh_buffer, primitive);
-}
-
-void Scene::visitNodeCamera(const tn::Camera& camera, node_t& buffer, const int nodeIndex) {
-  std::string name;
-  name.append("Attached to ");
-
-  if(const std::string nodeName = model.nodes[nodeIndex].name; !std::empty(nodeName))
-    name.append(nodeName);
-  name.append(" (Node ").append(std::to_string(nodeIndex)).append(") ");
-
-  if(const std::string cameraName = camera.name; !std::empty(cameraName))
-    name.append("Camera: ").append(cameraName);
-
-  if(camera.type == "perspective") {
-    buffer.camera = camera.perspective;
-
-    name.append(" (p)");
-    buffer.camera->name = name;
-  }
-
-  else if(camera.type == "orthographic") {
-    buffer.camera = camera.orthographic;
-
-    name.append(" (o)");
-    buffer.camera->name = name;
-  }
-
-  else {
-    std::unreachable();
-  }
 }
 
 void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive) {
@@ -381,7 +372,10 @@ void Scene::loadNodeTransformData(const tn::Node& node, node_t& buffer, const gl
     if(!std::empty(node.scale))
       S = glm::scale(glm::mat4x4(1.0), glm::vec3(glm::make_vec3(std::data(node.scale))));
 
-    buffer.transformMatrix_ = parentNodeTransform * T * R * S;
+    if(buffer.type == node_t::type_t::camera)
+      buffer.transformMatrix_ = glm::inverse(parentNodeTransform * T * R);
+    else
+      buffer.transformMatrix_ = parentNodeTransform * T * R * S;
   }
 }
 
