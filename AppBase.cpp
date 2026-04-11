@@ -39,7 +39,8 @@ void AppBase::run(std::unique_ptr<AppBase>&& the_app) {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
-    running = !glfwWindowShouldClose(window);
+    if(glfwWindowShouldClose(window))
+      running = false;
   }
 
   this->shutdown();

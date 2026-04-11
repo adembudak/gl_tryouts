@@ -214,6 +214,10 @@ void App::putMenuBar() {
 
     ImGui::MenuItem("Dear ImGui demo", nullptr, &imgui_demo_window_visible);
 
+    if(ImGui::MenuItem("Close")) {
+      running = false;
+    }
+
     ImGui::EndMenu();
   }
 
