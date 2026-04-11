@@ -46,7 +46,7 @@ private:
   void visitScene(const tn::Scene& scene);
   void visitNode(const int nodeIndex, const glm::mat4x4& parentNodeTransform);
   void visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer);
-  void visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive);
+  void visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& primitive);
 
   void loadNodeTransformData(const tn::Node& node, node_t& buffer, const glm::mat4x4& parentNodeTransform);
   void loadMeshVertexPositionData(mesh_buffer_t& buffer, int accessorIndex);

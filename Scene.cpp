@@ -139,30 +139,31 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
   glGenVertexArrays(1, &mesh_buffer.vertexArrayID);
   glBindVertexArray(mesh_buffer.vertexArrayID);
 
-  for(const tn::Primitive& primitive : mesh.primitives)
+  for(const tn::Primitive& primitive : mesh.primitives) {
     visitMeshPrimitive(mesh_buffer, primitive);
+  }
 }
 
-void Scene::visitMeshPrimitive(mesh_buffer_t& buffer, const tn::Primitive& primitive) {
+void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& primitive) {
   for(const auto& [attribute, accessorIndex] : primitive.attributes) {
     if(attribute == "POSITION")
-      loadMeshVertexPositionData(buffer, accessorIndex);
+      loadMeshVertexPositionData(mesh_buffer, accessorIndex);
 
     if(attribute == "NORMAL")
-      loadMeshVertexNormalData(buffer, accessorIndex);
+      loadMeshVertexNormalData(mesh_buffer, accessorIndex);
 
     if(attribute.starts_with("TEXCOORD_")) {
-      loadMeshTextureCoordinateData(buffer, accessorIndex, attribute);
+      loadMeshTextureCoordinateData(mesh_buffer, accessorIndex, attribute);
     }
   }
 
   if(primitive.indices != -1) {
-    buffer.element.mode = primitive.mode;
-    loadMeshDrawIndices(buffer, primitive.indices);
+    mesh_buffer.element.mode = primitive.mode;
+    loadMeshDrawIndices(mesh_buffer, primitive.indices);
   }
 
   if(primitive.material != -1) {
-    loadMeshMaterial(buffer, primitive.material);
+    loadMeshMaterial(mesh_buffer, primitive.material);
   }
 }
 
