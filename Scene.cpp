@@ -142,6 +142,7 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
   for(const tn::Primitive& primitive : mesh.primitives) {
     visitMeshPrimitive(mesh_buffer, primitive);
   }
+
 }
 
 void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& primitive) {
@@ -165,6 +166,25 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& 
   if(primitive.material != -1) {
     loadMeshMaterial(mesh_buffer, primitive.material);
   }
+
+  for(const std::map<std::string, int>& morphTarget : primitive.targets) {
+    for(const auto& [attribute, accessorIndex] : morphTarget) {
+      if(attribute == "POSITION") { // vec3, float
+        const tn::Accessor& accessor = model.accessors[accessorIndex];
+        const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+        const tn::Buffer& buf = model.buffers[bv.buffer];
+
+        const auto begin = reinterpret_cast<glm::vec3*>(const_cast<unsigned char*>(std::data(buf.data)) + bv.byteOffset + accessor.byteOffset);
+        const auto end = begin + accessor.count;
+
+        const std::span<glm::vec3> positionDeltas(begin, end);
+        for(const glm::vec3& e : positionDeltas) {
+          std::println("{}", glm::to_string(e));
+        }
+      }
+    }
+  }
+
 }
 
 void Scene::animate(float currentTime) {
