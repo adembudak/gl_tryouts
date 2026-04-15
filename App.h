@@ -46,14 +46,17 @@ private:
   GLuint projectionMatrixLocation;
   GLuint transformMatrixLocation;
 
-  GLuint baseColorLocation;
-  GLuint roughnessLocation;
-  GLuint metallicLocation;
-
   struct {
-    GLboolean hasValue;
-    GLuint sampler;
-  } baseColorTextureLocation;
+    GLuint baseColorLocation;
+    GLuint roughnessLocation;
+    GLuint metallicLocation;
+
+    struct {
+      GLboolean isDefined;
+      GLuint sampler;
+    } baseColorTextureLocation;
+
+  } pbr;
 
   util::ShaderLoader shaderLoader;
 

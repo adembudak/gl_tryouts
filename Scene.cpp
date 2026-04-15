@@ -1,7 +1,5 @@
 #define GLM_GTX_quaternion
 
-#include "Scene.h"
-
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
@@ -19,6 +17,8 @@
 #include <print>
 #include <utility>
 #include <algorithm>
+
+#include "Scene.h"
 
 void Scene::setProgramID(GLuint programID) {
   this->programID = programID;
@@ -83,20 +83,20 @@ void Scene::unload() {
     if(glIsBuffer(buffer.mesh_buffer.element.elementBufferID))
       glDeleteBuffers(1, &buffer.mesh_buffer.element.elementBufferID);
 
-    if(glIsTexture(buffer.mesh_buffer.material.normalTextureID))
-      glDeleteTextures(1, &buffer.mesh_buffer.material.normalTextureID);
+    if(glIsTexture(buffer.mesh_buffer.material.normalTexture.textureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.normalTexture.textureID);
 
-    if(glIsTexture(buffer.mesh_buffer.material.occlusionTextureID))
-      glDeleteTextures(1, &buffer.mesh_buffer.material.occlusionTextureID);
+    if(glIsTexture(buffer.mesh_buffer.material.occlusionTexture.textureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.occlusionTexture.textureID);
 
-    if(glIsTexture(buffer.mesh_buffer.material.emissionTextureID))
-      glDeleteTextures(1, &buffer.mesh_buffer.material.emissionTextureID);
+    if(glIsTexture(buffer.mesh_buffer.material.emissiveTexture.textureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.emissiveTexture.textureID);
 
-    if(glIsTexture(buffer.mesh_buffer.material.baseColorTextureID))
-      glDeleteTextures(1, &buffer.mesh_buffer.material.baseColorTextureID);
+    if(glIsTexture(buffer.mesh_buffer.material.pbr.baseColorTexture.textureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.pbr.baseColorTexture.textureID);
 
-    if(glIsTexture(buffer.mesh_buffer.material.metallicRoughnessTextureID))
-      glDeleteTextures(1, &buffer.mesh_buffer.material.metallicRoughnessTextureID);
+    if(glIsTexture(buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID))
+      glDeleteTextures(1, &buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID);
   }
 }
 
@@ -143,6 +143,8 @@ void Scene::visitNodeMesh(const tn::Mesh& mesh, mesh_buffer_t& mesh_buffer) {
     visitMeshPrimitive(mesh_buffer, primitive);
   }
 
+  for(size_t i = 0; i < mesh.weights.size(); ++i) {
+  }
 }
 
 void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& primitive) {
@@ -167,7 +169,7 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& 
     loadMeshMaterial(mesh_buffer, primitive.material);
   }
 
-  for(const std::map<std::string, int>& morphTarget : primitive.targets) {
+  for(const std::map<std::string, int>& morphTarget : primitive.targets) { // morph targets
     for(const auto& [attribute, accessorIndex] : morphTarget) {
       if(attribute == "POSITION") { // vec3, float
         const tn::Accessor& accessor = model.accessors[accessorIndex];
@@ -184,7 +186,6 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& 
       }
     }
   }
-
 }
 
 void Scene::animate(float currentTime) {
@@ -536,9 +537,9 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
 
   const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
-  buffer.material.roughnessFactor = pbr.roughnessFactor;
-  ranges::copy(pbr.baseColorFactor, std::begin(buffer.material.baseColorFactor));
-  buffer.material.metallicFactor = pbr.metallicFactor;
+  buffer.material.pbr.roughnessFactor = pbr.roughnessFactor; // [0.0, 1.0]
+  ranges::copy(pbr.baseColorFactor, std::begin(buffer.material.pbr.baseColorFactor));
+  buffer.material.pbr.metallicFactor = pbr.metallicFactor; // [0.0, 1.0]
 
   if(const tn::TextureInfo& baseColorTexture = pbr.baseColorTexture; baseColorTexture.index != -1) {
     loadTexture(buffer, baseColorTexture.index, baseColorTexture.texCoord, mesh_buffer_t::material_properties_t::textureKind::baseColorTexture);
@@ -586,27 +587,27 @@ void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex, int texCoord_n,
     using enum mesh_buffer_t::material_properties_t::textureKind;
   case normalTexture:
     internalFormat = im.component == 4 ? GL_RGBA8 : GL_RGB8;
-    buffer.material.normalTextureID = id;
+    buffer.material.normalTexture.textureID = id;
     break;
 
   case occlusionTexture:
     internalFormat = im.component == 4 ? GL_RGBA8 : im.component == 3 ? GL_RGB8 : im.component == 2 ? GL_RG8 : GL_R8;
-    buffer.material.occlusionTextureID = id;
+    buffer.material.occlusionTexture.textureID = id;
     break;
 
   case emissionTexture:
     internalFormat = im.component == 4 ? GL_RGBA8 : GL_RGB8;
-    buffer.material.emissionTextureID = id;
+    buffer.material.emissiveTexture.textureID = id;
     break;
 
   case baseColorTexture:
     internalFormat = im.component == 4 ? GL_SRGB8_ALPHA8 : GL_SRGB8;
-    buffer.material.baseColorTextureID = id;
+    buffer.material.pbr.baseColorTexture.textureID = id;
     break;
 
   case metallicRoughnessTexture:
     internalFormat = im.component == 4 ? GL_RGBA8 : GL_RGB8;
-    buffer.material.metallicRoughnessTextureID = id;
+    buffer.material.pbr.metallicRoughnessTexture.textureID = id;
     break;
   };
   assert(internalFormat != 0);

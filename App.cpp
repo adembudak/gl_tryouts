@@ -39,12 +39,12 @@ void App::startup() {
   projectionMatrixLocation = glGetUniformLocation(programID, "projection");
   transformMatrixLocation = glGetUniformLocation(programID, "transform");
 
-  baseColorLocation = glGetUniformLocation(programID, "baseColor");
-  roughnessLocation = glGetUniformLocation(programID, "roughness");
-  metallicLocation = glGetUniformLocation(programID, "metallic");
+  pbr.baseColorLocation = glGetUniformLocation(programID, "pbr.baseColor");
+  pbr.roughnessLocation = glGetUniformLocation(programID, "pbr.roughness");
+  pbr.metallicLocation = glGetUniformLocation(programID, "pbr.metallic");
 
-  baseColorTextureLocation.hasValue = glGetUniformLocation(programID, "baseColorTexture.hasValue");
-  baseColorTextureLocation.sampler = glGetUniformLocation(programID, "baseColorTexture.sampler");
+  pbr.baseColorTextureLocation.isDefined = glGetUniformLocation(programID, "baseColorTexture.isDefined");
+  pbr.baseColorTextureLocation.sampler = glGetUniformLocation(programID, "baseColorTexture.sampler");
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
@@ -159,16 +159,16 @@ void App::render(double currentTime) {
         glCullFace(GL_BACK);
       }
 
-      if(node_buffer.mesh_buffer.material.baseColorTextureID != -1) {
-        glUniform1i(baseColorTextureLocation.hasValue, true);
-        glBindTextureUnit(0, node_buffer.mesh_buffer.material.baseColorTextureID);
+      if(node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID != -1) {
+        glUniform1i(pbr.baseColorTextureLocation.isDefined, true);
+        glBindTextureUnit(0, node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID);
       } else {
-        glUniform1i(baseColorTextureLocation.hasValue, false);
+        glUniform1i(pbr.baseColorTextureLocation.isDefined, false);
       }
 
-      glUniform4fv(baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.baseColorFactor));
-      glUniform1f(roughnessLocation, node_buffer.mesh_buffer.material.roughnessFactor);
-      glUniform1f(metallicLocation, node_buffer.mesh_buffer.material.metallicFactor);
+      glUniform4fv(pbr.baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.pbr.baseColorFactor));
+      glUniform1f(pbr.roughnessLocation, node_buffer.mesh_buffer.material.pbr.roughnessFactor);
+      glUniform1f(pbr.metallicLocation, node_buffer.mesh_buffer.material.pbr.metallicFactor);
 
       if(node_buffer.mesh_buffer.element.elementBufferID != -1)
         glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);

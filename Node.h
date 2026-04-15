@@ -36,15 +36,33 @@ struct mesh_buffer_t {
     double alphaCutoff = 0.5;                    // default
     bool doubleSided = false;                    // default
 
-    std::array<float, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
-    float roughnessFactor = 1.0;                                 // default
-    float metallicFactor = 1.0;                                  // default
+    struct pbrMetallicRoughness_t {
+      std::array<float, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
+      float roughnessFactor = 1.0;                                 // default
+      float metallicFactor = 1.0;                                  // default
 
-    GLuint normalTextureID = -1;
-    GLuint occlusionTextureID = -1;
-    GLuint emissionTextureID = -1;
-    GLuint baseColorTextureID = -1;
-    GLuint metallicRoughnessTextureID = -1;
+      struct baseColorTexture_t {
+        GLuint textureID = -1;
+      } baseColorTexture;
+
+      struct metallicRoughnessTexture_t {
+        GLuint textureID = -1;
+      } metallicRoughnessTexture;
+
+    } pbr;
+
+    struct normalTexture_t {
+      float scale = 1.0; // default;
+      GLuint textureID = -1;
+    } normalTexture;
+
+    struct occlusionTexture_t {
+      GLuint textureID = -1;
+    } occlusionTexture;
+
+    struct emissiveTexture_t {
+      GLuint textureID = -1;
+    } emissiveTexture;
 
     std::unordered_map<std::string, GLuint> textureUV;
 
