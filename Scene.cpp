@@ -155,9 +155,11 @@ void Scene::visitMeshPrimitive(mesh_buffer_t& mesh_buffer, const tn::Primitive& 
     if(attribute == "NORMAL")
       loadMeshVertexNormalData(mesh_buffer, accessorIndex);
 
-    if(attribute.starts_with("TEXCOORD_")) {
+    if(attribute.starts_with("TEXCOORD_"))
       loadMeshTextureCoordinateData(mesh_buffer, accessorIndex, attribute);
-    }
+
+    if(attribute == "TANGENT")
+      loadMeshTangentialDirectionData(mesh_buffer, accessorIndex);
   }
 
   if(primitive.indices != -1) {
@@ -471,6 +473,28 @@ void Scene::loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex) {
   glEnableVertexArrayAttrib(buffer.vertexArrayID, attribIndex);
 
   assert(glGetError() == GL_NO_ERROR);
+}
+
+void Scene::loadMeshTangentialDirectionData(mesh_buffer_t& mesh_buffer, int accessorIndex) {
+  GLuint attribIndex = glGetAttribLocation(programID, "vertexTangent");
+
+  const tn::Accessor accessor = model.accessors[accessorIndex];
+  const tn::BufferView& bv = model.bufferViews[accessor.bufferView];
+  const tn::Buffer& buf = model.buffers[bv.buffer];
+
+  GLuint id;
+  glCreateBuffers(1, &id);
+  glBindBuffer(bv.target, id);
+
+  mesh_buffer.vertexAttribute.tangentBufferID = id;
+
+  glBufferStorage(bv.target, bv.byteLength, std::data(buf.data) + bv.byteOffset, GL_MAP_READ_BIT);
+
+  glVertexArrayVertexBuffer(mesh_buffer.vertexArrayID, attribIndex, mesh_buffer.vertexAttribute.tangentBufferID, accessor.byteOffset, accessor.ByteStride(bv));
+  glVertexArrayAttribFormat(mesh_buffer.vertexArrayID, attribIndex, tn::GetNumComponentsInType(accessor.type), accessor.componentType, accessor.normalized, accessor.byteOffset);
+
+  glVertexArrayAttribBinding(mesh_buffer.vertexArrayID, attribIndex, attribIndex);
+  glEnableVertexArrayAttrib(mesh_buffer.vertexArrayID, attribIndex);
 }
 
 void Scene::loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex, const std::string& TEXCOORD_n) {

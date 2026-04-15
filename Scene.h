@@ -53,6 +53,7 @@ private:
   void loadMeshVertexNormalData(mesh_buffer_t& buffer, int accessorIndex);
   void loadMeshTextureCoordinateData(mesh_buffer_t& buffer, int accessorIndex, const std::string& TEXCOORD_n);
   void loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex);
+  void loadMeshTangentialDirectionData(mesh_buffer_t& buffer, int accessorIndex);
 
   void loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex);
 

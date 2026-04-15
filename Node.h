@@ -15,6 +15,7 @@ struct mesh_buffer_t {
   struct vertexAttributeBuffer_t {
     GLuint positionBufferID = -1;
     GLuint normalBufferID = -1;
+    GLuint tangentBufferID = -1;
   } vertexAttribute;
 
   size_t count;
@@ -57,6 +58,7 @@ struct mesh_buffer_t {
     } normalTexture;
 
     struct occlusionTexture_t {
+      float strength = 1.0;
       GLuint textureID = -1;
     } occlusionTexture;
 

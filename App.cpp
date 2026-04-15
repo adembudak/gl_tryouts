@@ -46,6 +46,9 @@ void App::startup() {
   pbr.baseColorTextureLocation.isDefined = glGetUniformLocation(programID, "baseColorTexture.isDefined");
   pbr.baseColorTextureLocation.sampler = glGetUniformLocation(programID, "baseColorTexture.sampler");
 
+  pbr.metallicRoughnessTextureLocation.isDefined = glGetUniformLocation(programID, "metallicRoughnessTexture.isDefined");
+  pbr.metallicRoughnessTextureLocation.sampler = glGetUniformLocation(programID, "metallicRoughnessTexture.sampler");
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -159,6 +162,10 @@ void App::render(double currentTime) {
         glCullFace(GL_BACK);
       }
 
+      glUniform4fv(pbr.baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.pbr.baseColorFactor));
+      glUniform1f(pbr.roughnessLocation, node_buffer.mesh_buffer.material.pbr.roughnessFactor);
+      glUniform1f(pbr.metallicLocation, node_buffer.mesh_buffer.material.pbr.metallicFactor);
+
       if(node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID != -1) {
         glUniform1i(pbr.baseColorTextureLocation.isDefined, true);
         glBindTextureUnit(0, node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID);
@@ -166,9 +173,12 @@ void App::render(double currentTime) {
         glUniform1i(pbr.baseColorTextureLocation.isDefined, false);
       }
 
-      glUniform4fv(pbr.baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.pbr.baseColorFactor));
-      glUniform1f(pbr.roughnessLocation, node_buffer.mesh_buffer.material.pbr.roughnessFactor);
-      glUniform1f(pbr.metallicLocation, node_buffer.mesh_buffer.material.pbr.metallicFactor);
+      if(node_buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID != -1) {
+        glUniform1i(pbr.metallicRoughnessTextureLocation.isDefined, true);
+	glBindTextureUnit(1, node_buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID);
+      } else {
+        glUniform1i(pbr.metallicRoughnessTextureLocation.isDefined, false);
+      }
 
       if(node_buffer.mesh_buffer.element.elementBufferID != -1)
         glDrawElements(node_buffer.mesh_buffer.element.mode, node_buffer.mesh_buffer.element.count, node_buffer.mesh_buffer.element.componentType, nullptr);

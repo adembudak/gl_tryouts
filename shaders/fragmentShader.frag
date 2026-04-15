@@ -33,10 +33,12 @@ uniform NormalTexture_t normalTexture;
 struct OcclusionTexture_t {
   bool isDefined;
   sampler2D sampler;
+  float strength;
 };
 uniform OcclusionTexture_t occlusionTexture;
 
 in vec3 normal;
+in vec4 tangent;
 in vec2 textureCoordinate;
 
 out vec4 fragmentColor;
@@ -55,8 +57,12 @@ void main() {
     metallicFinal = pbr.metallic * sampled.b;
   }
 
+  vec3 N = normalize(normal);
   if(normalTexture.isDefined) {
-    vec4 sampled = texture(normalTexture.sampler, textureCoordinate);
+    vec3 n = texture(normalTexture.sampler, textureCoordinate).rgb;
+    n = sampled * 2.0f - 1.0f;
+    n *= normalTexture.scale;
+    n = normalize(n);
   }
 
   vec3 base = baseColorFinal.rgb;

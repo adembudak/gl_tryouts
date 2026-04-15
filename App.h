@@ -56,6 +56,10 @@ private:
       GLuint sampler;
     } baseColorTextureLocation;
 
+    struct {
+      GLboolean isDefined;
+      GLuint sampler;
+    } metallicRoughnessTextureLocation;
   } pbr;
 
   util::ShaderLoader shaderLoader;
