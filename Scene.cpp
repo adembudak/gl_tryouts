@@ -6,8 +6,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include <range/v3/algorithm/copy.hpp>
-
 #include <tiny_gltf.h>
 
 #include <filesystem>
@@ -550,11 +548,19 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
 void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   const tn::Material& material = model.materials[materialIndex];
 
+  buffer.material.emissiveFactor.r = material.emissiveFactor[0];
+  buffer.material.emissiveFactor.g = material.emissiveFactor[1];
+  buffer.material.emissiveFactor.b = material.emissiveFactor[2];
+
   const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
-  buffer.material.pbr.roughnessFactor = pbr.roughnessFactor; // [0.0, 1.0]
-  ranges::copy(pbr.baseColorFactor, std::begin(buffer.material.pbr.baseColorFactor));
-  buffer.material.pbr.metallicFactor = pbr.metallicFactor; // [0.0, 1.0]
+  buffer.material.pbr.roughnessFactor = pbr.roughnessFactor;
+  buffer.material.pbr.metallicFactor = pbr.metallicFactor;
+
+  buffer.material.pbr.baseColorFactor.r = pbr.baseColorFactor[0];
+  buffer.material.pbr.baseColorFactor.g = pbr.baseColorFactor[1];
+  buffer.material.pbr.baseColorFactor.b = pbr.baseColorFactor[2];
+  buffer.material.pbr.baseColorFactor.a = pbr.baseColorFactor[3];
 
   if(const tn::TextureInfo& baseColorTexture = pbr.baseColorTexture; baseColorTexture.index != -1) {
     loadTexture(buffer, baseColorTexture.index, baseColorTexture.texCoord, mesh_buffer_t::material_properties_t::textureKind::baseColorTexture);

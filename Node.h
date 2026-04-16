@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <optional>
 #include <array>
@@ -37,10 +39,12 @@ struct mesh_buffer_t {
     double alphaCutoff = 0.5;                    // default
     bool doubleSided = false;                    // default
 
+    glm::vec3 emissiveFactor = {0.0f, 0.0f, 0.0f}; // default
+
     struct pbrMetallicRoughness_t {
-      std::array<float, 4> baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
-      float roughnessFactor = 1.0;                                 // default
-      float metallicFactor = 1.0;                                  // default
+      glm::vec4 baseColorFactor = {1.0, 1.0, 1.0, 1.0}; // default
+      float roughnessFactor = 1.0;                      // default
+      float metallicFactor = 1.0;                       // default
 
       struct baseColorTexture_t {
         GLuint textureID = -1;

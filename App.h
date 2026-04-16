@@ -74,6 +74,7 @@ private:
     GLuint strength;
   } occlusionTextureLocation;
 
+  GLuint emissiveFactorLocation;
   struct {
     GLuint isDefined;
     GLuint sampler;

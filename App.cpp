@@ -57,6 +57,7 @@ void App::startup() {
   occlusionTextureLocation.sampler = glGetUniformLocation(programID, "occlusionTexture.sampler");
   occlusionTextureLocation.strength = glGetUniformLocation(programID, "occlusionTexture.strength");
 
+  emissiveFactorLocation = glGetUniformLocation(programID, "emissiveFactor");
   emissiveTextureLocation.isDefined = glGetUniformLocation(programID, "emissiveTexture.isDefined");
   emissiveTextureLocation.sampler = glGetUniformLocation(programID, "emissiveTexture.sampler");
 
@@ -173,9 +174,11 @@ void App::render(double currentTime) {
         glCullFace(GL_BACK);
       }
 
-      glUniform4fv(pbr.baseColorLocation, 1, std::data(node_buffer.mesh_buffer.material.pbr.baseColorFactor));
+      glUniform4fv(pbr.baseColorLocation, 1, glm::value_ptr(node_buffer.mesh_buffer.material.pbr.baseColorFactor));
       glUniform1f(pbr.roughnessLocation, node_buffer.mesh_buffer.material.pbr.roughnessFactor);
       glUniform1f(pbr.metallicLocation, node_buffer.mesh_buffer.material.pbr.metallicFactor);
+
+      glUniform3fv(emissiveFactorLocation, 1, glm::value_ptr(node_buffer.mesh_buffer.material.emissiveFactor));
 
       if(node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID != -1) {
         glUniform1i(pbr.baseColorTextureLocation.isDefined, true);

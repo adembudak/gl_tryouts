@@ -11,6 +11,8 @@ struct PBRMetallicRoughness_t {
 };
 uniform PBRMetallicRoughness_t pbr;
 
+uniform vec3 emissiveFactor;
+
 struct BaseColorTexture_t {
   bool isDefined;
   sampler2D sampler;
@@ -71,8 +73,18 @@ void main() {
     n = normalize(n);
   }
 
-  if(occlusionTexture.isDefined) {}
-  if(emissiveTexture.isDefined) {}
+  float occlusionValueFinal = 1.0f;
+  if(occlusionTexture.isDefined) {
+    float sampled = texture(occlusionTexture.sampler, textureCoordinate).r;
+    occlusionValueFinal = 1.0f + occlusionTexture.strength * (sampled - 1.0f);
+    occlusionValueFinal = clamp(occlusionValueFinal, 0.0f, 1.0f);
+  }
+
+  vec3 emissiveValueFinal = emissiveFactor;
+  if(emissiveTexture.isDefined) {
+    vec3 sampled = texture(emissiveTexture.sampler, textureCoordinate).rgb;
+    emissiveValueFinal *= sampled;
+  }
 
   vec3 base = baseColorFinal.rgb;
   vec3 F0 = mix(vec3(0.04f), base, metallicFinal);
