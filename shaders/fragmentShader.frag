@@ -37,6 +37,12 @@ struct OcclusionTexture_t {
 };
 uniform OcclusionTexture_t occlusionTexture;
 
+struct EmissiveTexture_t {
+  bool isDefined;
+  sampler2D sampler;
+};
+uniform EmissiveTexture_t emissiveTexture;
+
 in vec3 normal;
 in vec4 tangent;
 in vec2 textureCoordinate;
@@ -60,10 +66,13 @@ void main() {
   vec3 N = normalize(normal);
   if(normalTexture.isDefined) {
     vec3 n = texture(normalTexture.sampler, textureCoordinate).rgb;
-    n = sampled * 2.0f - 1.0f;
+    n = n * 2.0f - 1.0f;
     n *= normalTexture.scale;
     n = normalize(n);
   }
+
+  if(occlusionTexture.isDefined) {}
+  if(emissiveTexture.isDefined) {}
 
   vec3 base = baseColorFinal.rgb;
   vec3 F0 = mix(vec3(0.04f), base, metallicFinal);

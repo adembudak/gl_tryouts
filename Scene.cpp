@@ -550,15 +550,6 @@ void Scene::loadMeshDrawIndices(mesh_buffer_t& buffer, int accessorIndex) {
 void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   const tn::Material& material = model.materials[materialIndex];
 
-  if(const tn::NormalTextureInfo& normalTexture = material.normalTexture; normalTexture.index != -1) {
-  }
-
-  if(const tn::OcclusionTextureInfo& occlusionTexture = material.occlusionTexture; occlusionTexture.index != -1) {
-  }
-
-  if(const tn::TextureInfo& emissiveTexture = material.emissiveTexture; emissiveTexture.index != -1) {
-  }
-
   const tn::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
   buffer.material.pbr.roughnessFactor = pbr.roughnessFactor; // [0.0, 1.0]
@@ -572,6 +563,16 @@ void Scene::loadMeshMaterial(mesh_buffer_t& buffer, int materialIndex) {
   if(const tn::TextureInfo& metallicRoughnessTexture = pbr.metallicRoughnessTexture; metallicRoughnessTexture.index != -1) {
     loadTexture(buffer, metallicRoughnessTexture.index, metallicRoughnessTexture.texCoord, mesh_buffer_t::material_properties_t::textureKind::metallicRoughnessTexture);
   }
+
+  if(const tn::NormalTextureInfo& normalTexture = material.normalTexture; normalTexture.index != -1) {
+  }
+
+  if(const tn::OcclusionTextureInfo& occlusionTexture = material.occlusionTexture; occlusionTexture.index != -1) {
+  }
+
+  if(const tn::TextureInfo& emissiveTexture = material.emissiveTexture; emissiveTexture.index != -1) {
+  }
+
 }
 
 void Scene::loadTexture(mesh_buffer_t& buffer, int textureIndex, int texCoord_n, mesh_buffer_t::material_properties_t::textureKind kind) {

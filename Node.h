@@ -58,7 +58,7 @@ struct mesh_buffer_t {
     } normalTexture;
 
     struct occlusionTexture_t {
-      float strength = 1.0;
+      float strength = 1.0; // default
       GLuint textureID = -1;
     } occlusionTexture;
 

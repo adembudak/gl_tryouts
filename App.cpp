@@ -49,6 +49,17 @@ void App::startup() {
   pbr.metallicRoughnessTextureLocation.isDefined = glGetUniformLocation(programID, "metallicRoughnessTexture.isDefined");
   pbr.metallicRoughnessTextureLocation.sampler = glGetUniformLocation(programID, "metallicRoughnessTexture.sampler");
 
+  normalTextureLocation.isDefined = glGetUniformLocation(programID, "normalTexture.isDefined");
+  normalTextureLocation.sampler = glGetUniformLocation(programID, "normalTexture.sampler");
+  normalTextureLocation.scale = glGetUniformLocation(programID, "normalTexture.scale");
+
+  occlusionTextureLocation.isDefined = glGetUniformLocation(programID, "occlusionTexture.isDefined");
+  occlusionTextureLocation.sampler = glGetUniformLocation(programID, "occlusionTexture.sampler");
+  occlusionTextureLocation.strength = glGetUniformLocation(programID, "occlusionTexture.strength");
+
+  emissiveTextureLocation.isDefined = glGetUniformLocation(programID, "emissiveTexture.isDefined");
+  emissiveTextureLocation.sampler = glGetUniformLocation(programID, "emissiveTexture.sampler");
+
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glDisable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -127,7 +138,7 @@ void App::render(double currentTime) {
   p_fileDialog->Display();
 
   if(p_fileDialog->HasSelected()) {
-    std::println("Selected filename {}", p_fileDialog->GetSelected().string());
+    std::println("-- Selected filename {}", p_fileDialog->GetSelected().string());
     is_scene_loaded = my_scene.load(p_fileDialog->GetSelected());
     this->loadSceneCameras();
     p_fileDialog->ClearSelected();
@@ -168,16 +179,39 @@ void App::render(double currentTime) {
 
       if(node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID != -1) {
         glUniform1i(pbr.baseColorTextureLocation.isDefined, true);
-        glBindTextureUnit(0, node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID);
+        glBindTextureUnit(pbr.baseColorTextureLocation.sampler, node_buffer.mesh_buffer.material.pbr.baseColorTexture.textureID);
       } else {
         glUniform1i(pbr.baseColorTextureLocation.isDefined, false);
       }
 
       if(node_buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID != -1) {
         glUniform1i(pbr.metallicRoughnessTextureLocation.isDefined, true);
-	glBindTextureUnit(1, node_buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID);
+        glBindTextureUnit(pbr.metallicRoughnessTextureLocation.sampler, node_buffer.mesh_buffer.material.pbr.metallicRoughnessTexture.textureID);
       } else {
         glUniform1i(pbr.metallicRoughnessTextureLocation.isDefined, false);
+      }
+
+      if(node_buffer.mesh_buffer.material.normalTexture.textureID != -1) {
+        glUniform1i(normalTextureLocation.isDefined, true);
+        glBindTextureUnit(normalTextureLocation.sampler, node_buffer.mesh_buffer.material.normalTexture.textureID);
+        glUniform1f(normalTextureLocation.scale, node_buffer.mesh_buffer.material.normalTexture.scale);
+      } else {
+        glUniform1i(normalTextureLocation.isDefined, false);
+      }
+
+      if(node_buffer.mesh_buffer.material.occlusionTexture.textureID != -1) {
+        glUniform1i(occlusionTextureLocation.isDefined, true);
+        glBindTextureUnit(occlusionTextureLocation.sampler, node_buffer.mesh_buffer.material.occlusionTexture.textureID);
+        glUniform1f(occlusionTextureLocation.strength, node_buffer.mesh_buffer.material.occlusionTexture.strength);
+      } else {
+        glUniform1i(occlusionTextureLocation.isDefined, false);
+      }
+
+      if(node_buffer.mesh_buffer.material.emissiveTexture.textureID != -1) {
+        glUniform1i(emissiveTextureLocation.isDefined, true);
+        glBindTexture(emissiveTextureLocation.sampler, node_buffer.mesh_buffer.material.emissiveTexture.textureID);
+      } else {
+        glUniform1i(emissiveTextureLocation.isDefined, false);
       }
 
       if(node_buffer.mesh_buffer.element.elementBufferID != -1)

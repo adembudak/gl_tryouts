@@ -52,15 +52,32 @@ private:
     GLuint metallicLocation;
 
     struct {
-      GLboolean isDefined;
+      GLuint isDefined;
       GLuint sampler;
     } baseColorTextureLocation;
 
     struct {
-      GLboolean isDefined;
+      GLuint isDefined;
       GLuint sampler;
     } metallicRoughnessTextureLocation;
   } pbr;
+
+  struct {
+    GLuint isDefined;
+    GLuint sampler;
+    GLuint scale;
+  } normalTextureLocation;
+
+  struct {
+    GLuint isDefined;
+    GLuint sampler;
+    GLuint strength;
+  } occlusionTextureLocation;
+
+  struct {
+    GLuint isDefined;
+    GLuint sampler;
+  } emissiveTextureLocation;
 
   util::ShaderLoader shaderLoader;
 
