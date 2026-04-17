@@ -14,7 +14,6 @@
 
 #include <vector>
 #include <utility>
-#include <ranges>
 #include <print>
 
 void App::setConfigDefaults() {
@@ -123,10 +122,10 @@ void App::render(double currentTime) {
   ImGui::Begin("Scene");
 
   if(ImGui::BeginCombo("Cameras", active_camera.c_str())) {
-    for(const auto& cam : cameraNames) {
-      bool is_selected = (active_camera == cam);
-      if(ImGui::Selectable(cam.c_str(), is_selected))
-        active_camera = cam;
+    for(const auto& [cameraName, _] : cameras) {
+      bool is_selected = (active_camera == cameraName);
+      if(ImGui::Selectable(cameraName.c_str(), is_selected))
+        active_camera = cameraName;
 
       if(is_selected)
         ImGui::SetItemDefaultFocus();
@@ -280,9 +279,6 @@ void App::loadSceneCameras() {
       cameras[node.camera->name] = std::move(t);
     }
   }
-
-  if(!cameras.empty())
-    cameraNames = cameras | std::ranges::views::keys | std::ranges::to<std::vector<std::string>>();
 }
 
 void App::onKey(int key, int action, int mods) {

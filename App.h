@@ -1,5 +1,12 @@
 #pragma once
 
+#include <string>
+#include <map>
+
+#include <GL/glew.h>
+
+#include <glm/mat4x4.hpp>
+
 #include "AppBase.h"
 #include "Scene.h"
 #include "ShaderLoader.h"
@@ -27,7 +34,6 @@ private:
   };
 
   std::map<std::string, T> cameras;
-  std::vector<std::string> cameraNames;
   std::string active_camera;
 
 private:
